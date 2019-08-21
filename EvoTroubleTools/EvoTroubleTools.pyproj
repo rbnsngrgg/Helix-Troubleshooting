@@ -11,7 +11,7 @@
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>EvoTroubleTools</Name>
-    <RootNamespace>summary_prog</RootNamespace>
+    <RootNamespace>EvoTroubleTools</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -26,7 +26,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="EvoTroubleTools.py" />
-    <Compile Include="summary_prog.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
