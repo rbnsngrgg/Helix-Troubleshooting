@@ -5,12 +5,12 @@
     <ProjectGuid>97817eac-0b90-48a6-9b30-a52816d6332a</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>EvoTroubleTools.py</StartupFile>
+    <StartupFile>HelixTroubleshooting.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>EvoTroubleTools</Name>
+    <Name>HelixTroubleshooting</Name>
     <RootNamespace>EvoTroubleTools</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -22,10 +22,24 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="HelixTroubleshooting.py" />
+    <Compile Include="ImageClasses.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TTools.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="EvoTroubleTools.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bar.ico" />
+    <Content Include="Change Log.txt" />
+    <Content Include="Images\bar.ico" />
+    <Content Include="Images\bar.png" />
+    <Content Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Images\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

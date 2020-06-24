@@ -1,7 +1,10 @@
-import os, shutil
-from PySide2.QtWidgets import QMessageBox
+import os, shutil, math, HTconfig
+import xml.etree.ElementTree as ET
+import ImageClasses as IC
+from PySide2.QtWidgets import QMessageBox, QProgressDialog
+from PySide2.QtCore import Qt
 from PIL import Image,ImageChops,ImageDraw
-
+from statistics import mean
 
 def pointRemover(directory = '', sn = ''):
     try:
@@ -40,8 +43,6 @@ def pointRemover(directory = '', sn = ''):
             for row in rowNums.keys():
                 if rowNums[row] > 3:
                     toRemove.append(row)
-            #if "38500" in file:
-                #print(toRemove)
             newText = []
             for line in data:
                 keepLine = True
@@ -49,8 +50,6 @@ def pointRemover(directory = '', sn = ''):
                     if str(number) in line.split()[5]:
                         keepLine = False
                 if keepLine == True:
-                    #if "38500" in file:
-                        #print(line)
                     newText.append(line)
             #Rewrite the file with selected lines removed.
             with open(file,'wt') as f:
@@ -91,8 +90,6 @@ def dotEraser(directory):
                         file2 = file
                     elif file1 != '' and file2 != '':
                         break
-            #print(file1)
-            #print(file2)
             image1 = Image.open(file1)
             image1 = image1.convert(mode = "1")
             image2 = Image.open(file2)
@@ -172,22 +169,10 @@ def summary(directory):
 
 def fixAlgoErrors(sn = '',tcompDir = '',backupDir = ''):
     try:
-        if sn == '':
-            raise Exception("No serial number was entered")
-        elif 'SN' not in sn:
-            raise Exception("Serial number must be entered with SNXXXXXX format.")
-        #Find the tcomp file for the specified SN
-        selectedFile = ''
-        selectedFolder = ''
-        snPrefix = sn[0:5]
-        for folder in os.listdir(tcompDir):
-            if snPrefix in folder:
-                selectedFolder = tcompDir + '\\' + folder
-                break
-        for file in os.listdir(selectedFolder):
-            if sn in file:
-                selectedFile = selectedFolder + '\\' + file
-                break
+        #Find folder and file
+        selectedFile, selectedFolder = getFileFolder(sn,tcompDir)
+        if selectedFile == '' or selectedFolder == '':
+            return
 
         #Copy file to backup folder
         shutil.copy(selectedFile,backupDir)
@@ -332,14 +317,242 @@ def restoreTcomp(sn = '', tcompDir = '', backupDir = ''):
         errorMessage('Error!', 'Error removing Tcomp file from backup folder: ' + str(e))
         return
 
+def tempAdjust(sn = '',setTemp = None, tcompDir = '', backupDir = ''):
+    try:
+        if setTemp == None or setTemp == '':
+            errorMessage("Error","No set temperature was entered.")
+            return
+        #Find folder and file
+        selectedFile, selectedFolder = getFileFolder(sn,tcompDir)
+        if selectedFile == '' or selectedFolder == '':
+            return
+        shutil.copy(selectedFile,backupDir)
 
+        with open(selectedFile,'rt') as f:
+            data = f.readlines()
+        #Read tempurature values and get reference average
+        splitData = []
+        for line in data:
+            splitData.append(line.split('\t'))
+        tempuratures = []
+        for line in splitData:
+            tempuratures.append(line[1])
+        reference = tempuratures[1:6]
+        floatRef = []
+        for temp in reference:
+            floatRef.append(float(temp))
+        referenceAverage = sum(floatRef) / len(floatRef)
+        #print(f"Reference Average: {referenceAverage}")
+        adjustBy = float(setTemp) - referenceAverage
+        #print(f"Adjusting {adjustBy} degrees.")
+        targetAverage = referenceAverage + adjustBy
+        #print(f"Setting new reference average to {targetAverage}")
+
+        newData = splitData
+        newReference = []
+        for index, line in enumerate(newData):
+            if index == 0:
+                continue
+            line[1] = str(float(line[1]) + adjustBy)
+            if index < 6:
+                newReference.append(float(line[1]))
+        newRefAvg = sum(newReference) / len(newReference)
+        #print(f"New reference average set to {newRefAvg}")
+        writeData = []
+        for line in newData:
+            writeData.append('\t'.join(line))
+
+        with open(selectedFile,'wt') as f:
+            f.writelines(writeData)
+        successMessage("Done",f"Reference temperature for {sn} adjusted to {setTemp}")
+    except Exception as e:
+        errorMessage("Error",str(e))
+
+def lineAnalysis(directory, thresholdPercent, all ,masterLog):
+    if not all:
+        folders = [directory]
+    else:
+        folders = []
+        for folder in os.listdir(directory):
+            folders.append(f"{directory}\\{folder}")
+        pd = QProgressDialog("Analyzing all images. This may take several minutes..","Cancel",0,len(folders))
+        pd.setAutoClose(True)
+        pd.setFixedSize(300,120)
+        pd.setWindowTitle("Line Analysis")
+        pd.setWindowModality(Qt.WindowModal)
+        progress = 0
+    for folder in folders:
+        if not os.path.isdir(folder):
+            progress += 1
+            pd.setValue(progress)
+            continue
+        masterEntry = ''
+        images = []
+        zValues = []
+        angles = []
+        masterAngle = None
+        minMaxWidth = [99,0]
+        focusNSF = [0,0,0]
+        dataFolder = folder+'\\line analysis'
+
+        #Find all images, make list in of LaserImage class instances, create results folder. Raise error if none found---------------------
+        images, zValues = imageList(folder,'solo')
+
+        #Get Data from sensor.xml (SNXXXXXX.xml) for master log file entry
+        sn, pn, sensorRev, rectRev, rectPosRev, date, rows, cols = getSensorData(folder)
+        masterEntry = f"\n{sn}\t{pn}\t{date}\t{sensorRev}\t{rectRev}\t{rectPosRev}\t"
+        if images == [] and not all:
+            errorMessage('Error!','No non-filtered TZ image files were found.')
+            return
+        elif '916' not in pn and '917' not in pn and not all:
+            if pn == '':
+                return
+            errorMessage('Error!','The selected sensor is not a Helix Solo or V7 sensor.')
+            return
+        elif all and ('916' in pn or '917' in pn) and images != []:
+            progress += 1
+            pd.setValue(progress)
+            continue
+        if not os.path.isdir(dataFolder):
+            os.mkdir(dataFolder)
+        if not all:
+            pd = QProgressDialog("Analyzing images.","Cancel",0,len(images))
+            pd.setAutoClose(True)
+            pd.setFixedSize(300,120)
+            pd.setWindowTitle("Line Analysis")
+            pd.setWindowModality(Qt.WindowModal)
+            progress = 0
+        if pd.wasCanceled():
+            break
+        with open(f'{dataFolder}\\Focus Summary.txt','wt') as focusLog:
+            focusLog.write(f'{sn}\t{pn}\t{date}\n\nZ-Values\tFocus Score\n')
+        zValues.sort()
+        #Go through z values in ascending order, get matching img. For each img, create data text file and perform ops-------------------------
+        for z in zValues:
+            if pd.wasCanceled():
+                break
+            for lineImage in images:
+                if f'TZ{str(z)}Y' not in lineImage.name:
+                    continue
+                #Start log entry
+                with open('{}\\{}.txt'.format(dataFolder,lineImage.name),'wt') as log:
+                    log.write(f'{sn}\t{pn}\t{date}\n{lineImage.name}\n')
+                    log.write('CG_Row\tCG_Col\tWidth\tPeak_Intensity\tFocus_Score\tRow-Value_Pixel_Data\n')
+                lineImage.rows = int(rows)
+                lineImage.columns = int(cols)
+                lineImage.thresholdPercent = thresholdPercent
+                lineImage.startAnalysis()
+                if lineImage.lineAngle != None:
+                    angles.append(lineImage.lineAngle)
+                #Focus Data
+                with open(f'{dataFolder}\\Focus Summary.txt','at') as focusLog:
+                    focusLog.write(f'{lineImage.zValue}\t{lineImage.overallFocus}\n')
+                #Prep data for master log entry
+                if lineImage.widthAvg < minMaxWidth[0]:
+                    minMaxWidth[0] = lineImage.widthAvg
+                if lineImage.widthAvg > minMaxWidth[1]:
+                    minMaxWidth[1] = lineImage.widthAvg
+                if z == zValues[0]:
+                    focusNSF[0] = lineImage.overallFocus
+                elif z == zValues[-1]:
+                    focusNSF[2] = lineImage.overallFocus
+                elif int(z) == 0:
+                    focusNSF[1] = lineImage.overallFocus
+                with open('{}\\{}.txt'.format(dataFolder,lineImage.name),'at') as log:
+                    for line in lineImage.logLines:
+                        log.write(line)
+                if not all:
+                    progress += 1
+                    pd.setValue(progress)
+        if len(angles) > 0:
+            masterAngle = round(mean(angles),2)
+        masterEntry = masterEntry + f"{minMaxWidth[0]}\t{minMaxWidth[1]}\t{focusNSF[0]}\t{focusNSF[1]}\t{focusNSF[2]}\t{masterAngle}\t{thresholdPercent}"
+        if not pd.wasCanceled():
+            with open(masterLog,'at') as mLog:
+                mLog.write(masterEntry)
+        if not all:
+            if pd.wasCanceled():
+                successMessage('Canceled','User canceled.')
+            else:
+                successMessage('Done','Images analyzed.')
+        if all:
+            progress += 1
+            pd.setValue(progress)
+    if all:
+        if pd.wasCanceled():
+            successMessage('Canceled','User canceled.')
+        else:
+            successMessage('Done','All Solo laser images analyzed.')
+
+#Gathers the filenames of all of the images required for analysis
+def imageList(directory,mode = 'solo'):
+    images = []
+    zValues = []
+    if mode == 'solo':
+        for img in os.listdir(directory):
+            if 'TZ' in img and 'Filter' not in img and '.tif' in img:
+                z = getZ(img)
+                try:
+                    zValues.append(int(z))
+                except Exception:
+                    continue
+                newImage = IC.LaserImage()
+                newImage.name = img.replace('.tif','')
+                newImage.location = directory+'\\'+img
+                newImage.zValue = z
+                images.append(newImage)
+        return images, zValues
+
+def getZ(text):
+    #Format TZ-0Y0X0.tif
+    yIndex = 0
+    for index,char in enumerate(text):
+        if char == 'Y':
+            yIndex=index
+            break
+    text = text.replace(text[yIndex:],'')
+    text = text.replace('TZ','')
+    return text
+
+#Handling XML Data-------------------------------------------------------------------------------------------------------------------------
+def getSensorData(directory):
+    try:
+        sensorXML = ''
+        for file in os.listdir(directory):
+            if 'SN' in file and '.xml' in file and (len(file) < 16):
+                sensorXML = f"{directory}\\{file}"
+        tree = ET.parse(sensorXML)
+        root = tree.getroot()
+        sn = root[0][0].attrib['Sensor_ID']
+        pn = root[0][0].attrib['Part_Number']
+        sensorRev = root[0][0].attrib['Part_Rev']
+        rectRev = root[0][0].attrib['Rect_File_Rev']
+        rectPosRev = root[0][0].attrib['Rect_Pos_File_Rev']
+        date = root.attrib['Date']
+        rows = root[1][0].attrib['Number_Of_Rows']
+        cols = root[1][0].attrib['Number_Of_Columns']
+    except Exception as e:
+        errorMessage('Error!',f"TTools.py getSensorData: {str(e)}")
+        tree = ''
+        root = ''
+        sn = ''
+        pn = ''
+        sensorRev = ''
+        rectRev = ''
+        rectPosRev = ''
+        date = ''
+        rows = 0
+        cols = 0
+    return sn, pn, sensorRev, rectRev, rectPosRev, date, rows, cols
+
+#Message Boxes-----------------------------------------------------------------------------------------------------------------------------
 def errorMessage(title = '', text = ''):
     message = QMessageBox()
     message.setIcon(QMessageBox.Critical)
     message.setWindowTitle(title)
     message.setText(text)
     message.exec_()
-
+    message.setFocus()
 
 def successMessage(title = '', text = ''):
     message = QMessageBox()
@@ -347,3 +560,80 @@ def successMessage(title = '', text = ''):
     message.setWindowTitle(title)
     message.setText(text)
     message.exec_()
+    message.setFocus()
+
+#Day2 Calc---------------------------------------------------------------------------------------------------------------------------------
+def day2(directory):
+    total_sensors = 0
+    required_rerun = 0
+    too_few = 0
+    solo_sensors = []
+    sn_list = []
+    dir_list = os.listdir(directory)
+    #Get list of solo sensors
+    for folder in dir_list:
+        folderDir = f"{directory}\\{folder}"
+        print(f"Checking: {folderDir}")
+        if os.path.isdir(folderDir) and folder[0:2] == "SN":
+            print('Valid folder...')
+            if folder[0:8] in sn_list:
+                continue
+            if not os.path.isfile(f"{folderDir}\\AccDataAcq.log"):
+                continue
+            with open(f"{folderDir}\\AccDataAcq.log",'rt') as log:
+                lines = log.readlines()
+            solo = False
+            print(lines[6])
+            if "916-" in lines[6] or "917-" in lines[6]:
+                solo = True
+            if "916-01" in lines[6]:
+                solo = False
+            if solo == True:
+                print('Solo sensor:')
+                if folder[0:8] not in sn_list:
+                    sn_list.append(folder[0:8])
+                    solo_sensors.append([folder[0:8],0]) #list pair as [SNXXXXXX,# of occurrences]
+                    print(f"{folder[0:8]} added.\n")
+            else:
+                print(f"{folder[0:8]} is not Solo.\n")
+    print('Found solo sensors----------------------------------------------------------------------')
+    print(solo_sensors)
+    print('----------------------------------------------------------------------------------------')
+    #Check how many folders each has, update sensor[1]
+    total_sensors = len(solo_sensors)
+    for sensor in solo_sensors:
+        for folder in dir_list:
+            folderDir = f"{directory}\\{folder}"
+            if sensor[0] in folder and os.path.isfile(f"{folderDir}\\AccDataAcq.log"):
+                sensor[1] += 1
+        if sensor[1] > 3:
+            required_rerun += 1
+        elif sensor[1] < 3:
+            too_few += 1
+    print(solo_sensors)
+    print(f"Solo sensors: {total_sensors}")
+    print(f"# requiring extra thermal: {required_rerun}")
+    print(f"Sensors with < 3 folders: {too_few}")
+
+   #Utility functions----------------------------------------------------------------------------------------------------------------------
+def getFileFolder(sn = '', tcompDir = ''):
+    selectedFile = ''
+    selectedFolder = ''
+    try:
+        if sn == '':
+            raise Exception("No serial number was entered")
+        elif 'SN' not in sn:
+            raise Exception("Serial number must be entered with SNXXXXXX format.")
+        #Find the tcomp file for the specified SN
+        snPrefix = sn[0:5]
+        for folder in os.listdir(tcompDir):
+            if snPrefix in folder:
+                selectedFolder = tcompDir + '\\' + folder
+                break
+        for file in os.listdir(selectedFolder):
+            if sn in file:
+                selectedFile = selectedFolder + '\\' + file
+                break
+    except:
+        errorMessage("Error","Unable to find the folder or file for the specified SN.")
+    return selectedFile, selectedFolder

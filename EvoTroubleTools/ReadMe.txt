@@ -1,0 +1,1 @@
+business-and-finance (bar chart) Icon by https://www.flaticon.com/authors/fjstudio
