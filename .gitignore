@@ -338,3 +338,11 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/EvoTroubleTools/Test/SN137082.Day2
+/EvoTroubleTools/dist
+/EvoTroubleTools/build/HelixTroubleshooting
+/EvoTroubleTools/HelixTroubleshooting.spec
+/EvoTroubleTools/HTconfigS.py
+/EvoTroubleTools/HTconfig.py
+/EvoTroubleTools/TZ0Y0X0.txt
+/Performance.pyperf

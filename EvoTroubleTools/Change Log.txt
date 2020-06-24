@@ -19,3 +19,10 @@
 	-Fixing algorithm errors in tcomp files
 	-Removing staring dots from laser line (TZ) images
 -GUI has been redone and simplified
+
+1.0.0
+-GUI redone to have a list of available functions that, when selected, give brief instructions on how and why they are used.
+-Added Functions:
+	-Solo laser line analysis. Gives CG data, line width, focus scores, average CG locations, line angle, and pixel data.
+	-Temperature adjust function for Evo t-comp files. User inputs serial number and desired reference cycle average temperature. Temp column is adjusted and original is backed up.
+-Icon added.
