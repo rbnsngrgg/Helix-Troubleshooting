@@ -19,10 +19,6 @@ except FileNotFoundError:
                     'rectImages  = r"\\\\universal-pc\RectImages2\"\n',
                     "\n",
                     "#Prefix directory strings with r\n",
-                    "\n",
-                    "#Database name\n",
-                    "#Currently unused\n"
-                    'dbName = r"HTools.db"\n',
                     '\n',
                     '#Location of HTools Database and Results Folders\n',
                     'HToolsDir = r"\\\\castor\Production\Manufacturing\Solo\Analysis Results"\n',

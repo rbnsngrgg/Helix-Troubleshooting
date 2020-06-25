@@ -29,7 +29,6 @@
     <Compile Include="TTools.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="EvoTroubleTools.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bar.ico" />
