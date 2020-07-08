@@ -1,0 +1,28 @@
+0.1.1
+-Initial build
+
+0.1.2
+-Included SN991XXX sensors in functionality.
+-Fixed a bug in handling incorrect serial number entries for illuminated sphere gathering.
+-Fixed T-comp injection to work with the file structure of the thermal test results folder on castor.
+-Storing all directories into one pickle file, instead of 4. Also improved loading/writing of the file.
+-Changing a directory no longer requires restarting the software.
+-Added image distances for illuminated spheres for remaining models.
+
+0.2.0
+-All functions that handle files have been moved to TTools module.
+-Functions have been redone and streamlined for:
+	-Restoring Tcomp files
+	-Fixing ALS points
+	-Creating illuminated sphere summaries
+-Functions have been added for:
+	-Fixing algorithm errors in tcomp files
+	-Removing staring dots from laser line (TZ) images
+-GUI has been redone and simplified
+
+1.0.0
+-GUI redone to have a list of available functions that, when selected, give brief instructions on how and why they are used.
+-Added Functions:
+	-Solo laser line analysis. Gives CG data, line width, focus scores, average CG locations, line angle, and pixel data.
+	-Temperature adjust function for Evo t-comp files. User inputs serial number and desired reference cycle average temperature. Temp column is adjusted and original is backed up.
+-Icon added.
