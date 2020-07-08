@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         #Initialize the parent class, then set title and min window size
         super().__init__()
-        self.setWindowTitle('Helix Troubleshooting 1.0.0')
+        self.setWindowTitle('Helix Troubleshooting 1.0.1')
         self.setMinimumSize(750,500)
 
         #Icon

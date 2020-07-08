@@ -4,11 +4,11 @@ block_cipher = None
 
 
 a = Analysis(['HelixTroubleshooting.py'],
-             pathex=['C:\\Users\\grobinson\\source\\repos\\EvoTroubleTools\\EvoTroubleTools\\'],
+             pathex=['C:\\Users\\grobinson\\source\\repos\\HelixTroubleshooting\\HelixTroubleshooting\\'],
              binaries=[],
              datas=[
-			 ('C:\\Users\\grobinson\\source\\repos\\EvoTroubleTools\\EvoTroubleTools\\Images\\bar.png','images'),
-			 ('C:\\Users\\grobinson\\source\\repos\\EvoTroubleTools\\EvoTroubleTools\\Images\\bar.ico','images')
+			 ('C:\\Users\\grobinson\\source\\repos\\HelixTroubleshooting\\HelixTroubleshooting\\Images\\bar.png','images'),
+			 ('C:\\Users\\grobinson\\source\\repos\\HelixTroubleshooting\\HelixTroubleshooting\\Images\\bar.ico','images')
 			 ],
              hiddenimports=[],
              hookspath=[],
