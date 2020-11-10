@@ -1,0 +1,21 @@
+﻿<Window x:Class="HelixTroubleshootingWPF.ProgressBar"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HelixTroubleshootingWPF"
+        mc:Ignorable="d"
+        Title="Progress" Height="120" Width="300"
+        Visibility="Visible"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="36"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ProgressBar Name="mainProgressBar" Minimum="0" Maximum="100" Value="0" Height="26" Width="275" VerticalAlignment="Center" Grid.Row="1"/>
+        <TextBox Name ="label" BorderThickness="0" HorizontalAlignment="Center"  Text="" TextWrapping="Wrap" Width="246" Height="16" VerticalAlignment="Center" Grid.Row="2"/>
+    </Grid>
+</Window>

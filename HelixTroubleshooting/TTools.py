@@ -124,10 +124,8 @@ def dotEraser(directory):
                     newImage = image.copy()
                     draw = ImageDraw.Draw(newImage)
                     draw.rectangle(xy = [(minX-2,minY-2),(maxX+2,maxY+2)], fill = 0)
-                    #print(file)
                     filename = file.split('\\')[-1]
                     image.close()
-                    #os.unlink(file)
                     newImage.save(file)
                     newImage.close()
         successMessage('Done','All staring dots removed.')

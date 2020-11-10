@@ -340,7 +340,7 @@ ASALocalRun/
 healthchecksdb
 /HelixTroubleshooting/Test/SN137082.Day2
 /HelixTroubleshooting/dist
-/HelixTroubleshooting/build/HelixTroubleshooting
+/HelixTroubleshooting/build
 /HelixTroubleshooting/HTconfigS.py
 /HelixTroubleshooting/HTconfig.py
 /HelixTroubleshooting/TZ0Y0X0.txt

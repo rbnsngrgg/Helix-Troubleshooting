@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="bar.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LiteGuard" Version="2.2.0" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.20.0.1" />
+    <PackageReference Include="Telnet" Version="0.8.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="bar.ico" />
+  </ItemGroup>
+
+</Project>
