@@ -395,6 +395,7 @@ def lineAnalysis(directory, thresholdPercent, all ,masterLog):
 
         #Get Data from sensor.xml (SNXXXXXX.xml) for master log file entry
         sn, pn, sensorRev, rectRev, rectPosRev, date, rows, cols = getSensorData(folder)
+        lineExposure = getLineExposure(folder)
         masterEntry = f"\n{sn}\t{pn}\t{date}\t{sensorRev}\t{rectRev}\t{rectPosRev}\t"
         if '916-0401' in pn:
             rotated = True
@@ -426,7 +427,7 @@ def lineAnalysis(directory, thresholdPercent, all ,masterLog):
         if pd.wasCanceled():
             break
         with open(f'{dataFolder}\\Focus Summary.txt','wt') as focusLog:
-            focusLog.write(f'{sn}\t{pn}\t{date}\n\nZ-Values\tFocus Score\n')
+            focusLog.write(f'{sn}\t{pn}\t{date}\n{lineExposure}\nZ-Values\tFocus Score\n')
         zValues.sort()
         #Go through z values in ascending order, get matching img. For each img, create data text file and perform ops-------------------------
         for z in zValues:
@@ -553,7 +554,18 @@ def getSensorData(directory):
         rows = 0
         cols = 0
     return sn, pn, sensorRev, rectRev, rectPosRev, date, rows, cols
-
+def getLineExposure(directory):
+    try:
+        for file in os.listdir(directory):
+            if 'DataAcq.log' in file:
+                with open(f"{directory}\\{file}", 'rt') as acqLog:
+                    lines = acqLog.readlines()
+                    for line in lines:
+                        if 'Line Exposure' in line:
+                            return line
+    except Exception as e:
+        return ''
+    return ''
 #Message Boxes-----------------------------------------------------------------------------------------------------------------------------
 def errorMessage(title = '', text = ''):
     message = QMessageBox()

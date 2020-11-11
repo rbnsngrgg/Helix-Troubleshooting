@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         #Initialize the parent class, then set title and min window size
         super().__init__()
-        self.setWindowTitle('Helix Troubleshooting 1.0.1')
+        self.setWindowTitle('Helix Troubleshooting 1.0.2')
         self.setMinimumSize(750,500)
 
         #Icon
@@ -95,7 +95,7 @@ class MainWindow(QMainWindow):
         self.groupBoxLayout = QVBoxLayout()
         self.description = QLabel()
         self.description.setWordWrap(True)
-        self.description.setText('Helix Tools 0.3.0')
+        self.description.setText('Helix Tools 1.0.2')
         self.parameters = QFormLayout()
         self.textEntry = QLineEdit()
         self.textEntry.setVisible(False)
