@@ -29,3 +29,6 @@
 
 1.0.1
 -Fixed a bug that caused Laser Line Analysis for 916-0401-XXXX sensors to return "None" due to the rotated images (Issue 7).
+
+1.0.2
+-Included laser line exposure value in the line analysis summary.
