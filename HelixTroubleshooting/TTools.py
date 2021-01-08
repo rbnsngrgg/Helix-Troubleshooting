@@ -154,7 +154,7 @@ def summary(directory):
             summaryImg = Image.new(mode = 'L', size = (1920,1200))
             fileName = 'Z{0}_summary.tif'.format(zValue)
             for file in files:
-                if zValue in file:
+                if zValue == os.path.split(file)[1].split('Y')[0].replace('RZ',''):
                     image = Image.open(file)
                     summaryImg = ImageChops.lighter(summaryImg,image)
                     image.close()
