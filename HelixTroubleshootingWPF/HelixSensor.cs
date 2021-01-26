@@ -7,7 +7,7 @@ using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Xml;
 
-namespace TTools
+namespace HelixTroubleshootingWPF
 {
     //Represents an instance of a sensor as it is represented in a particular sensor.xml file
     class HelixSensor
@@ -35,7 +35,7 @@ namespace TTools
         }
         
         //Methods
-        //Option to set (or re-set) parameters if xmlPath was not provided to constructor.
+        //Option to set parameters, or re-set if xml folder was not provided to constructor.
         public bool GetSensorData(string containingFolder)
         {
             if (!Directory.Exists(containingFolder)) { return false; }
@@ -53,7 +53,7 @@ namespace TTools
             //Date = DateTime.ParseExact("Wed Jul 22 08:24:53 2020\n", format, CultureInfo.InvariantCulture);
             Date = DateTime.ParseExact(xml.ChildNodes[0].Attributes[1].Value.Replace("\n","").Replace("\r",""), format, CultureInfo.InvariantCulture); //RECT_OUTPUT > Date
             SerialNumber = xml.ChildNodes[0].ChildNodes[0].ChildNodes[0].Attributes[0].Value;
-            PartNumber = xml.ChildNodes[0].ChildNodes[0].ChildNodes[0].Attributes[2].Value; //RECT_OUTPUT > SENSORS > SENSOR > Part_Nmber
+            PartNumber = xml.ChildNodes[0].ChildNodes[0].ChildNodes[0].Attributes[2].Value; //RECT_OUTPUT > SENSORS > SENSOR > Part_Number
             SensorRev = xml.ChildNodes[0].ChildNodes[0].ChildNodes[0].Attributes[3].Value;
             RectRev = xml.ChildNodes[0].ChildNodes[0].ChildNodes[0].Attributes[4].Value;
             RectPosRev = xml.ChildNodes[0].ChildNodes[0].ChildNodes[0].Attributes[5].Value;

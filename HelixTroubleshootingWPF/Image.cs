@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using ImageMagick;
 
-namespace TTools
+namespace HelixTroubleshootingWPF
 {
     class HelixImage
     {
@@ -13,6 +13,7 @@ namespace TTools
         private int columns;
         private string name;
         private string path;
+        IPixelCollection<byte> pixels;
         private MagickImage magick;
 
         //Constructors
@@ -28,6 +29,7 @@ namespace TTools
                 this.path = path;
                 name = System.IO.Path.GetFileName(path);
                 magick = new MagickImage(path, settings);
+                pixels = magick.GetPixels();
                 rows = magick.Height;
                 columns = magick.Width;
             }
@@ -62,6 +64,12 @@ namespace TTools
                     return false;
                 }
             }
+        }
+
+        //Get pixel
+        public int GetPixelValue(int x, int y)
+        {
+            return pixels.GetPixel(x,y).GetChannel(0);
         }
     }
 

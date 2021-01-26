@@ -14,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TTools;
+using HelixTroubleshootingWPF.Functions;
 namespace HelixTroubleshootingWPF
 {
     /// <summary>
@@ -22,15 +22,12 @@ namespace HelixTroubleshootingWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        // Init class containing main functions
-        TToolsFunctions tools = new TToolsFunctions();
-
         public MainWindow()
         {
             InitializeComponent();
-            tools.LoadConfig();
+            TToolsFunctions.LoadConfig();
             //Add functions to the list widget
-            foreach (string function in tools.functionList)
+            foreach (string function in TToolsFunctions.functionList)
             {
                 ListViewItem newItem = new ListViewItem();
                 newItem.Content = function;
@@ -128,26 +125,26 @@ namespace HelixTroubleshootingWPF
 
             if(function.Contains("ALS Point Removal"))
                 {
-                tools.ALSPointRemoval(DetailsTextBox1.Text);
+                TToolsFunctions.ALSPointRemoval(DetailsTextBox1.Text);
                 }
             else if(function.Contains("Fix Algorithm Errors"))
                 {
-                tools.AlgorithmErrors(DetailsTextBox1.Text);
+                TToolsFunctions.AlgorithmErrors(DetailsTextBox1.Text);
                 }
             else if (function.Contains("Illuminated Sphere Summary"))
                 {
-                tools.SphereSummary(DetailsTextBox1.Text);
+                TToolsFunctions.SphereSummary(DetailsTextBox1.Text);
                 }
             else if (function.Contains("Solo Laser Line Analysis"))
                 {
                 }
             else if (function.Contains("Staring Dot Removal"))
                 {
-                tools.StaringDotRemoval(DetailsTextBox1.Text);
+                TToolsFunctions.StaringDotRemoval(DetailsTextBox1.Text);
                 }
             else if (function.Contains("Temperature Adjust"))
                 {
-                tools.TempAdjust(DetailsTextBox1.Text,DetailsTextBox2.Text);
+                TToolsFunctions.TempAdjust(DetailsTextBox1.Text,DetailsTextBox2.Text);
                 }
         }
 
@@ -159,7 +156,7 @@ namespace HelixTroubleshootingWPF
 
             if (function.Contains("Fix Algorithm Errors"))
             {
-                tools.RestoreTcomp(DetailsTextBox1.Text);
+                TToolsFunctions.RestoreTcomp(DetailsTextBox1.Text);
             }
         }
     }
