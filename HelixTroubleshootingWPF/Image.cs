@@ -2,19 +2,28 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using ImageMagick;
 
 namespace HelixTroubleshootingWPF
 {
     class HelixImage
     {
-        private MagickReadSettings settings = new MagickReadSettings();
-        private int rows;
-        private int columns;
-        private string name;
-        private string path;
-        IPixelCollection<byte> pixels;
-        private MagickImage magick;
+        protected MagickImage magick = null;
+
+        protected static MagickReadSettings settings = new MagickReadSettings();
+        public string Name { get; protected set; }
+        protected string path = "";
+        public MagickImage Magick
+        {
+            get
+            {
+                if (magick == null)
+                { magick = new MagickImage(path, settings); }
+                return magick;
+            }
+            protected set { magick = value; } 
+        }
 
         //Constructors
         public HelixImage()
@@ -27,21 +36,16 @@ namespace HelixTroubleshootingWPF
             if (File.Exists(path))
             {
                 this.path = path;
-                name = System.IO.Path.GetFileName(path);
-                magick = new MagickImage(path, settings);
-                pixels = magick.GetPixels();
-                rows = magick.Height;
-                columns = magick.Width;
+                Name = System.IO.Path.GetFileName(path);
+                //Magick = new MagickImage(path, settings);
             }
         }
         public HelixImage(string path, MagickImage magick)
         {
             settings.SetDefine("tiff:ignore-tags", "37373");
             this.path = path;
-            name = System.IO.Path.GetFileName(path);
-            this.magick = magick;
-            rows = magick.Height;
-            columns = magick.Width;
+            Name = System.IO.Path.GetFileName(path);
+            this.Magick = magick;
         }
 
         //Methods
@@ -49,14 +53,14 @@ namespace HelixTroubleshootingWPF
         {
             if (overwrite)
             {
-                magick.Write(this.path);
+                Magick.Write(this.path);
                 return true;
             }
             else
             {
                 try
                 {
-                    magick.Write(path);
+                    Magick.Write(path);
                     return true;
                 }
                 catch (System.Exception)
@@ -69,17 +73,41 @@ namespace HelixTroubleshootingWPF
         //Get pixel
         public int GetPixelValue(int x, int y)
         {
-            return pixels.GetPixel(x,y).GetChannel(0);
+            return Magick.GetPixels().GetPixel(x,y).GetChannel(0);
         }
     }
 
     class SoloLaserImage : HelixImage
     {
-        
+        public string ZValue {get; private set;}
+
+        public SoloLaserImage(string path) : base(path)
+        {
+            GetLaserZValue();
+        }
+
+        public void GetLaserZValue()
+        {
+            if(path == "") { return; }
+            if (path.Contains("TZ") & path.Contains(".tif"))
+            { ZValue = Path.GetFileNameWithoutExtension(path).Split("A")[0].Replace("TZ", ""); } //Get file name, split by "A", get first section, replace TZ with blank
+        }
     }
 
     class EvoLaserImage : HelixImage
-    { 
+    {
+        public string ZValue { get; private set; }
 
+        public EvoLaserImage(string path) : base(path)
+        {
+            GetLaserZValue();
+        }
+
+        public void GetLaserZValue()
+        {
+            if (path == "") { return; }
+            if (path.Contains("TZ") & path.Contains(".tif"))
+            { ZValue = Path.GetFileNameWithoutExtension(path).Split("A")[0].Replace("TZ", ""); } //Get file name, split by "A", get first section, replace TZ with blank
+        }
     }
 }

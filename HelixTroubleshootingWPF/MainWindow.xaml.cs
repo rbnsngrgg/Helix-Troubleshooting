@@ -29,8 +29,7 @@ namespace HelixTroubleshootingWPF
             //Add functions to the list widget
             foreach (string function in TToolsFunctions.functionList)
             {
-                ListViewItem newItem = new ListViewItem();
-                newItem.Content = function;
+                ListViewItem newItem = new ListViewItem() { Content = function };
                 FunctionList.Items.Add(newItem);
             }
             FunctionList.SelectedItem = FunctionList.Items.GetItemAt(0);
@@ -107,6 +106,31 @@ namespace HelixTroubleshootingWPF
                 DetailsButton2.Content = "";
                 DetailsButton2.Visibility = System.Windows.Visibility.Hidden;
             }
+            else if(item.Contains("DACMEMS Data Gather"))
+            {
+                DetailsBox.Text = "Gather data for each sensor that has run through the DACMEMS Tuning Fixture, paired with its zero degree 2RMS and Max Deviation.";
+                DataGatherSettings();
+            }
+            else if(item.Contains("UFF Data Gather"))
+            {
+                DetailsBox.Text = "Gather data for each sensor that has run through the Universal Focus Fixture, paired with its zero degree 2RMS and Max Deviation.";
+                DataGatherSettings();
+            }
+            else if(item.Contains("LPF Data Gather"))
+            {
+                DetailsBox.Text = "Gather data for each sensor that has run through the Laser Power Fixture, paired with its zero degree 2RMS and Max Deviation.";
+                DataGatherSettings();
+            }
+            else if(item.Contains("Pitch Data Gather"))
+            {
+                DetailsBox.Text = "Gather data for each sensor that has run through the Camera Pitch Fixture, paired with its zero degree 2RMS and Max Deviation.";
+                DataGatherSettings();
+            }
+            else if(item.Contains("Evo Data Gather"))
+            {
+                DetailsBox.Text = "Gather data from each fixture for each Evo sensor, paired with accuracy test 0 degree 2RMS and Max Deviation.";
+                DataGatherSettings();
+            }
         }
 
         //Event handlers
@@ -123,29 +147,49 @@ namespace HelixTroubleshootingWPF
             }
             string function = FunctionList.SelectedItem.ToString();
 
-            if(function.Contains("ALS Point Removal"))
-                {
+            if (function.Contains("ALS Point Removal"))
+            {
                 TToolsFunctions.ALSPointRemoval(DetailsTextBox1.Text);
-                }
-            else if(function.Contains("Fix Algorithm Errors"))
-                {
+            }
+            else if (function.Contains("Fix Algorithm Errors"))
+            {
                 TToolsFunctions.AlgorithmErrors(DetailsTextBox1.Text);
-                }
+            }
             else if (function.Contains("Illuminated Sphere Summary"))
-                {
+            {
                 TToolsFunctions.SphereSummary(DetailsTextBox1.Text);
-                }
+            }
             else if (function.Contains("Solo Laser Line Analysis"))
-                {
-                }
+            {
+            }
             else if (function.Contains("Staring Dot Removal"))
-                {
+            {
                 TToolsFunctions.StaringDotRemoval(DetailsTextBox1.Text);
-                }
+            }
             else if (function.Contains("Temperature Adjust"))
-                {
-                TToolsFunctions.TempAdjust(DetailsTextBox1.Text,DetailsTextBox2.Text);
-                }
+            {
+                TToolsFunctions.TempAdjust(DetailsTextBox1.Text, DetailsTextBox2.Text);
+            }
+            else if (function.Contains("DACMEMS Data Gather"))
+            {
+                TToolsFunctions.DacMemsDataGather();
+            }
+            else if (function.Contains("UFF Data Gather"))
+            {
+                TToolsFunctions.UffDataGather();
+            }
+            else if (function.Contains("LPF Data Gather"))
+            {
+                TToolsFunctions.LpfDataGather();
+            }
+            else if (function.Contains("Pitch Data Gather"))
+            {
+                TToolsFunctions.PitchDataGather();
+            }
+            else if (function.Contains("Evo Data Gather"))
+            {
+                TToolsFunctions.GatherEvoData();
+            }
         }
 
         private void DetailsButton2_Click(object sender, RoutedEventArgs e)
@@ -158,6 +202,16 @@ namespace HelixTroubleshootingWPF
             {
                 TToolsFunctions.RestoreTcomp(DetailsTextBox1.Text);
             }
+        }
+
+        private void DataGatherSettings()
+        {
+            DetailsTextBox1.Visibility = System.Windows.Visibility.Hidden;
+            DetailsTextBox2.Visibility = System.Windows.Visibility.Hidden;
+            DetailsButton1.Content = "Start";
+            DetailsButton1.Visibility = System.Windows.Visibility.Visible;
+            DetailsButton2.Content = "";
+            DetailsButton2.Visibility = System.Windows.Visibility.Hidden;
         }
     }
 }

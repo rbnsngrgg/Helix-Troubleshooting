@@ -20,8 +20,12 @@ namespace HelixTroubleshootingWPF.Functions
 {
     static partial class TToolsFunctions
     {
+        //Working directory folder for saving the results of data gathering functions
+        private static string dataGatherFolder = @$"{Directory.GetCurrentDirectory()}\DataGather\";
         //Array of strings to be added to function list
-        public static readonly string[] functionList = new string[] {"ALS Point Removal","Fix Algorithm Errors","Illuminated Sphere Summary","Solo Laser Line Analysis","Staring Dot Removal","Temperature Adjust"};
+        public static readonly string[] functionList = new string[] {"ALS Point Removal","Fix Algorithm Errors","Illuminated Sphere Summary",
+            "Solo Laser Line Analysis","Staring Dot Removal","Temperature Adjust", "DACMEMS Data Gather", "UFF Data Gather", "LPF Data Gather",
+            "Pitch Data Gather","Evo Data Gather"};
 
         //Private variables for config file loading
         private static string configName = "HTconfig.xml";
@@ -38,15 +42,6 @@ namespace HelixTroubleshootingWPF.Functions
             Debug.WriteLine("Laser line analysis\n");
         }
 
-        public static void StaringDotRemoval(string imagesFolder)
-        {
-            if (!Directory.Exists(imagesFolder)) { return; }
-            Debug.WriteLine("Staring dot removal----------------------------------------\n");
-            HelixSensor sensor = new HelixSensor(imagesFolder);
-            Debug.WriteLine($"{sensor.Date}\n\tSensor information for {sensor.SerialNumber}:\n\tPN: {sensor.PartNumber}\n\tSensor Rev: {sensor.SensorRev}\n\tRect Rev: {sensor.RectRev}\n\t" +
-                $"Rect Pos Rev: {sensor.RectPosRev}\n\tAcc Pos Rev: {sensor.AccPosRev}\n\t" +
-                $"Laser Color: {sensor.Color}\n\tLaser Class: {sensor.LaserClass}\n");
-        }
 
 
         //Private Helper Functions----------------------------------------------------------------------------------------

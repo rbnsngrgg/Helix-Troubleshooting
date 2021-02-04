@@ -65,7 +65,8 @@ namespace HelixTroubleshootingWPF.Functions
                         summaryImage = new MagickImage(image, settings);
                         foreach (string image2 in images)
                         {
-                            if (image2.Contains(zValue))
+                            //if (image2.Contains(zValue))
+                            if(System.IO.Path.GetFileName(image2).Split("Y")[0] == zValue)
                             {
                                 summaryImage.Composite(new MagickImage(image2, settings), CompositeOperator.Lighten);
                             }
