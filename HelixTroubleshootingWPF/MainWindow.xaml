@@ -5,21 +5,36 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HelixTroubleshootingWPF"
         mc:Ignorable="d"
-        Title="Helix Troubleshooting" Height="450" Width="800" MinHeight="450" MinWidth="800"
+        x:Name="HelixTroubleshootingMainWindow"
+        Title="Helix Troubleshooting" Height="500" Width="800" MinHeight="450" MinWidth="800"
         Icon="bar.ico">
     <Grid Background="#FFF1EEEE">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="263*"/>
             <ColumnDefinition Width="537*"/>
         </Grid.ColumnDefinitions>
-        <ListView Name="FunctionList" SelectionChanged="FunctionList_SelectionChanged" MaxWidth="200" Margin="0,30,0,0" HorizontalAlignment="Left" Width="180" SelectionMode="Single" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Visibility="Visible">
+            <Menu x:Name="MainMenuBar" DockPanel.Dock="Top" Background="White">
+                <MenuItem Header="_File">
+                    <MenuItem x:Name="FileMenuExit" Header="Exit" Click="FileMenuExit_Click"/>
+                </MenuItem>
+                <MenuItem Header="_Tools">
+                    <MenuItem x:Name="ToolsMenuToggleDataGather" Header="Show/Hide Data Gather Functions" Click="ToolsMenuToggleDataGather_Click"/>
+                </MenuItem>
+            </Menu>
+        </DockPanel>
+        <ListView Grid.Row="1" Name="FunctionList" SelectionChanged="FunctionList_SelectionChanged" MaxWidth="200" Margin="0,30,0,0" HorizontalAlignment="Left" Width="180" SelectionMode="Single" >
             <ListView.View>
                 <GridView>
                     <GridViewColumn/>
                 </GridView>
             </ListView.View>
         </ListView>
-        <GroupBox Header="Details" Margin="185,30,0,0" Grid.ColumnSpan="2" >
+        <GroupBox Grid.Row="1" Header="Details" Margin="185,30,0,0" Grid.ColumnSpan="2" >
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition MinHeight="145" MaxHeight="300" Height="Auto"/>

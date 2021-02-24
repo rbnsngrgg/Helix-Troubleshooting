@@ -14,13 +14,8 @@ namespace HelixTroubleshootingWPF
             InitializeComponent();
             Title = $"{Title} {Version}";
             TToolsFunctions.LoadConfig();
-            //Add functions to the list widget
-            foreach (string function in TToolsFunctions.functionList)
-            {
-                ListViewItem newItem = new ListViewItem() { Content = function };
-                FunctionList.Items.Add(newItem);
-            }
-            FunctionList.SelectedItem = FunctionList.Items.GetItemAt(0);
+            AddFunctions();
+            ToggleDataGather();
         }
 
         //Updates Details Groupbox based on the item that was selected
@@ -193,6 +188,31 @@ namespace HelixTroubleshootingWPF
             }
         }
 
+        private void AddFunctions()
+        {
+            FunctionList.Items.Clear();
+            //Add functions to the list widget
+            foreach (string function in TToolsFunctions.functionList)
+            {
+                ListViewItem newItem = new ListViewItem() { Content = function };
+                FunctionList.Items.Add(newItem);
+            }
+            FunctionList.SelectedItem = FunctionList.Items.GetItemAt(0);
+        }
+        private void ToggleDataGather()
+        {
+            foreach (ListViewItem item in FunctionList.Items)
+            {
+                if (item.Content.ToString().Contains("Data Gather"))
+                {
+                    if (item.Visibility == Visibility.Visible)
+                    { item.Visibility = Visibility.Collapsed; }
+                    else
+                    { item.Visibility = Visibility.Visible; }
+                }
+            }
+        }
+
         private void DataGatherSettings()
         {
             DetailsTextBox1.Visibility = System.Windows.Visibility.Hidden;
@@ -201,6 +221,16 @@ namespace HelixTroubleshootingWPF
             DetailsButton1.Visibility = System.Windows.Visibility.Visible;
             DetailsButton2.Content = "";
             DetailsButton2.Visibility = System.Windows.Visibility.Hidden;
+        }
+
+        private void FileMenuExit_Click(object sender, RoutedEventArgs e)
+        {
+            HelixTroubleshootingMainWindow.Close();
+        }
+
+        private void ToolsMenuToggleDataGather_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleDataGather();
         }
     }
 }
