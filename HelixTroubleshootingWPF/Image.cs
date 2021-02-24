@@ -1,9 +1,7 @@
-﻿using System;
+﻿using ImageMagick;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using ImageMagick;
 
 namespace HelixTroubleshootingWPF
 {
@@ -79,8 +77,27 @@ namespace HelixTroubleshootingWPF
 
     class SoloLaserImage : HelixImage
     {
+        private List<CGInfo> cgs = new List<CGInfo>();
+        public List<CGInfo> CGs 
+        {
+            get { return cgs; }
+            set 
+            {
+                cgs = value;
+                if(value.Count > 0)
+                {
+                    SetCgAverages();
+                    SetWidthAverages();
+                    SetLineAngle();
+                    SetFocusScore();
+                }
+            }
+        }
         public string ZValue {get; private set;}
-
+        public float FocusScore { get; private set; }
+        public double LineAngle { get; private set; }
+        public Tuple<float, float, float> CgAverages { get; private set; }
+        public Tuple<float, float, float> WidthAverages { get; private set; }
         public SoloLaserImage(string path) : base(path)
         {
             GetLaserZValue();
@@ -89,8 +106,54 @@ namespace HelixTroubleshootingWPF
         public void GetLaserZValue()
         {
             if(path == "") { return; }
+            //Get file name, split by "A", get first section, replace TZ with blank
             if (path.Contains("TZ") & path.Contains(".tif"))
-            { ZValue = Path.GetFileNameWithoutExtension(path).Split("A")[0].Replace("TZ", ""); } //Get file name, split by "A", get first section, replace TZ with blank
+            { ZValue = Path.GetFileNameWithoutExtension(path).Split("Y")[0].Replace("TZ", ""); } 
+        }
+
+        private void SetCgAverages()
+        {
+            float cgAvgLeft = 0, cgAvg = 0, cgAvgRight = 0;
+            int center = CGs.Count / 2;
+            foreach(CGInfo cg in CGs)
+            {
+                cgAvg += cg.Row;
+                if (cg.Col < center) { cgAvgLeft += cg.Row; }
+                else { cgAvgRight += cg.Row; }
+            }
+            cgAvgLeft = (float)Math.Round(cgAvgLeft / center, 2);
+            cgAvg = (float)Math.Round(cgAvg / CGs.Count, 2);
+            cgAvgRight = (float)Math.Round(cgAvgRight / center, 2);
+            CgAverages =  new Tuple<float, float, float>(cgAvgLeft, cgAvg, cgAvgRight);
+        }
+        private void SetFocusScore()
+        {
+            float focusAvg = 0;
+            foreach(CGInfo cg in CGs)
+            {
+                focusAvg += cg.Score;
+            }
+            FocusScore = (float)Math.Round(focusAvg / CGs.Count, 2);
+        }
+        private void SetWidthAverages()
+        {
+            float widthAvgLeft = 0, widthAvg = 0, widthAvgRight = 0;
+            int center = CGs.Count / 2;
+            foreach (CGInfo cg in CGs)
+            {
+                widthAvg += cg.LineWidth;
+                if (cg.Col < center) { widthAvgLeft += cg.LineWidth; }
+                else { widthAvgRight += cg.LineWidth; }
+            }
+            widthAvgLeft = (float)Math.Round(widthAvgLeft / center,2);
+            widthAvg = (float)Math.Round(widthAvg / CGs.Count, 2);
+            widthAvgRight = (float)Math.Round(widthAvgRight / center, 2);
+            WidthAverages = new Tuple<float, float, float>(widthAvgLeft, widthAvg, widthAvgRight);
+        }
+        private void SetLineAngle()
+        {
+            double lineDegrees = (180/Math.PI) * Math.Atan((CGs[^1].Row - CGs[0].Row) / Magick.Width);
+            LineAngle = Math.Round(lineDegrees, 2);
         }
     }
 
@@ -106,8 +169,31 @@ namespace HelixTroubleshootingWPF
         public void GetLaserZValue()
         {
             if (path == "") { return; }
+            //Get file name, split by "A", get first section, replace TZ with blank
             if (path.Contains("TZ") & path.Contains(".tif"))
-            { ZValue = Path.GetFileNameWithoutExtension(path).Split("A")[0].Replace("TZ", ""); } //Get file name, split by "A", get first section, replace TZ with blank
+            { ZValue = Path.GetFileNameWithoutExtension(path).Split("A")[0].Replace("TZ", ""); }
+        }
+    }
+
+    struct CGInfo
+    {
+        public float Col;
+        public float Row;
+        public float Score;
+        public float LineWidth;
+        public int PeakIntensity;
+        public CGInfo(float col, float row, float score, float lineWidth, int peakIntensity)
+        {
+            Col = col;
+            Row = row;
+            Score = score;
+            LineWidth = lineWidth;
+            PeakIntensity = peakIntensity;
+        }
+
+        public override string ToString()
+        {
+            return $"{Row.ToString("F2")}\t{Col}\t{LineWidth}\t{PeakIntensity}\t{Score}";
         }
     }
 }

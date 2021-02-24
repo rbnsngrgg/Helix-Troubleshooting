@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Security.Cryptography.Xml;
-using System.Text;
 using System.Xml;
 
 namespace HelixTroubleshootingWPF
@@ -78,6 +75,12 @@ namespace HelixTroubleshootingWPF
         public HelixEvoSensor() :base() { }
         public HelixEvoSensor(string sensorXmlFolder) : base(sensorXmlFolder) { }
 
+        public bool CheckComplete()
+        {
+            if(!DacMemsData.CheckComplete() || !LpfData.CheckComplete() || 
+                !PitchData.CheckComplete() || !UffData.CheckComplete() || !AccuracyResult.CheckComplete()) { return false; }
+            return true;
+        }
     }
     class HelixSoloSensor : HelixSensor
     {
@@ -88,9 +91,14 @@ namespace HelixTroubleshootingWPF
     class AccuracyResult
     {
         public DateTime Timestamp = new DateTime();
-        public float ZeroDegree2Rms;
-        public float ZeroDegreeMaxDev;
+        public float ZeroDegree2Rms = 0f;
+        public float ZeroDegreeMaxDev = 0f;
 
+        public bool CheckComplete()
+        {
+            if(Timestamp == new DateTime() || ZeroDegree2Rms == 0f || ZeroDegreeMaxDev == 0f) { return false; }
+            return true;
+        }
         public override string ToString()
         {
             return $"{Timestamp}\t{ZeroDegree2Rms}\t{ZeroDegreeMaxDev}";
@@ -113,14 +121,14 @@ namespace HelixTroubleshootingWPF
             string[] split = dataLine.Split("\t");
             if(split.Length < 97) 
             {
-                NLRange = 0;
-                NLCoverage = 0;
-                NRRange = 0;
-                NRCoverage = 0;
-                FLRange = 0;
-                FLCoverage = 0;
-                FRRange = 0;
-                FRCoverage = 0;
+                NLRange = 0d;
+                NLCoverage = 0d;
+                NRRange = 0d;
+                NRCoverage = 0d;
+                FLRange = 0d;
+                FLCoverage = 0d;
+                FRRange = 0d;
+                FRCoverage = 0d;
                 return; 
             }
             double.TryParse(split[80], out NLRange);
@@ -132,7 +140,12 @@ namespace HelixTroubleshootingWPF
             double.TryParse(split[95], out FRRange);
             double.TryParse(split[96], out FRCoverage);
         }
-
+        public bool CheckComplete()
+        {
+            if(NLRange == 0d || NLCoverage == 0d || NRRange == 0d || NRCoverage == 0d ||
+                FLRange == 0d || FLCoverage == 0d || FRRange == 0d || FRCoverage == 0d) { return false; }
+            return true;
+        }
         public override string ToString()
         {
             return $"{NLRange}\t{NLCoverage}\t{NRRange}\t{NRCoverage}\t{FLRange}\t{FLCoverage}\t{FRRange}\t{FRCoverage}";
@@ -228,6 +241,15 @@ namespace HelixTroubleshootingWPF
                 TableSamples = newSamples;
             }
         }
+        public bool CheckComplete()
+        {
+            if(TableSamples == null || TableSamples.Count < 14) { return false; }
+            foreach(LpfTestIndex sample in TableSamples)
+            {
+                if (!sample.CheckComplete()) { return false; }
+            }
+            return true;
+        }
         public override string ToString()
         {
             string line =
@@ -249,6 +271,12 @@ namespace HelixTroubleshootingWPF
         public int Index;
         public int PoweruW;
         public int PercentNominal;
+
+        public bool CheckComplete()
+        {
+            if(PoweruW == default || PercentNominal == default) { return false; }
+            return true;
+        }
 
         public override string ToString()
         {
@@ -282,6 +310,12 @@ namespace HelixTroubleshootingWPF
                 if(!float.TryParse(split[7], out XPixelsDelta)) { XPixelsDelta = 0f; }
                 if(!float.TryParse(split[8], out YPixelsDelta)) { YPixelsDelta = 0f; }
             }
+        }
+        public bool CheckComplete()
+        {
+            if(Date == new DateTime() || Operator == "")
+            {return false;}
+            return true;
         }
         public override string ToString()
         {
@@ -330,6 +364,12 @@ namespace HelixTroubleshootingWPF
                 if (!float.TryParse(split[13], out FocusRow)) { FocusRow = 0; }
                 if (!float.TryParse(split[14], out FocusScore)) { FocusScore = 0; }
             }
+        }
+        public bool CheckComplete()
+        {
+            if (Date == new DateTime() || Operator == "" || CameraTempC == 0f || TargetMonitorAngle == 0f || FocusScore == 0 )
+            { return false; }
+            else { return true; }
         }
         public override string ToString()
         {

@@ -1,20 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
-using System.Windows.Shapes;
-using System.Windows.Navigation;
-using System.Text.RegularExpressions;
-using System.Xml;
-using ImageMagick;
-using System.Windows.Controls;
-using HelixTroubleshootingWPF;
-using System.Windows.Threading;
-using PrimS;
-using System.Threading.Tasks;
 //namespace Helix_Troubleshooting_CS
 namespace HelixTroubleshootingWPF.Functions
 {
@@ -35,13 +22,6 @@ namespace HelixTroubleshootingWPF.Functions
         private static string resultsDir = "";
         private static int lineThresholdPercent = 20;
         private static int alsSensitivity = 3;
-
-
-        public static void LineAnalysis()
-        {
-            Debug.WriteLine("Laser line analysis\n");
-        }
-
 
 
         //Private Helper Functions----------------------------------------------------------------------------------------

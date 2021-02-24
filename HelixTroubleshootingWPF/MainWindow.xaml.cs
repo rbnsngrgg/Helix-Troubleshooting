@@ -1,20 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HelixTroubleshootingWPF.Functions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using HelixTroubleshootingWPF.Functions;
 namespace HelixTroubleshootingWPF
 {
     /// <summary>
@@ -22,9 +8,11 @@ namespace HelixTroubleshootingWPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        public readonly string Version = "2.0.0";
         public MainWindow()
         {
             InitializeComponent();
+            Title = $"{Title} {Version}";
             TToolsFunctions.LoadConfig();
             //Add functions to the list widget
             foreach (string function in TToolsFunctions.functionList)
@@ -161,6 +149,7 @@ namespace HelixTroubleshootingWPF
             }
             else if (function.Contains("Solo Laser Line Analysis"))
             {
+                TToolsFunctions.LineAnalysis(DetailsTextBox1.Text);
             }
             else if (function.Contains("Staring Dot Removal"))
             {

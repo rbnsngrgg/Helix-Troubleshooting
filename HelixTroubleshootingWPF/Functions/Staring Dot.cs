@@ -1,20 +1,11 @@
-﻿using System;
+﻿using ImageMagick;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
 using System.IO;
-using System.Diagnostics;
-using System.Windows;
 //using System.Windows.Shapes;
-using System.Windows.Navigation;
 using System.Text.RegularExpressions;
-using System.Xml;
-using ImageMagick;
-using System.Windows.Controls;
-using HelixTroubleshootingWPF;
+using System.Windows;
 using System.Windows.Threading;
-using PrimS;
-using System.Threading.Tasks;
 
 namespace HelixTroubleshootingWPF.Functions
 {
@@ -26,8 +17,8 @@ namespace HelixTroubleshootingWPF.Functions
             HelixSensor sensor = new HelixSensor(imagesFolder);
             List<string> laserImages = GetLaserLineImages(imagesFolder);
             List<string> zValues = ListZValues(laserImages);
-            ProgressBar progressBar = new HelixTroubleshootingWPF.ProgressBar();
-            progressBar.Visibility = Visibility.Visible;
+            ProgressBar progressBar = new ProgressBar
+            { Visibility = Visibility.Visible };
             progressBar.Show();
             progressBar.mainProgressBar.Visibility = Visibility.Visible;
             float progressTick = 100f / (float)zValues.Count;

@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using System.Windows;
+using System.Windows.Threading;
 
 namespace HelixTroubleshootingWPF
 {
@@ -17,9 +8,37 @@ namespace HelixTroubleshootingWPF
     /// </summary>
     public partial class ProgressBar : Window
     {
+
+        public float ProgressTick { get; private set; } = 100f;
+        public bool Canceled { get; private set; } = false;
         public ProgressBar()
         {
             InitializeComponent();
+        }
+
+        public void SetProgressTick(float count)
+        {
+            ProgressTick = 100f / count;
+        }
+
+        public void TickProgress()
+        {
+            mainProgressBar.Dispatcher.Invoke(() => mainProgressBar.Value += ProgressTick, DispatcherPriority.Background);
+        }
+
+        public void SetLabel(string message)
+        {
+            label.Dispatcher.Invoke(() => label.Text = message, DispatcherPriority.Background);
+        }
+
+        public void SetValueComplete()
+        {
+            mainProgressBar.Value = 100;
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            Canceled = true;
         }
     }
 }

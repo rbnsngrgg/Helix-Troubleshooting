@@ -1,21 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using System.IO;
 using System.Diagnostics;
 using System.Globalization;
-using System.Windows;
+using System.IO;
 //using System.Windows.Shapes;
-using System.Windows.Navigation;
-using System.Text.RegularExpressions;
-using System.Xml;
-using ImageMagick;
-using System.Windows.Controls;
-using HelixTroubleshootingWPF;
-using System.Windows.Threading;
-using PrimS;
-using System.Threading.Tasks;
 
 namespace HelixTroubleshootingWPF.Functions
 {
@@ -41,7 +29,8 @@ namespace HelixTroubleshootingWPF.Functions
             GetAccuracyResults(ref sensorList);
             foreach(HelixEvoSensor s in sensorList)
             {
-                logLines.Add($"{s.SerialNumber}\t{s.PartNumber}\t{s.AccuracyResult}\t{s.UffData}\t{s.DacMemsData}\t{s.LpfData}\t{s.PitchData}");
+                if (s.CheckComplete())
+                { logLines.Add($"{s.SerialNumber}\t{s.PartNumber}\t{s.AccuracyResult}\t{s.UffData}\t{s.DacMemsData}\t{s.LpfData}\t{s.PitchData}"); }
             }
             string filePath = @$"{dataGatherFolder}\{DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm-ss")}_EvoFixtureDataGather.txt";
             WriteAndOpen(dataGatherFolder, filePath, logLines);
@@ -237,30 +226,38 @@ namespace HelixTroubleshootingWPF.Functions
                     {
                         if (folder.Contains(sensor.SerialNumber))
                         {
-                            foreach (string file in Directory.GetFiles(folder))
+                            if (Directory.Exists(folder))
                             {
-                                if (Path.GetFileName(file) == "AccDataAcq.log")
+                                foreach (string file in Directory.GetFiles(folder))
                                 {
-                                    AccuracyResult result = new AccuracyResult();
-                                    bool zeroDegree = false;
-                                    foreach (string line in File.ReadAllLines(file))
+                                    if (Path.GetFileName(file) == "AccDataAcq.log")
                                     {
-                                        DateTime newTimestamp = new DateTime();
-                                        if (line.Contains("Started at"))
+                                        AccuracyResult result = new AccuracyResult();
+                                        bool zeroDegree = false;
+                                        try
                                         {
-                                            newTimestamp = DateTime.ParseExact(line.Replace("Started at ", ""), "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
-                                            if (newTimestamp < sensor.AccuracyResult.Timestamp) { break; }
-                                            sensor.AccuracyResult.Timestamp = newTimestamp;
+                                            foreach (string line in File.ReadAllLines(file))
+                                            {
+                                                DateTime newTimestamp = new DateTime();
+                                                if (line.Contains("Started at"))
+                                                {
+                                                    newTimestamp = DateTime.ParseExact(line.Replace("Started at ", ""), "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
+                                                    if (newTimestamp < sensor.AccuracyResult.Timestamp) { break; }
+                                                    sensor.AccuracyResult.Timestamp = newTimestamp;
+                                                }
+                                                else if (line.Contains("Line_Zero Test Type"))
+                                                { zeroDegree = true; }
+                                                else if (line.Contains("Maximum deviation") & zeroDegree)
+                                                { float.TryParse(line.Split("=")[1].Split(",")[0], out sensor.AccuracyResult.ZeroDegreeMaxDev); }
+                                                else if (line.Contains("2RMS deviation") & zeroDegree)
+                                                { float.TryParse(line.Split("=")[1].Split(",")[0], out sensor.AccuracyResult.ZeroDegree2Rms); break; }
+                                            }
                                         }
-                                        else if (line.Contains("Line_Zero Test Type"))
-                                        { zeroDegree = true; }
-                                        else if (line.Contains("Maximum deviation") & zeroDegree)
-                                        { float.TryParse(line.Split("=")[1].Split(",")[0], out sensor.AccuracyResult.ZeroDegreeMaxDev); }
-                                        else if (line.Contains("2RMS deviation") & zeroDegree)
-                                        { float.TryParse(line.Split("=")[1].Split(",")[0], out sensor.AccuracyResult.ZeroDegree2Rms); break; }
+                                        catch(System.IO.IOException)
+                                        { continue; }
                                     }
+                                    break;
                                 }
-                                break;
                             }
                         }
                     }

@@ -1,20 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
 using System.IO;
-using System.Diagnostics;
 using System.Windows;
-using System.Windows.Shapes;
-using System.Windows.Navigation;
-using System.Text.RegularExpressions;
 using System.Xml;
-using ImageMagick;
-using System.Windows.Controls;
-using HelixTroubleshootingWPF;
-using System.Windows.Threading;
-using PrimS;
-using System.Threading.Tasks;
 
 namespace HelixTroubleshootingWPF.Functions
 {
