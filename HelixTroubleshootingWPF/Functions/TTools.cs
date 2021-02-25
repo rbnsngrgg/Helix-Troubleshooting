@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using uEye;
 //namespace Helix_Troubleshooting_CS
 namespace HelixTroubleshootingWPF.Functions
 {
@@ -25,7 +26,6 @@ namespace HelixTroubleshootingWPF.Functions
 
 
         //Private Helper Functions----------------------------------------------------------------------------------------
-
         //Find all files in directory that contain a certain string. Return empty list if none found.
         private static List<string> GetFilesWith(string directory, string find)
         {
