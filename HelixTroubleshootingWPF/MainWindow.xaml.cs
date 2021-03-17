@@ -13,15 +13,16 @@ namespace HelixTroubleshootingWPF
         {
             InitializeComponent();
             Title = $"{Title} {Version}";
-            TToolsFunctions.LoadConfig();
+            TToolsFunctions.Config.LoadConfig();
             AddFunctions();
             ToggleDataGather();
         }
 
-        //Updates Details Groupbox based on the item that was selected
+        
         private void UpdateDetails(string item)
         {
-            if(item.Contains("ALS Point Removal"))
+            /// <summary>Updates Details Groupbox based on the item that was selected</summary>
+            if (item.Contains("ALS Point Removal"))
             {
                 DetailsBox.Text = "Removes erroneous entries in the CG text files for Evo sensors that cause ALS Point errors during rectification." +
                     "\nEnter the directory of a rectification images folder, then click \"Start\".";
@@ -114,6 +115,28 @@ namespace HelixTroubleshootingWPF
                 DetailsBox.Text = "Gather data from each fixture for each Evo sensor, paired with accuracy test 0 degree 2RMS and Max Deviation.";
                 DataGatherSettings();
             }
+            else if(item.Contains("Sensor Test"))
+            {
+                DetailsBox.Text = "Test sensor functionality";
+                DataGatherSettings();
+            }
+            else if(item.Contains("Evo KNN"))
+            {
+                DetailsBox.Text = "K-Nearest Neighbors algorithm for Helix Evo Sensors. Enter a model number, or leave blank to include all Evo models.";
+                DataGatherSettings();
+                DetailsTextBox1.Visibility = System.Windows.Visibility.Visible;
+            }
+            else if (item.Contains("Evo KNN Regression"))
+            {
+                DetailsBox.Text = "K-Nearest Neighbors regression for Helix Evo Sensors. Enter a serial number, then start.";
+                DataGatherSettings();
+                DetailsTextBox1.Visibility = System.Windows.Visibility.Visible;
+            }
+            else if (item.Contains("KNN Validation"))
+            {
+                DetailsBox.Text = "Find and validate the best combination of data for the KNN.";
+                DataGatherSettings();
+            }
         }
 
         //Event handlers
@@ -174,8 +197,23 @@ namespace HelixTroubleshootingWPF
             {
                 TToolsFunctions.GatherEvoData();
             }
+            else if (function.Contains("Sensor Test"))
+            {
+                TToolsFunctions.RunSensorTest();
+            }
+            else if (function == ("Evo KNN"))
+            {
+                TToolsFunctions.RunKnn("", DetailsTextBox1.Text);
+            }
+            else if (function.Contains("Evo KNN Regression"))
+            {
+                TToolsFunctions.RunKnn(DetailsTextBox1.Text,"");
+            }
+            else if(function.Contains("KNN Validation"))
+            {
+                TToolsFunctions.RunCombos();
+            }
         }
-
         private void DetailsButton2_Click(object sender, RoutedEventArgs e)
         {
             if (FunctionList.SelectedItems.Count == 0) { return; }
@@ -212,7 +250,6 @@ namespace HelixTroubleshootingWPF
                 }
             }
         }
-
         private void DataGatherSettings()
         {
             DetailsTextBox1.Visibility = System.Windows.Visibility.Hidden;
@@ -222,12 +259,10 @@ namespace HelixTroubleshootingWPF
             DetailsButton2.Content = "";
             DetailsButton2.Visibility = System.Windows.Visibility.Hidden;
         }
-
         private void FileMenuExit_Click(object sender, RoutedEventArgs e)
         {
             HelixTroubleshootingMainWindow.Close();
         }
-
         private void ToolsMenuToggleDataGather_Click(object sender, RoutedEventArgs e)
         {
             ToggleDataGather();

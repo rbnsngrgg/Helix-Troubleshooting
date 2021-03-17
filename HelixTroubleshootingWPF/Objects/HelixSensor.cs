@@ -70,6 +70,7 @@ namespace HelixTroubleshootingWPF
     {
         public EvoDacMemsData DacMemsData { get; set; }
         public EvoLpfData LpfData { get; set; }
+        public MirrorcleData Mirrorcle { get; set; }
         public EvoPitchData PitchData { get; set; }
         public EvoUffData UffData { get; set; }
         public HelixEvoSensor() :base() { }
@@ -78,10 +79,25 @@ namespace HelixTroubleshootingWPF
         public bool CheckComplete()
         {
             if(!DacMemsData.CheckComplete() || !LpfData.CheckComplete() || 
-                !PitchData.CheckComplete() || !UffData.CheckComplete() || !AccuracyResult.CheckComplete()) { return false; }
+                !PitchData.CheckComplete() || !UffData.CheckComplete() ||
+                !AccuracyResult.CheckComplete() || !Mirrorcle.CheckComplete()) { return false; }
             return true;
         }
+        public string GetDataString()
+        {
+            return $"{SerialNumber}\t{PartNumber}\t{AccuracyResult}\t{UffData}\t{DacMemsData}\t{Mirrorcle}\t{LpfData}\t{PitchData}";
+        }
+        public List<string> GetDataList()
+        {
+            List<string> data = new List<string>();
+            foreach(string dataString in GetDataString().Split("\t"))
+            {
+                data.Add(dataString);
+            }
+            return data;
+        }
     }
+
     class HelixSoloSensor : HelixSensor
     {
         public HelixSoloSensor() : base() { }
@@ -94,6 +110,36 @@ namespace HelixTroubleshootingWPF
         public float ZeroDegree2Rms = 0f;
         public float ZeroDegreeMaxDev = 0f;
 
+
+        public AccuracyResult()
+        {
+
+        }
+        public AccuracyResult(string filePath)
+        {
+            Update(filePath);
+        }
+        public bool Update(string filePath)
+        {
+            bool zeroDegree = false;
+            foreach (string line in File.ReadAllLines(filePath))
+            {
+                DateTime newTimestamp = new DateTime();
+                if (line.Contains("Started at"))
+                {
+                    newTimestamp = DateTime.ParseExact(line.Replace("Started at ", ""), "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
+                    if (newTimestamp < Timestamp) { return false; }
+                    Timestamp = newTimestamp;
+                }
+                else if (line.Contains("Line_Zero Test Type"))
+                { zeroDegree = true; }
+                else if (line.Contains("Maximum deviation") & zeroDegree)
+                { float.TryParse(line.Split("=")[1].Split(",")[0], out ZeroDegreeMaxDev); }
+                else if (line.Contains("2RMS deviation") & zeroDegree)
+                { float.TryParse(line.Split("=")[1].Split(",")[0], out ZeroDegree2Rms); return true; }
+            }
+            return false;
+        }
         public bool CheckComplete()
         {
             if(Timestamp == new DateTime() || ZeroDegree2Rms == 0f || ZeroDegreeMaxDev == 0f) { return false; }
@@ -107,6 +153,7 @@ namespace HelixTroubleshootingWPF
 
     struct EvoDacMemsData
     {
+        public string MemsSerialNumber;
         public double NLRange;
         public double NLCoverage;
         public double NRRange;
@@ -115,12 +162,14 @@ namespace HelixTroubleshootingWPF
         public double FLCoverage;
         public double FRRange;
         public double FRCoverage;
+        public bool IsAssigned;
 
         public EvoDacMemsData(string dataLine)
         {
             string[] split = dataLine.Split("\t");
             if(split.Length < 97) 
             {
+                MemsSerialNumber = "";
                 NLRange = 0d;
                 NLCoverage = 0d;
                 NRRange = 0d;
@@ -129,8 +178,10 @@ namespace HelixTroubleshootingWPF
                 FLCoverage = 0d;
                 FRRange = 0d;
                 FRCoverage = 0d;
+                IsAssigned = false;
                 return; 
             }
+            MemsSerialNumber = split[5];
             double.TryParse(split[80], out NLRange);
             double.TryParse(split[81], out NLCoverage);
             double.TryParse(split[85], out NRRange);
@@ -139,18 +190,20 @@ namespace HelixTroubleshootingWPF
             double.TryParse(split[91], out FLCoverage);
             double.TryParse(split[95], out FRRange);
             double.TryParse(split[96], out FRCoverage);
+            IsAssigned = true;
         }
         public bool CheckComplete()
         {
             if(NLRange == 0d || NLCoverage == 0d || NRRange == 0d || NRCoverage == 0d ||
-                FLRange == 0d || FLCoverage == 0d || FRRange == 0d || FRCoverage == 0d) { return false; }
+                FLRange == 0d || FLCoverage == 0d || FRRange == 0d || FRCoverage == 0d || !IsAssigned) { return false; }
             return true;
         }
         public override string ToString()
         {
-            return $"{NLRange}\t{NLCoverage}\t{NRRange}\t{NRCoverage}\t{FLRange}\t{FLCoverage}\t{FRRange}\t{FRCoverage}";
+            return $"{MemsSerialNumber}\t{NLRange}\t{NLCoverage}\t{NRRange}\t{NRCoverage}\t{FLRange}\t{FLCoverage}\t{FRRange}\t{FRCoverage}";
         }
     }
+
     struct EvoLpfData
     {
         public DateTime Date;
@@ -266,6 +319,7 @@ namespace HelixTroubleshootingWPF
             return line;
         }
     }
+
     struct LpfTestIndex
     {
         public int Index;
@@ -283,6 +337,7 @@ namespace HelixTroubleshootingWPF
             return $"{Index}\t{PoweruW}\t{PercentNominal}";
         }
     }
+
     struct EvoPitchData
     {
         public DateTime Date;
@@ -322,6 +377,7 @@ namespace HelixTroubleshootingWPF
             return $"{Operator}\t{PitchTestRan}\t{XPixelsDelta}\t{YPixelsDelta}";
         }
     }
+
     struct EvoUffData
     {
         public DateTime Date;
@@ -375,6 +431,75 @@ namespace HelixTroubleshootingWPF
         {
             return $"{Operator}\t{CameraTempC}\t{MinTempOverridden}\t{AlignTargetRan}\t" +
                 $"{TargetMonitorAngle}\t{FocusTestRan}\t{FocusExposureGood}\t{FocusRow}\t{FocusScore}";
+        }
+    }
+
+    struct MirrorcleData
+    {
+        public string SerialNumber;
+        public float ThetaX110;
+        public float ThetaY110;
+        public int FnX;
+        public int FnY;
+        public float PrcpMaxDiff;
+        public decimal FitC0;
+        public decimal FitC1;
+        public decimal FitC2;
+        public decimal FitC3;
+        public decimal FitC4;
+        public decimal FitC5;
+        public float LinError;
+        public bool IsAssigned;
+
+        public MirrorcleData(string line)
+        {
+            string[] split = line.Split(",");
+            if(split.Length < 31)
+            {
+                SerialNumber = default;
+                ThetaX110 = default;
+                ThetaY110 = default;
+                FnX = default;
+                FnY = default;
+                PrcpMaxDiff = default;
+                FitC0 = default;
+                FitC1 = default;
+                FitC2 = default;
+                FitC3 = default;
+                FitC4 = default;
+                FitC5 = default;
+                LinError = default;
+                IsAssigned = false;
+            }
+            else
+            {
+                SerialNumber = split[0];
+                if(!float.TryParse(split[17], out ThetaX110))   { ThetaX110 = default; }
+                if(!float.TryParse(split[18], out ThetaY110))   { ThetaY110 = default; }
+                if(!int.TryParse(split[19], out FnX))           { FnX = default; }
+                if(!int.TryParse(split[20], out FnY))           { FnY = default; }
+                if(!float.TryParse(split[21], out PrcpMaxDiff)) { PrcpMaxDiff = default; }
+                if (!decimal.TryParse(split[22], NumberStyles.Float, CultureInfo.InvariantCulture, out FitC0)) { FitC0 = default; }
+                if (!decimal.TryParse(split[23], NumberStyles.Float, CultureInfo.InvariantCulture, out FitC1)) { FitC1 = default; }
+                if (!decimal.TryParse(split[24], NumberStyles.Float, CultureInfo.InvariantCulture, out FitC2)) { FitC2 = default; }
+                if (!decimal.TryParse(split[25], NumberStyles.Float, CultureInfo.InvariantCulture, out FitC3)) { FitC3 = default; }
+                if (!decimal.TryParse(split[26], NumberStyles.Float, CultureInfo.InvariantCulture, out FitC4)) { FitC4 = default; }
+                if (!decimal.TryParse(split[27], NumberStyles.Float, CultureInfo.InvariantCulture, out FitC5)) { FitC5 = default; }
+                if (!float.TryParse(split[28], out LinError)) { LinError = default; }
+                IsAssigned = true;
+            }
+        }
+        public bool CheckComplete()
+        {
+            return (
+                SerialNumber != "" & ThetaX110 != default & ThetaY110 != default & FnX != default
+                & FnY != default & PrcpMaxDiff != default & FitC0 != default & FitC1 != default & FitC2 != default
+                & FitC3 != default & FitC4 != default & FitC5 != default & LinError != default & IsAssigned
+                );
+        }
+        public override string ToString()
+        {
+            return $"{ThetaX110}\t{ThetaY110}\t{FnX}\t{FnY}\t{PrcpMaxDiff}\t{FitC0}\t{FitC1}\t{FitC2}\t{FitC3}\t{FitC4}\t{FitC5}\t{LinError}";
         }
     }
 }

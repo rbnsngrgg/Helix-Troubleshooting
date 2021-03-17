@@ -1,0 +1,36 @@
+﻿<Window x:Class="HelixTroubleshootingWPF.SensorTest"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HelixTroubleshootingWPF"
+        mc:Ignorable="d"
+        Title="Sensor Test" Height="550" Width="850">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="175"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <GroupBox Header="Test Items" Grid.Row="1" Grid.Column="0">
+            <TreeView x:Name="SensorTestTree">
+                
+            </TreeView>
+        </GroupBox>
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="100"/>
+            </Grid.RowDefinitions>
+            <!--Video box for camera-->
+            <MediaElement x:Name="SensorTestMediaElement" Grid.Row="0"/>
+            <GroupBox Header="Log" Grid.Row="1">
+                <TextBox x:Name="SensorTestLogBox" IsEnabled="False"/>
+            </GroupBox>
+        </Grid>
+    </Grid>
+</Window>

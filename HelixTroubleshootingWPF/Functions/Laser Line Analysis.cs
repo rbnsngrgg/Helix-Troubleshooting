@@ -6,6 +6,7 @@ using System.IO;
 //using System.Windows.Shapes;
 using System.Text.RegularExpressions;
 using System.Windows;
+using HelixTroubleshootingWPF.Objects;
 
 namespace HelixTroubleshootingWPF.Functions
 {
@@ -92,11 +93,11 @@ namespace HelixTroubleshootingWPF.Functions
                     var pixel = pixels.GetPixel(col, row).GetChannel(0);
                     if (pixel > peak) { peak = pixel; }
                 }
-                if (peak < (lineThresholdPercent / 100.0) * 255.0) { continue; }
+                if (peak < (Config.LineThresholdPercent / 100.0) * 255.0) { continue; }
                 for (int row = 0; row < image.Magick.Height; row++)
                 {
                     var pixel = pixels.GetPixel(col, row);
-                    if (pixel.GetChannel(0) > (lineThresholdPercent / 100.0) * peak)
+                    if (pixel.GetChannel(0) > (Config.LineThresholdPercent / 100.0) * peak)
                     { 
                         cgPixels.Add(pixel);
                     }

@@ -10,30 +10,84 @@ namespace HelixTroubleshootingWPF.Functions
     static partial class TToolsFunctions
     {
         private static readonly string BaseDataHeader = "SN\tModel\tAccuracyTimestamp\t2RMS\tMaxDev";
-        private static readonly string DacMemsDataHeader = "NLRange\tNLCoverage\tNRRange\tNRCoverage\tFLRange\tFLCoverage\tFRRange\tFRCoverage";
+        private static readonly string DacMemsDataHeader = "MemsSN\tNLRange\tNLCoverage\tNRRange\tNRCoverage\tFLRange\tFLCoverage\tFRRange\tFRCoverage";
         private static readonly string LpfDataHeader = "LPFOperator\tMeterZeroed\tMeterBackGroundBiasuW\t" +
                                                 "MeterAligned\tXAlignMM\tYAlignMM\tStabilityMinPowermW\tStabilityMaxPowermW\tPowerStabilityPassed\t" +
                                                 "RangeTestPassed\tMinPowermW\tMaxPowermW\tLinearityPassed\tCalibratePassed";
         private static readonly string PitchDataHeader = "PitchOperator\tPitchTestRan\tXPixelsDelta\tYPixelsDelta";
+        private static readonly string MirrorcleHeader = "ThetaX@110V\tThetaY@110V\tFnX\tFnY\tPRCPMaxDiff\tFitC0\tFitC1\tFitC2\tFitC3\tFitC4\tFitC5\tLinError";
         private static readonly string UffDataHeader = "UFFOperator\tCameraTempC\tMinTempOverridden\tAlignTargetRan\tMonitorAngle\tFocusTestRan\tExposureGood\tFocusRow\tFocusScore";
-        public static void GatherEvoData()
+        private static List<string> ComboHeaderList = new Func<List<string>>(() =>
+       {
+           string header = $"{BaseDataHeader}\t{UffDataHeader}\t{DacMemsDataHeader}\t{MirrorcleHeader}\t{LpfDataHeader}";
+           for (int i = 1; i <= 14; i++) { header = header + $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
+           header = header + $"\t{PitchDataHeader}";
+           List<string> headerList = new List<string>();
+           headerList.AddRange(header.Split("\t"));
+           return headerList;
+       })();
+        private static string ComboHeader = new Func<string>( () => 
         {
+            string header = $"{BaseDataHeader}\t{UffDataHeader}\t{DacMemsDataHeader}\t{MirrorcleHeader}\t{LpfDataHeader}";
+            for (int i = 1; i <= 14; i++) { header = header + $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
+            header = header + $"\t{PitchDataHeader}";
+            return header;
+        })();
+
+        public static void GetMirrorcleData(ref List<HelixEvoSensor> sensors)
+        {
+            if (File.Exists(Config.MirrorcleDataPath))
+            {
+                string[] mirrorcleDataLines = File.ReadAllLines(Config.MirrorcleDataPath);
+                foreach(HelixEvoSensor sensor in sensors)
+                {
+                    foreach (string line in mirrorcleDataLines)
+                    {
+                        if (sensor.DacMemsData.CheckComplete())
+                        {
+                            if (line.StartsWith($"MTI{sensor.DacMemsData.MemsSerialNumber.Replace("MTI", "")}"))
+                            {
+                                sensor.Mirrorcle =  new MirrorcleData(line);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        public static void GatherEvoData(string pathFolder = "")
+        {
+            List<HelixEvoSensor> sensorList = GetEvoData();
+            List<string> logLines = new List<string>() { ComboHeader };
+
+            foreach(HelixEvoSensor s in sensorList)
+            {
+                if (s.CheckComplete())
+                { logLines.Add(s.GetDataString()); }
+            }
+            string filePath;
+            if (pathFolder == "")
+            { 
+                filePath = @$"{dataGatherFolder}\{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_EvoFixtureDataGather.txt";
+                WriteAndOpen(dataGatherFolder, filePath, logLines);
+            }
+            else
+            { 
+                filePath = @$"{dataGatherFolder}\{pathFolder}\{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_EvoFixtureDataGather.txt";
+                WriteAndOpen(@$"{dataGatherFolder}\{pathFolder}", filePath, logLines);
+            }
+            
+        }
+        public static List<HelixEvoSensor> GetEvoData()
+        {
+            //Return list of Evo sensor data
             List<HelixEvoSensor> sensorList = EvoSensorsFromPitch(
                 EvoSensorsFromLpf(
                     EvoSensorsFromDacMems(
                         EvoSensorsFromUff())));
-            List<string> logLines = new List<string>() {$"{BaseDataHeader}\t{UffDataHeader}\t{DacMemsDataHeader}\t{LpfDataHeader}"};
-            for (int i = 1; i <= 14; i++) { logLines[0] = logLines[0] + $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
-            logLines[0] = logLines[0] + $"\t{PitchDataHeader}";
-
+            GetMirrorcleData(ref sensorList);
             GetAccuracyResults(ref sensorList);
-            foreach(HelixEvoSensor s in sensorList)
-            {
-                if (s.CheckComplete())
-                { logLines.Add($"{s.SerialNumber}\t{s.PartNumber}\t{s.AccuracyResult}\t{s.UffData}\t{s.DacMemsData}\t{s.LpfData}\t{s.PitchData}"); }
-            }
-            string filePath = @$"{dataGatherFolder}\{DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm-ss")}_EvoFixtureDataGather.txt";
-            WriteAndOpen(dataGatherFolder, filePath, logLines);
+            return sensorList;
         }
         public static void DacMemsDataGather()
         {
@@ -209,6 +263,116 @@ namespace HelixTroubleshootingWPF.Functions
             }
             return sensors;
         }
+        static public HelixEvoSensor AllSensorDataSingle(string sn)
+        {
+            return SingleSensorAccuracy(
+                    SingleSensorUff(
+                        SingleSensorPitch(
+                            SingleSensorLpf(
+                                SingleSensorMirrorcle(
+                                    SingleSensorDacMems(new HelixEvoSensor() { SerialNumber = sn }
+                                    ))))));
+        }
+        static public HelixEvoSensor SingleSensorDacMems(HelixEvoSensor sensor)
+        {
+            string tuningFixtureLog = @"\\castor\Production\Manufacturing\MfgSoftware\DACMEMSTuningFixture\200-0530\Results\MEMSDACTuningFixtureResults.txt";
+            foreach (string line in File.ReadAllLines(tuningFixtureLog))
+            {
+                string[] split = line.Split("\t");
+                if (split.Length < 65 | split[4].Length < 6) { continue; }
+                if (sensor.SerialNumber == split[4])
+                {
+                    sensor.PartNumber = split[9];
+                    sensor.DacMemsData = new EvoDacMemsData(line);
+                }
+            }
+            return sensor;
+        }
+        static public HelixEvoSensor SingleSensorLpf(HelixEvoSensor sensor)
+        {
+            string lpfLog = @"\\castor\Production\Manufacturing\MfgSoftware\HelixEvoLaserPowerFixture\200-0638\Results\HelixEvoLaserPowerFixtureResultsLog.txt";
+            foreach (string line in File.ReadAllLines(lpfLog))
+            {
+                string[] split = line.Split("\t");
+                if (split.Length < 65 | split[4].Length < 6) { continue; }
+                if (sensor.SerialNumber == split[4])
+                {
+                    sensor.PartNumber = split[5];
+                    sensor.LpfData = new EvoLpfData(line);
+                }
+            }
+            return sensor;
+        }
+        static public HelixEvoSensor SingleSensorMirrorcle(HelixEvoSensor sensor)
+        {
+            if (File.Exists(Config.MirrorcleDataPath))
+            {
+                string[] mirrorcleDataLines = File.ReadAllLines(Config.MirrorcleDataPath);
+                foreach (string line in mirrorcleDataLines)
+                {
+                    if (sensor.DacMemsData.MemsSerialNumber != "")
+                    {
+                        if (line.StartsWith($"MTI{sensor.DacMemsData.MemsSerialNumber.Replace("MTI", "")}"))
+                        {
+                            sensor.Mirrorcle = new MirrorcleData(line);
+                            break;
+                        }
+                    }
+                }
+            }
+            return sensor;
+        }
+        static public HelixEvoSensor SingleSensorPitch(HelixEvoSensor sensor)
+        {
+            string lpfLog = @"\\castor\Production\Manufacturing\MfgSoftware\HelixEvoCameraPitchFixture\200-0632\Results\HelixEvoCameraPitchFixtureMasterLog.txt";
+            foreach (string line in File.ReadAllLines(lpfLog))
+            {
+                string[] split = line.Split("\t");
+                if (split.Length < 9 | split[4].Length < 6) { continue; }
+                if(split[4] == sensor.SerialNumber)
+                {
+                    sensor.PartNumber = split[5];
+                    sensor.PitchData = new EvoPitchData(line);
+                }
+            }
+            return sensor;
+        }
+        static public HelixEvoSensor SingleSensorUff(HelixEvoSensor sensor)
+        {
+            string uffLog = @"\\castor\Production\Manufacturing\MfgSoftware\UniversalFocusFixture\200-0539\Results\UniversalFocusFixtureMasterLog.txt";
+            foreach (string line in File.ReadAllLines(uffLog))
+            {
+                string[] split = line.Split("\t");
+                if (split.Length < 15) { continue; }
+                if (split[11] != "Yes" | split[4].Length < 6) { continue; }
+                if(split[4] == sensor.SerialNumber)
+                    {
+                        sensor.PartNumber = split[6];
+                        sensor.UffData = new EvoUffData(line);
+                    }
+            }
+            return sensor;
+        }
+        static public HelixEvoSensor SingleSensorAccuracy(HelixEvoSensor sensor)
+        {
+            string rectDataFolder = $"SN{sensor.SerialNumber.Substring(0, 3)}XXX";
+            if (!Directory.Exists(Path.Join(@"\\castor\Ftproot\RectData", rectDataFolder))) { return sensor; }
+            foreach (string folder in Directory.EnumerateDirectories(Path.Join(@"\\castor\Ftproot\RectData", rectDataFolder)))
+            {
+                if (folder.Contains(sensor.SerialNumber) && Directory.Exists(folder))
+                {
+                    foreach (string file in Directory.GetFiles(folder))
+                    {
+                        if (Path.GetFileName(file) == "AccDataAcq.log")
+                        {
+                            sensor.AccuracyResult.Update(file);
+                            break;
+                        }
+                    }
+                }
+            }
+            return sensor;
+        }
         static public void GetAccuracyResults(ref List<HelixEvoSensor> sensors)
         {
             List<string> rectDataFolders = new List<string>();
@@ -224,38 +388,13 @@ namespace HelixTroubleshootingWPF.Functions
                 {
                     foreach (HelixEvoSensor sensor in sensors)
                     {
-                        if (folder.Contains(sensor.SerialNumber))
+                        if (folder.Contains(sensor.SerialNumber) && Directory.Exists(folder))
                         {
-                            if (Directory.Exists(folder))
+                            foreach (string file in Directory.GetFiles(folder))
                             {
-                                foreach (string file in Directory.GetFiles(folder))
+                                if (Path.GetFileName(file) == "AccDataAcq.log")
                                 {
-                                    if (Path.GetFileName(file) == "AccDataAcq.log")
-                                    {
-                                        AccuracyResult result = new AccuracyResult();
-                                        bool zeroDegree = false;
-                                        try
-                                        {
-                                            foreach (string line in File.ReadAllLines(file))
-                                            {
-                                                DateTime newTimestamp = new DateTime();
-                                                if (line.Contains("Started at"))
-                                                {
-                                                    newTimestamp = DateTime.ParseExact(line.Replace("Started at ", ""), "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
-                                                    if (newTimestamp < sensor.AccuracyResult.Timestamp) { break; }
-                                                    sensor.AccuracyResult.Timestamp = newTimestamp;
-                                                }
-                                                else if (line.Contains("Line_Zero Test Type"))
-                                                { zeroDegree = true; }
-                                                else if (line.Contains("Maximum deviation") & zeroDegree)
-                                                { float.TryParse(line.Split("=")[1].Split(",")[0], out sensor.AccuracyResult.ZeroDegreeMaxDev); }
-                                                else if (line.Contains("2RMS deviation") & zeroDegree)
-                                                { float.TryParse(line.Split("=")[1].Split(",")[0], out sensor.AccuracyResult.ZeroDegree2Rms); break; }
-                                            }
-                                        }
-                                        catch(System.IO.IOException)
-                                        { continue; }
-                                    }
+                                    sensor.AccuracyResult.Update(file);
                                     break;
                                 }
                             }
