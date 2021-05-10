@@ -12,7 +12,7 @@ namespace HelixTroubleshootingWPF.Functions
         //Array of strings to be added to function list
         public static readonly string[] functionList = new string[] {"ALS Point Removal","Fix Algorithm Errors","Illuminated Sphere Summary",
             "Solo Laser Line Analysis","Staring Dot Removal","Temperature Adjust", "DACMEMS Data Gather", "UFF Data Gather", "LPF Data Gather",
-            "Pitch Data Gather","Evo Data Gather", "Sensor Test", "Evo KNN", "Evo KNN Regression", "KNN Validation"};
+            "Pitch Data Gather","Evo Data Gather", "Sensor Test" };// "Evo KNN", "Evo KNN Regression", "KNN Validation", "Test ML.net"};
 
         public static TToolsConfig Config = new TToolsConfig();
         //Private Helper Functions----------------------------------------------------------------------------------------

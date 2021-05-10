@@ -20,6 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="bar-tp.ico" />
     <None Remove="bar.ico" />
   </ItemGroup>
 
@@ -30,6 +31,10 @@
     <PackageReference Include="ScottPlot" Version="4.0.48" />
     <PackageReference Include="ScottPlot.WPF" Version="4.0.48" />
     <PackageReference Include="Telnet" Version="0.8.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HelixTroubleshootingML.Model\HelixTroubleshootingML.Model.csproj" />
   </ItemGroup>
 
   <ItemGroup>

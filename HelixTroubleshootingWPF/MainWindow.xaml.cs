@@ -120,22 +120,28 @@ namespace HelixTroubleshootingWPF
                 DetailsBox.Text = "Test sensor functionality";
                 DataGatherSettings();
             }
-            else if(item.Contains("Evo KNN"))
-            {
-                DetailsBox.Text = "K-Nearest Neighbors algorithm for Helix Evo Sensors. Enter a model number, or leave blank to include all Evo models.";
-                DataGatherSettings();
-                DetailsTextBox1.Visibility = System.Windows.Visibility.Visible;
-            }
             else if (item.Contains("Evo KNN Regression"))
             {
                 DetailsBox.Text = "K-Nearest Neighbors regression for Helix Evo Sensors. Enter a serial number, then start.";
                 DataGatherSettings();
-                DetailsTextBox1.Visibility = System.Windows.Visibility.Visible;
+                DetailsTextBox1.Visibility = Visibility.Visible;
+            }
+            else if (item.Contains("Evo KNN"))
+            {
+                DetailsBox.Text = "K-Nearest Neighbors algorithm for Helix Evo Sensors. Enter a model number, or leave blank to include all Evo models.";
+                DataGatherSettings();
+                DetailsTextBox1.Visibility = Visibility.Visible;
             }
             else if (item.Contains("KNN Validation"))
             {
                 DetailsBox.Text = "Find and validate the best combination of data for the KNN.";
                 DataGatherSettings();
+            }
+            else if (item.Contains("Test ML.net"))
+            {
+                DetailsBox.Text = "Test the ML.net regression algorithm with data from the specified Evo sensor. Enter serial number without \"SN\" prefix.";
+                DataGatherSettings();
+                DetailsTextBox1.Visibility = Visibility.Visible;
             }
         }
 
@@ -212,6 +218,10 @@ namespace HelixTroubleshootingWPF
             else if(function.Contains("KNN Validation"))
             {
                 TToolsFunctions.RunCombos();
+            }
+            else if(function.Contains("Test ML.net"))
+            {
+                TToolsFunctions.TestML(DetailsTextBox1.Text);
             }
         }
         private void DetailsButton2_Click(object sender, RoutedEventArgs e)

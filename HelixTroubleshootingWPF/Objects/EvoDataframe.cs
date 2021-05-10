@@ -172,6 +172,7 @@ namespace HelixTroubleshootingWPF.Objects
                 else { distanceList.Add(new Tuple<EvoDataPoint, double>(data, GetMinkowski((EvoDataPoint)newData, data, colOverride))); }
             }
             distanceList = SortDistanceList(distanceList);
+            if(distanceList[0].Item1.Id == sensor.SerialNumber) { distanceList.RemoveAt(0); }
             return new Tuple<EvoDataPoint, List<Tuple<EvoDataPoint, double>>>((EvoDataPoint)newData,distanceList);
         }
         public void ScaleData()

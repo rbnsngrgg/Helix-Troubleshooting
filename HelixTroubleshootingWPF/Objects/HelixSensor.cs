@@ -22,6 +22,7 @@ namespace HelixTroubleshootingWPF
         public string Color { get; set; }
         public string LaserClass { get; set; }
         public AccuracyResult AccuracyResult { get; set; } = new AccuracyResult();
+        public VDEResult VDE { get; set; } = new VDEResult();
 
         //Constructors
         public HelixSensor()
@@ -80,12 +81,12 @@ namespace HelixTroubleshootingWPF
         {
             if(!DacMemsData.CheckComplete() || !LpfData.CheckComplete() || 
                 !PitchData.CheckComplete() || !UffData.CheckComplete() ||
-                !AccuracyResult.CheckComplete() || !Mirrorcle.CheckComplete()) { return false; }
+                !AccuracyResult.CheckComplete() || !Mirrorcle.CheckComplete() || !VDE.CheckComplete()) { return false; }
             return true;
         }
         public string GetDataString()
         {
-            return $"{SerialNumber}\t{PartNumber}\t{AccuracyResult}\t{UffData}\t{DacMemsData}\t{Mirrorcle}\t{LpfData}\t{PitchData}";
+            return $"{SerialNumber}\t{PartNumber}\t{AccuracyResult}\t{VDE}\t{UffData}\t{DacMemsData}\t{Mirrorcle}\t{LpfData}\t{PitchData}";
         }
         public List<string> GetDataList()
         {
@@ -110,7 +111,6 @@ namespace HelixTroubleshootingWPF
         public float ZeroDegree2Rms = 0f;
         public float ZeroDegreeMaxDev = 0f;
 
-
         public AccuracyResult()
         {
 
@@ -121,24 +121,52 @@ namespace HelixTroubleshootingWPF
         }
         public bool Update(string filePath)
         {
-            bool zeroDegree = false;
-            foreach (string line in File.ReadAllLines(filePath))
+            for(int i = 0; i < 4; i++)
             {
-                DateTime newTimestamp = new DateTime();
-                if (line.Contains("Started at"))
+                try
                 {
-                    newTimestamp = DateTime.ParseExact(line.Replace("Started at ", ""), "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
-                    if (newTimestamp < Timestamp) { return false; }
-                    Timestamp = newTimestamp;
+                    bool zeroDegree = false;
+                    foreach (string line in File.ReadAllLines(filePath))
+                    {
+                        DateTime newTimestamp = new DateTime();
+                        if (line.Contains("Started at"))
+                        {
+                            newTimestamp = DateTime.ParseExact(line.Replace("Started at ", ""), "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
+                            if (newTimestamp < Timestamp) { return false; }
+                            Timestamp = newTimestamp;
+                        }
+                        else if (line.Contains("Line_Zero Test Type"))
+                        { zeroDegree = true; }
+                        else if (line.Contains("Maximum deviation") & zeroDegree)
+                        { float.TryParse(line.Split("=")[1].Split(",")[0], out ZeroDegreeMaxDev); }
+                        else if (line.Contains("2RMS deviation") & zeroDegree)
+                        { float.TryParse(line.Split("=")[1].Split(",")[0], out ZeroDegree2Rms); return true; }
+                    }
+                    return false;
                 }
-                else if (line.Contains("Line_Zero Test Type"))
-                { zeroDegree = true; }
-                else if (line.Contains("Maximum deviation") & zeroDegree)
-                { float.TryParse(line.Split("=")[1].Split(",")[0], out ZeroDegreeMaxDev); }
-                else if (line.Contains("2RMS deviation") & zeroDegree)
-                { float.TryParse(line.Split("=")[1].Split(",")[0], out ZeroDegree2Rms); return true; }
+                catch (System.IO.IOException)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    continue;
+                }
             }
             return false;
+        }
+        public bool UpdateFromLog(string[] line)
+        {
+            DateTime newTimestamp;
+            try
+            {
+                newTimestamp = DateTime.ParseExact(line[7], "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
+            }
+            catch { return false; }
+            float.TryParse(line[45], out float zero2Rms);
+            float.TryParse(line[42], out float zeroMaxDev);
+            if(zero2Rms == 0f || zeroMaxDev == 0f) { return false; }
+            ZeroDegree2Rms = zero2Rms;
+            ZeroDegreeMaxDev = zeroMaxDev;
+            Timestamp = newTimestamp;
+            return true;
         }
         public bool CheckComplete()
         {
@@ -148,6 +176,89 @@ namespace HelixTroubleshootingWPF
         public override string ToString()
         {
             return $"{Timestamp}\t{ZeroDegree2Rms}\t{ZeroDegreeMaxDev}";
+        }
+    }
+
+    class VDEResult
+    {
+        public DateTime Timestamp = new DateTime();
+        public float SphereSpacingError = 0f;
+        public float SphereProbingErrorSize = 0f;
+        public float SphereProbingErrorForm = 0f;
+        public float PlaneProbingError = 0f;
+
+        public VDEResult()
+        {
+
+        }
+        public VDEResult(string filePath)
+        {
+            Update(filePath);
+        }
+        public bool Update(string filePath)
+        {
+            for (int i = 0; i < 4; i++) //Attempt to get the data a maximum of 4 times
+            {
+                try
+                {
+                    bool results = false;
+                    foreach (string line in File.ReadAllLines(filePath))
+                    {
+                        DateTime newTimestamp = new DateTime();
+                        if (line.Contains("Time"))
+                        {
+                            newTimestamp = DateTime.ParseExact(line.Replace("Time : ", ""), "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
+                            if (newTimestamp < Timestamp) { return false; }
+                            Timestamp = newTimestamp;
+                        }
+                        else if (line.Contains("VDE-2634 Accuracy Test: Inspection Results"))
+                        { results = true; }
+                        else if (line.Contains("Sphere Spacing Error (SD)") & results)
+                        { float.TryParse(line.Split(" ")[4], out SphereSpacingError); }
+                        else if (line.Contains("Sphere Probing Error - Size (Ps)") & results)
+                        { float.TryParse(line.Split("=")[6], out SphereProbingErrorSize); }
+                        else if (line.Contains("Sphere Probing Error - Form (Pf)") & results)
+                        { float.TryParse(line.Split("=")[6], out SphereProbingErrorForm); }
+                        else if (line.Contains("Plane Probing Error  - Form (F)") & results)
+                        { float.TryParse(line.Split("=")[6], out PlaneProbingError); return true; }
+                    }
+                    return false;
+                }
+                catch (System.IO.IOException)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    continue;
+                }
+            }
+            return false;
+        }
+        public bool UpdateFromLog(string[] line)
+        {
+            DateTime newTimestamp;
+            try
+            {
+                newTimestamp = DateTime.ParseExact(line[7], "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
+            }
+            catch { return false; }
+            float.TryParse(line[176], out float sphereSpacingError);
+            float.TryParse(line[179], out float sphereProbingErrorForm);
+            float.TryParse(line[182], out float sphereProbingErrorSize);
+            float.TryParse(line[185], out float planeProbingError);
+            if (sphereSpacingError == 0f || sphereProbingErrorForm == 0f) { return false; }
+            SphereSpacingError = sphereSpacingError;
+            SphereProbingErrorForm = sphereProbingErrorForm;
+            SphereProbingErrorSize = sphereProbingErrorSize;
+            PlaneProbingError = planeProbingError;
+            Timestamp = newTimestamp;
+            return true;
+        }
+        public bool CheckComplete()
+        {
+            return SphereSpacingError != 0f && SphereProbingErrorSize != 0f && SphereProbingErrorForm != 0f && PlaneProbingError != 0f;
+        }
+        public override string ToString()
+        {
+            return $"{Timestamp}\t{SphereSpacingError}\t{SphereProbingErrorSize}\t{SphereProbingErrorForm}\t{PlaneProbingError}";
         }
     }
 

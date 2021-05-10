@@ -12,7 +12,7 @@ namespace HelixTroubleshootingWPF.Functions
 {
     static partial class TToolsFunctions
     {
-        private static Tuple<List<int>, double> bestCombo = new Tuple<List<int>, double>(new List<int>(), double.MaxValue);
+        private static Tuple<List<int>, double, double> bestCombo = new Tuple<List<int>, double, double>(new List<int>(), double.MaxValue, 0.0);
         private static List<HelixEvoSensor> sensorList = new List<HelixEvoSensor>();
         private static List<HelixEvoSensor> testSensors = new List<HelixEvoSensor>();
         private static EvoDataframe Dataframe;
@@ -52,7 +52,7 @@ namespace HelixTroubleshootingWPF.Functions
         public static void GetTestSensors()
         {
             //Get sensors to be used as validation input for KNN
-            List<HelixEvoSensor> sensors = LoadEvoData(true, false);
+            List<HelixEvoSensor> sensors = LoadEvoData(false, false);
             for(int i = sensors.Count - 1; i >= 0; i--)
             {
                 if(int.TryParse(sensors[i].SerialNumber, out int snInt))
@@ -73,16 +73,21 @@ namespace HelixTroubleshootingWPF.Functions
                     if (snInt > 138600) { sensorList.RemoveAt(i); }
                 }
             }
+            Random rand = new Random();
             LoadDataframe(sensorList, true);
-            for (int i = 4; i < 16; i++)
-            {
-                //GetCombo(2, i);
-                TestBestCombo(Config.KnnDataColumns, i);
-            }
+            //GetCombo(2, 10);
+            //for (int i = 10; i < 16; i++)
+            //{
+            //    //GetCombo(2, i);
+            //    TestBestCombo(Config.KnnDataColumns, i);
+            //}
+            TestBestCombo(Config.KnnDataColumns);
+            Console.WriteLine("Done");
         }
         public static void TestBestCombo(List<int> combo, int k = 0)
         {
             double avgDiff = 0.0;
+            double maxDiff = 0.0;
             int sensors = 0;
             if (k > 0) { Dataframe.NumNeighbors = k; }
             Dataframe.ScaleData();
@@ -97,7 +102,9 @@ namespace HelixTroubleshootingWPF.Functions
                         labelRegression += neighbors.Item2[i].Item1.Label;
                     }
                     labelRegression = labelRegression / Dataframe.NumNeighbors;
-                    avgDiff += Math.Abs(labelRegression - neighbors.Item1.Label);
+                    double diff = Math.Abs(labelRegression - neighbors.Item1.Label);
+                    avgDiff += diff;
+                    if(diff > maxDiff) { maxDiff = diff; }
                     sensors += 1;
                 }
             }
@@ -105,8 +112,11 @@ namespace HelixTroubleshootingWPF.Functions
             combosTried++;
             if(avgDiff < bestCombo.Item2)
             {
-                bestCombo = new Tuple<List<int>, double>(combo, avgDiff);
-                Debug.WriteLine($"Best combo:\n\tColumns: {string.Join(",",bestCombo.Item1)}\n\tAvg Label Regression Difference: {bestCombo.Item2}\n\tCombo # {combosTried}\n\tK = {k}");
+                bestCombo = new Tuple<List<int>, double, double>(combo, avgDiff, maxDiff);
+                Debug.WriteLine($"Best combo:\n\tColumns: {string.Join(",",bestCombo.Item1)}" +
+                    $"\n\tMax Label Regression Difference: {bestCombo.Item3}" +
+                    $"\n\tAvg Label Regression Difference: {bestCombo.Item2}" +
+                    $"\n\tCombo # {combosTried}\n\tK = {k}");
             }
         }
         private static void GetCombo(int start, int comboLen, List<int> currentCombo = null)

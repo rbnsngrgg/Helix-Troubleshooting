@@ -28,17 +28,28 @@ namespace HelixTroubleshootingWPF
         {
             SensorIp = sensorIp;
             InitializeComponent();
+            PopulateTestList();
         }
 
         private void PopulateTestList()
         {
             TreeViewItem onboardFilesItem = new TreeViewItem { Header = "On-board Files" };
             string[] files = new string[] { "FPGAInit.dat", "LaserPowerTable.dat", "OPAInit.dat", "Sensor.xml" };
-            foreach(string file in files)
+            foreach (string file in files)
             {
                 onboardFilesItem.Items.Add(new TreeViewItem { Header = file });
             }
-            
+            SensorTestTree.Items.Add(onboardFilesItem);
+
+            TreeViewItem telnetItem = new TreeViewItem { Header = "Telnet" };
+            telnetItem.Items.Add(new TreeViewItem { Header = "Connection" });
+            telnetItem.Items.Add(new TreeViewItem { Header = "Temptest" });
+            telnetItem.Items.Add(new TreeViewItem { Header = "Acceltest" });
+            SensorTestTree.Items.Add(telnetItem);
+
+            TreeViewItem cameraItem = new TreeViewItem { Header = "Camera" };
+            cameraItem.Items.Add(new TreeViewItem { Header = "Gig-E" });
+            SensorTestTree.Items.Add(cameraItem);
         }
         private async void SensorTelnet()
         {

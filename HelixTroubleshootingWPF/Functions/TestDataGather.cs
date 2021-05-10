@@ -3,23 +3,25 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using HelixTroubleshootingML.Model;
 //using System.Windows.Shapes;
 
 namespace HelixTroubleshootingWPF.Functions
 {
     static partial class TToolsFunctions
     {
-        private static readonly string BaseDataHeader = "SN\tModel\tAccuracyTimestamp\t2RMS\tMaxDev";
+        private static readonly string BaseDataHeader = "SN\tModel\tAccuracyTimestamp\t_2RMS\tMaxDev";
+        private static readonly string VDEDataHeader = "VDETimestamp\tSphereSpacingError\tSphereProbingErrorSize\tSphereProbingErrorForm\tPlaneProbingError";
         private static readonly string DacMemsDataHeader = "MemsSN\tNLRange\tNLCoverage\tNRRange\tNRCoverage\tFLRange\tFLCoverage\tFRRange\tFRCoverage";
         private static readonly string LpfDataHeader = "LPFOperator\tMeterZeroed\tMeterBackGroundBiasuW\t" +
                                                 "MeterAligned\tXAlignMM\tYAlignMM\tStabilityMinPowermW\tStabilityMaxPowermW\tPowerStabilityPassed\t" +
                                                 "RangeTestPassed\tMinPowermW\tMaxPowermW\tLinearityPassed\tCalibratePassed";
         private static readonly string PitchDataHeader = "PitchOperator\tPitchTestRan\tXPixelsDelta\tYPixelsDelta";
-        private static readonly string MirrorcleHeader = "ThetaX@110V\tThetaY@110V\tFnX\tFnY\tPRCPMaxDiff\tFitC0\tFitC1\tFitC2\tFitC3\tFitC4\tFitC5\tLinError";
+        private static readonly string MirrorcleHeader = "ThetaX_110V\tThetaY_110V\tFnX\tFnY\tPRCPMaxDiff\tFitC0\tFitC1\tFitC2\tFitC3\tFitC4\tFitC5\tLinError";
         private static readonly string UffDataHeader = "UFFOperator\tCameraTempC\tMinTempOverridden\tAlignTargetRan\tMonitorAngle\tFocusTestRan\tExposureGood\tFocusRow\tFocusScore";
         private static List<string> ComboHeaderList = new Func<List<string>>(() =>
        {
-           string header = $"{BaseDataHeader}\t{UffDataHeader}\t{DacMemsDataHeader}\t{MirrorcleHeader}\t{LpfDataHeader}";
+           string header = $"{BaseDataHeader}\t{VDEDataHeader}\t{UffDataHeader}\t{DacMemsDataHeader}\t{MirrorcleHeader}\t{LpfDataHeader}";
            for (int i = 1; i <= 14; i++) { header = header + $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
            header = header + $"\t{PitchDataHeader}";
            List<string> headerList = new List<string>();
@@ -28,7 +30,7 @@ namespace HelixTroubleshootingWPF.Functions
        })();
         private static string ComboHeader = new Func<string>( () => 
         {
-            string header = $"{BaseDataHeader}\t{UffDataHeader}\t{DacMemsDataHeader}\t{MirrorcleHeader}\t{LpfDataHeader}";
+            string header = $"{BaseDataHeader}\t{VDEDataHeader}\t{UffDataHeader}\t{DacMemsDataHeader}\t{MirrorcleHeader}\t{LpfDataHeader}";
             for (int i = 1; i <= 14; i++) { header = header + $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
             header = header + $"\t{PitchDataHeader}";
             return header;
@@ -86,14 +88,15 @@ namespace HelixTroubleshootingWPF.Functions
                     EvoSensorsFromDacMems(
                         EvoSensorsFromUff())));
             GetMirrorcleData(ref sensorList);
-            GetAccuracyResults(ref sensorList);
+            GetAccuracyResultsFromLog(ref sensorList);
+            //GetAccuracyResults(ref sensorList);
             return sensorList;
         }
         public static void DacMemsDataGather()
         {
             List<HelixEvoSensor> sensorList = EvoSensorsFromDacMems();
             List<string> logLines = new List<string>() {$"{BaseDataHeader}\t{DacMemsDataHeader}"};
-            GetAccuracyResults(ref sensorList);
+            GetAccuracyResultsFromLog(ref sensorList);
             foreach (HelixEvoSensor sensor in sensorList)
             {
                 logLines.Add($"{sensor.SerialNumber}\t{sensor.PartNumber}\t{sensor.AccuracyResult}\t{sensor.DacMemsData}");
@@ -105,7 +108,7 @@ namespace HelixTroubleshootingWPF.Functions
         {
             List<HelixEvoSensor> sensorList = EvoSensorsFromUff();
             List<string> logLines = new List<string>() {$"{BaseDataHeader}\t{UffDataHeader}"};
-            GetAccuracyResults(ref sensorList);
+            GetAccuracyResultsFromLog(ref sensorList);
             foreach (HelixEvoSensor s in sensorList)
             {
                 logLines.Add($"{s.SerialNumber}\t{s.PartNumber}\t{s.AccuracyResult}\t{s.UffData}");
@@ -118,7 +121,7 @@ namespace HelixTroubleshootingWPF.Functions
             List<HelixEvoSensor> sensorList = EvoSensorsFromLpf();
             List<string> logLines = new List<string>() { LpfDataHeader };
             for(int i = 1; i <= 14; i++) { logLines[0] = logLines[0] + $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
-            GetAccuracyResults(ref sensorList);
+            GetAccuracyResultsFromLog(ref sensorList);
             foreach (HelixEvoSensor s in sensorList)
             {
                 logLines.Add($"{s.SerialNumber}\t{s.PartNumber}\t{s.AccuracyResult}\t{s.LpfData}");
@@ -130,7 +133,7 @@ namespace HelixTroubleshootingWPF.Functions
         {
             List<HelixEvoSensor> sensorList = EvoSensorsFromPitch();
             List<string> logLines = new List<string>() {$"{BaseDataHeader}\t{PitchDataHeader}"};
-            GetAccuracyResults(ref sensorList);
+            GetAccuracyResultsFromLog(ref sensorList);
             foreach (HelixEvoSensor s in sensorList)
             {
                 logLines.Add($"{s.SerialNumber}\t{s.PartNumber}\t{s.AccuracyResult}\t{s.PitchData}");
@@ -265,7 +268,7 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public HelixEvoSensor AllSensorDataSingle(string sn)
         {
-            return SingleSensorAccuracy(
+            return SingleSensorAccuracyResultsFromLog(
                     SingleSensorUff(
                         SingleSensorPitch(
                             SingleSensorLpf(
@@ -368,10 +371,87 @@ namespace HelixTroubleshootingWPF.Functions
                             sensor.AccuracyResult.Update(file);
                             break;
                         }
+                        else if (Path.GetFileName(file) == "AccuracyTest_Vde2634.log")
+                        {
+                            sensor.VDE.Update(file);
+                        }
                     }
                 }
             }
             return sensor;
+        }
+        static public HelixEvoSensor SingleSensorAccuracyResultsFromLog(HelixEvoSensor sensor, bool first = false)
+        {
+            List<string> resultsLog = new List<string>();
+            resultsLog.AddRange(File.ReadAllLines($@"{Config.RectDataDir}\HelixRectResults.log"));
+
+            foreach (string line in resultsLog)
+            {
+                string[] lineSplit = line.Split("\t");
+                if (lineSplit[0] == sensor.SerialNumber)
+                {
+                    if (lineSplit.Length < 190) { continue; }
+                    //Check "Test Accuracy Status" and "0 Deg. 2 RMS error"
+                    if ((lineSplit[187] == "Finished") & float.TryParse(lineSplit[45], out float rms2))
+                    {
+                        if (rms2! < 0) { continue; }
+                        if (sensor.AccuracyResult.UpdateFromLog(lineSplit) & sensor.VDE.UpdateFromLog(lineSplit)) { if (first) { break; } }
+                    }
+                }
+            }
+            return sensor;
+        }
+        static public void TestML(string sn)
+        {
+            string[] headers = ComboHeader.Split("\t");
+            //string[] data = AllSensorDataSingle(sn).GetDataList().ToArray();
+            List<HelixEvoSensor> testSensors = GetEvoData();
+            for(int i = testSensors.Count - 1; i >= 0; i--)
+            {
+                if(int.TryParse(testSensors[i].SerialNumber, out int snInt))
+                {
+                    if(snInt < 138700 | !testSensors[i].CheckComplete())
+                    {
+                        testSensors.RemoveAt(i);
+                    }
+                }
+                else
+                {
+                    testSensors.RemoveAt(i);
+                }
+            }
+            int sensorsTested = 0;
+            float averageAbsError = 0.0f;
+            foreach(HelixEvoSensor sensor in testSensors)
+            {
+                var input = new ModelInput();
+                Type inputType = input.GetType();
+                string[] data = sensor.GetDataList().ToArray();
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    System.Reflection.PropertyInfo propertyInfo = inputType.GetProperty(headers[i]);
+                    if(propertyInfo == null) { continue; }
+                    Type propType = propertyInfo.PropertyType;
+                    if (propType == typeof(Single))
+                    {
+                        propertyInfo.SetValue(input, Single.Parse(data[i]));
+                    }
+                    else if (propType == typeof(System.String))
+                    {
+                        propertyInfo.SetValue(input, data[i]);
+                    }
+                    else if (propType == typeof(bool))
+                    {
+                        propertyInfo.SetValue(input, bool.Parse(data[i]));
+                    }
+                }
+                ModelOutput result = ConsumeModel.Predict(input);
+                float absDiff = Math.Abs(input.MaxDev - result.Score);
+                averageAbsError += absDiff;
+                sensorsTested++;
+                Debug.WriteLine($"Sensor {sensor.SerialNumber}:\t2RMS(Actual|Predicted) {input.MaxDev}|{result.Score}\tAbs Difference: {absDiff}");
+            }
+            Debug.WriteLine($"\nSensors tested:\t{sensorsTested}\nAverage Abs Diff:\t{averageAbsError/sensorsTested}");
         }
         static public void GetAccuracyResults(ref List<HelixEvoSensor> sensors)
         {
@@ -397,7 +477,36 @@ namespace HelixTroubleshootingWPF.Functions
                                     sensor.AccuracyResult.Update(file);
                                     break;
                                 }
+                                else if (Path.GetFileName(file) == "AccuracyTest_Vde2634.log")
+                                {
+                                    sensor.VDE.Update(file);
+                                }
                             }
+                        }
+                    }
+                }
+            }
+        }
+        static public void GetAccuracyResultsFromLog(ref List<HelixEvoSensor> sensors, bool first = false)
+        {
+            List<string> resultsLog = new List<string>();
+            resultsLog.AddRange(File.ReadAllLines($@"{Config.RectDataDir}\HelixRectResults.log"));
+            List<string[]> resultsLogSplit = new List<string[]>();
+            foreach (string line in resultsLog)
+            {
+                resultsLogSplit.Add(line.Split("\t"));
+            }
+            foreach(HelixEvoSensor sensor in sensors)
+            {
+                foreach (string[] line in resultsLogSplit)
+                {
+                    if (line[0] == sensor.SerialNumber)
+                    {
+                        if(line.Length < 190) { continue; }
+                        if(line[187] == "Finished"  & float.TryParse(line[45], out float rms2))
+                        {
+                            if(rms2 !< 0) { continue; }
+                            if (sensor.AccuracyResult.UpdateFromLog(line) & sensor.VDE.UpdateFromLog(line)) { if (first) { break; } }
                         }
                     }
                 }
