@@ -29,9 +29,10 @@ namespace HelixTroubleshootingWPF
         {
             
         }
-        public HelixSensor(string sensorXmlFolder)
+        public HelixSensor(string sensorXml, bool rawXml = false)
         {
-            GetSensorData(sensorXmlFolder);
+            if (!rawXml) { GetSensorData(sensorXml); }
+            else { GetSensorDataFromString(sensorXml); }
         }
         
         //Methods
@@ -52,6 +53,26 @@ namespace HelixTroubleshootingWPF
             //string format = "ddd MMM  d HH:mm:ss yyyy";
             //Date = DateTime.ParseExact("Wed Jul 22 08:24:53 2020\n", format, CultureInfo.InvariantCulture);
             Date = xml.LastChild.Attributes[1].Value.Replace("\n","").Replace("\r",""); //RECT_OUTPUT > Date
+            SerialNumber = xml.LastChild.ChildNodes[0].ChildNodes[0].Attributes[0].Value;
+            PartNumber = xml.LastChild.ChildNodes[0].ChildNodes[0].Attributes[2].Value; //RECT_OUTPUT > SENSORS > SENSOR > Part_Number
+            SensorRev = xml.LastChild.ChildNodes[0].ChildNodes[0].Attributes[3].Value;
+            RectRev = xml.LastChild.ChildNodes[0].ChildNodes[0].Attributes[4].Value;
+            RectPosRev = xml.LastChild.ChildNodes[0].ChildNodes[0].Attributes[5].Value;
+            AccPosRev = xml.LastChild.ChildNodes[0].ChildNodes[0].Attributes[6].Value;
+            Color = xml.LastChild.ChildNodes[0].ChildNodes[0].Attributes[16].Value;
+            LaserClass = xml.LastChild.ChildNodes[0].ChildNodes[0].Attributes[15].Value;
+
+            CameraSerial = xml.LastChild.ChildNodes[1].ChildNodes[0].Attributes[0].Value; //RECT_OUTPUT > IMAGERS > IMAGER > Imager_UID
+
+            return true;
+        }
+        public bool GetSensorDataFromString(string xmlString)
+        {
+            XmlDocument xml = new XmlDocument();
+            xml.LoadXml(xmlString);
+            //string format = "ddd MMM  d HH:mm:ss yyyy";
+            //Date = DateTime.ParseExact("Wed Jul 22 08:24:53 2020\n", format, CultureInfo.InvariantCulture);
+            Date = xml.LastChild.Attributes[1].Value.Replace("\n", "").Replace("\r", ""); //RECT_OUTPUT > Date
             SerialNumber = xml.LastChild.ChildNodes[0].ChildNodes[0].Attributes[0].Value;
             PartNumber = xml.LastChild.ChildNodes[0].ChildNodes[0].Attributes[2].Value; //RECT_OUTPUT > SENSORS > SENSOR > Part_Number
             SensorRev = xml.LastChild.ChildNodes[0].ChildNodes[0].Attributes[3].Value;

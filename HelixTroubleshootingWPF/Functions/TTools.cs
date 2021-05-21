@@ -14,7 +14,7 @@ namespace HelixTroubleshootingWPF.Functions
             "Solo Laser Line Analysis","Staring Dot Removal","Temperature Adjust", "DACMEMS Data Gather", "UFF Data Gather", "LPF Data Gather",
             "Pitch Data Gather","Evo Data Gather", "Sensor Test" };// "Evo KNN", "Evo KNN Regression", "KNN Validation", "Test ML.net"};
 
-        public static TToolsConfig Config = new TToolsConfig();
+        public static TToolsConfig Config = new();
         //Private Helper Functions----------------------------------------------------------------------------------------
 
         //Find all files in directory that contain a certain string. Return empty list if none found.
@@ -22,7 +22,7 @@ namespace HelixTroubleshootingWPF.Functions
         {
             find = find.Insert(0, "*");
             find += "*";
-            List<string> files = new List<string>();
+            List<string> files = new();
             try
             {
                 files.AddRange(Directory.GetFiles(directory, find));

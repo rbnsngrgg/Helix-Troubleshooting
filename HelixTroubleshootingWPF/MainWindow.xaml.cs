@@ -1,6 +1,9 @@
 ﻿using HelixTroubleshootingWPF.Functions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Diagnostics;
+using System;
+
 namespace HelixTroubleshootingWPF
 {
     /// <summary>
@@ -276,6 +279,15 @@ namespace HelixTroubleshootingWPF
         private void ToolsMenuToggleDataGather_Click(object sender, RoutedEventArgs e)
         {
             ToggleDataGather();
+        }
+
+        private void HelixTroubleshootingMainWindow_Closed(object sender, EventArgs e)
+        {
+            var processes = Process.GetProcessesByName("HelixTroubleshootingWPF");
+            foreach (Process p in processes)
+            {
+                p.Kill();
+            }
         }
     }
 }
