@@ -36,6 +36,26 @@ namespace HelixTroubleshootingWPF.Functions
             return header;
         })();
 
+
+        public static string GetSensorPn(string sn)
+        {
+            List<string> resultsLog = new List<string>();
+            resultsLog.AddRange(File.ReadAllLines($@"{Config.RectDataDir}\HelixRectResults.log"));
+            List<string[]> resultsLogSplit = new List<string[]>();
+            foreach (string line in resultsLog)
+            {
+                resultsLogSplit.Add(line.Split("\t"));
+            }
+            string pn = "";
+            foreach (string[] line in resultsLogSplit)
+            {
+                if (line[0] == sn)
+                {
+                    pn = line[2];
+                }
+            }
+            return pn;
+        }
         public static void GetMirrorcleData(ref List<HelixEvoSensor> sensors)
         {
             if (File.Exists(Config.MirrorcleDataPath))
@@ -266,15 +286,19 @@ namespace HelixTroubleshootingWPF.Functions
             }
             return sensors;
         }
-        static public HelixEvoSensor AllSensorDataSingle(string sn)
+        static public HelixEvoSensor AllEvoDataSingle(HelixEvoSensor sensor)
         {
-            return SingleSensorAccuracyResultsFromLog(
-                    SingleSensorUff(
-                        SingleSensorPitch(
-                            SingleSensorLpf(
-                                SingleSensorMirrorcle(
-                                    SingleSensorDacMems(new HelixEvoSensor() { SerialNumber = sn }
-                                    ))))));
+            if (sensor.SerialNumber != "")
+            {
+                return SingleSensorAccuracyResultsFromLog(
+                        SingleSensorUff(
+                            SingleSensorPitch(
+                                SingleSensorLpf(
+                                    SingleSensorMirrorcle(
+                                        SingleSensorDacMems(sensor
+                                        ))))));
+            }
+            else { return sensor; }
         }
         static public HelixEvoSensor SingleSensorDacMems(HelixEvoSensor sensor)
         {
