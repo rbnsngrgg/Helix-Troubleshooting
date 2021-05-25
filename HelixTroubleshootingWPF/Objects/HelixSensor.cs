@@ -22,7 +22,6 @@ namespace HelixTroubleshootingWPF
         public string Color { get; set; }
         public string LaserClass { get; set; }
         public AccuracyResult AccuracyResult { get; set; } = new AccuracyResult();
-        public VDEResult VDE { get; set; } = new VDEResult();
 
         //Constructors
         public HelixSensor()
@@ -90,14 +89,14 @@ namespace HelixTroubleshootingWPF
 
     class HelixEvoSensor : HelixSensor
     {
+        public VDEResult VDE { get; set; } = new VDEResult();
         public EvoDacMemsData DacMemsData { get; set; }
         public EvoLpfData LpfData { get; set; }
         public MirrorcleData Mirrorcle { get; set; }
         public EvoPitchData PitchData { get; set; }
         public EvoUffData UffData { get; set; }
         public HelixEvoSensor() :base() { }
-        public HelixEvoSensor(string sensorXmlFolder) : base(sensorXmlFolder) { }
-
+        public HelixEvoSensor(string sensorXmlFolder, bool rawXml = false) : base(sensorXmlFolder, rawXml) { }
         public bool CheckComplete()
         {
             if(!DacMemsData.CheckComplete() || !LpfData.CheckComplete() || 
@@ -122,15 +121,19 @@ namespace HelixTroubleshootingWPF
 
     class HelixSoloSensor : HelixSensor
     {
+        public SoloFocusData FocusData { get; set; }
         public HelixSoloSensor() : base() { }
-        public HelixSoloSensor(string sensorXmlFolder) : base(sensorXmlFolder) { }
+        public HelixSoloSensor(string sensorXmlFolder, bool rawXml = false) : base(sensorXmlFolder, rawXml) { }
     }
 
     class AccuracyResult
     {
-        public DateTime Timestamp = new DateTime();
-        public float ZeroDegree2Rms = 0f;
-        public float ZeroDegreeMaxDev = 0f;
+        private DateTime timestamp = new DateTime();
+        private float zeroDegree2Rms = 0f;
+        private float zeroDegreeMaxDev = 0f;
+        public DateTime Timestamp { get => timestamp; }
+        public float ZeroDegree2Rms { get => zeroDegree2Rms; }
+        public float ZeroDegreeMaxDev { get => zeroDegreeMaxDev; }
 
         public AccuracyResult()
         {
@@ -154,14 +157,14 @@ namespace HelixTroubleshootingWPF
                         {
                             newTimestamp = DateTime.ParseExact(line.Replace("Started at ", ""), "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
                             if (newTimestamp < Timestamp) { return false; }
-                            Timestamp = newTimestamp;
+                            timestamp = newTimestamp;
                         }
                         else if (line.Contains("Line_Zero Test Type"))
                         { zeroDegree = true; }
                         else if (line.Contains("Maximum deviation") & zeroDegree)
-                        { float.TryParse(line.Split("=")[1].Split(",")[0], out ZeroDegreeMaxDev); }
+                        { float.TryParse(line.Split("=")[1].Split(",")[0], out zeroDegreeMaxDev); }
                         else if (line.Contains("2RMS deviation") & zeroDegree)
-                        { float.TryParse(line.Split("=")[1].Split(",")[0], out ZeroDegree2Rms); return true; }
+                        { float.TryParse(line.Split("=")[1].Split(",")[0], out zeroDegree2Rms); return true; }
                     }
                     return false;
                 }
@@ -184,9 +187,9 @@ namespace HelixTroubleshootingWPF
             float.TryParse(line[45], out float zero2Rms);
             float.TryParse(line[42], out float zeroMaxDev);
             if(zero2Rms == 0f || zeroMaxDev == 0f) { return false; }
-            ZeroDegree2Rms = zero2Rms;
-            ZeroDegreeMaxDev = zeroMaxDev;
-            Timestamp = newTimestamp;
+            zeroDegree2Rms = zero2Rms;
+            zeroDegreeMaxDev = zeroMaxDev;
+            timestamp = newTimestamp;
             return true;
         }
         public bool CheckComplete()
@@ -199,14 +202,20 @@ namespace HelixTroubleshootingWPF
             return $"{Timestamp}\t{ZeroDegree2Rms}\t{ZeroDegreeMaxDev}";
         }
     }
-
+    //Evo Data
     class VDEResult
     {
-        public DateTime Timestamp = new DateTime();
-        public float SphereSpacingError = 0f;
-        public float SphereProbingErrorSize = 0f;
-        public float SphereProbingErrorForm = 0f;
-        public float PlaneProbingError = 0f;
+        private DateTime timestamp = new DateTime();
+        private float sphereSpacingError = 0f;
+        private float sphereProbingErrorSize = 0f;
+        private float sphereProbingErrorForm = 0f;
+        private float planeProbingError = 0f;
+
+        public DateTime Timestamp { get => timestamp; }
+        public float SphereSpacingError { get => sphereSpacingError; }
+        public float SphereProbingErrorSize { get => sphereProbingErrorSize; }
+        public float SphereProbingErrorForm { get => sphereProbingErrorForm; }
+        public float PlaneProbingError { get => planeProbingError; }
 
         public VDEResult()
         {
@@ -230,18 +239,18 @@ namespace HelixTroubleshootingWPF
                         {
                             newTimestamp = DateTime.ParseExact(line.Replace("Time : ", ""), "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
                             if (newTimestamp < Timestamp) { return false; }
-                            Timestamp = newTimestamp;
+                            timestamp = newTimestamp;
                         }
                         else if (line.Contains("VDE-2634 Accuracy Test: Inspection Results"))
                         { results = true; }
                         else if (line.Contains("Sphere Spacing Error (SD)") & results)
-                        { float.TryParse(line.Split(" ")[4], out SphereSpacingError); }
+                        { float.TryParse(line.Split(" ")[4], out sphereSpacingError); }
                         else if (line.Contains("Sphere Probing Error - Size (Ps)") & results)
-                        { float.TryParse(line.Split("=")[6], out SphereProbingErrorSize); }
+                        { float.TryParse(line.Split("=")[6], out sphereProbingErrorSize); }
                         else if (line.Contains("Sphere Probing Error - Form (Pf)") & results)
-                        { float.TryParse(line.Split("=")[6], out SphereProbingErrorForm); }
+                        { float.TryParse(line.Split("=")[6], out sphereProbingErrorForm); }
                         else if (line.Contains("Plane Probing Error  - Form (F)") & results)
-                        { float.TryParse(line.Split("=")[6], out PlaneProbingError); return true; }
+                        { float.TryParse(line.Split("=")[6], out planeProbingError); return true; }
                     }
                     return false;
                 }
@@ -261,16 +270,12 @@ namespace HelixTroubleshootingWPF
                 newTimestamp = DateTime.ParseExact(line[7], "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
             }
             catch { return false; }
-            float.TryParse(line[176], out float sphereSpacingError);
-            float.TryParse(line[179], out float sphereProbingErrorForm);
-            float.TryParse(line[182], out float sphereProbingErrorSize);
-            float.TryParse(line[185], out float planeProbingError);
+            float.TryParse(line[176], out sphereSpacingError);
+            float.TryParse(line[179], out sphereProbingErrorForm);
+            float.TryParse(line[182], out sphereProbingErrorSize);
+            float.TryParse(line[185], out planeProbingError);
             if (sphereSpacingError == 0f || sphereProbingErrorForm == 0f) { return false; }
-            SphereSpacingError = sphereSpacingError;
-            SphereProbingErrorForm = sphereProbingErrorForm;
-            SphereProbingErrorSize = sphereProbingErrorSize;
-            PlaneProbingError = planeProbingError;
-            Timestamp = newTimestamp;
+            timestamp = newTimestamp;
             return true;
         }
         public bool CheckComplete()
@@ -285,15 +290,24 @@ namespace HelixTroubleshootingWPF
 
     struct EvoDacMemsData
     {
-        public string MemsSerialNumber;
-        public double NLRange;
-        public double NLCoverage;
-        public double NRRange;
-        public double NRCoverage;
-        public double FLRange;
-        public double FLCoverage;
-        public double FRRange;
-        public double FRCoverage;
+        public string MemsSerialNumber { get => memsSerialNumber; }
+        private string memsSerialNumber;
+        public double NLRange { get => nlRange; }
+        private double nlRange;
+        public double NLCoverage { get => nlCoverage; }
+        private double nlCoverage;
+        public double NRRange { get => nrRange; }
+        private double nrRange;
+        public double NRCoverage { get => nrCoverage; }
+        private double nrCoverage;
+        public double FLRange { get => flRange; }
+        private double flRange;
+        public double FLCoverage { get => flCoverage; }
+        private double flCoverage;
+        public double FRRange { get => frRange; }
+        private double frRange;
+        public double FRCoverage { get => frCoverage; }
+        private double frCoverage;
         public bool IsAssigned;
 
         public EvoDacMemsData(string dataLine)
@@ -301,27 +315,27 @@ namespace HelixTroubleshootingWPF
             string[] split = dataLine.Split("\t");
             if(split.Length < 97) 
             {
-                MemsSerialNumber = "";
-                NLRange = 0d;
-                NLCoverage = 0d;
-                NRRange = 0d;
-                NRCoverage = 0d;
-                FLRange = 0d;
-                FLCoverage = 0d;
-                FRRange = 0d;
-                FRCoverage = 0d;
+                memsSerialNumber = "";
+                nlRange = 0d;
+                nlCoverage = 0d;
+                nrRange = 0d;
+                nrCoverage = 0d;
+                flRange = 0d;
+                flCoverage = 0d;
+                frRange = 0d;
+                frCoverage = 0d;
                 IsAssigned = false;
                 return; 
             }
-            MemsSerialNumber = split[5];
-            double.TryParse(split[80], out NLRange);
-            double.TryParse(split[81], out NLCoverage);
-            double.TryParse(split[85], out NRRange);
-            double.TryParse(split[86], out NRCoverage);
-            double.TryParse(split[90], out FLRange);
-            double.TryParse(split[91], out FLCoverage);
-            double.TryParse(split[95], out FRRange);
-            double.TryParse(split[96], out FRCoverage);
+            memsSerialNumber = split[5];
+            double.TryParse(split[80], out nlRange);
+            double.TryParse(split[81], out nlCoverage);
+            double.TryParse(split[85], out nrRange);
+            double.TryParse(split[86], out nrCoverage);
+            double.TryParse(split[90], out flRange);
+            double.TryParse(split[91], out flCoverage);
+            double.TryParse(split[95], out frRange);
+            double.TryParse(split[96], out frCoverage);
             IsAssigned = true;
         }
         public bool CheckComplete()
@@ -338,77 +352,99 @@ namespace HelixTroubleshootingWPF
 
     struct EvoLpfData
     {
-        public DateTime Date;
-        public string Operator;
-        public bool MeterZeroed;
-        public int MeterBackgroundBiasuW;
-        public bool MeterAligned;
-        public float XAlignMm;
-        public float YAlignMm;
-        public bool PowerStabilityRan;
-        public float StabilityMinPowermW;
-        public float StabilityMaxPowermW;
-        public bool PowerStabilityPassed;
-        public bool RangeTestRan;
-        public bool RangeTestPassed;
-        public float MinPowermW;
-        public float MaxPowermW;
-        public bool LinearityRan;
-        public bool LinearityPassed;
-        public bool CalibrateRan;
-        public bool CalibratePassed;
-        public bool AmSamplingRan;
-        public List<LpfTestIndex> TableSamples;
+        private DateTime date;
+        private string operatorInitials;
+        private bool meterZeroed;
+        private int meterBackgroundBiasuW;
+        private bool meterAligned;
+        private float xAlignMm;
+        private float yAlignMm;
+        private bool powerStabilityRan;
+        private float stabilityMinPowermW;
+        private float stabilityMaxPowermW;
+        private bool powerStabilityPassed;
+        private bool rangeTestRan;
+        private bool rangeTestPassed;
+        private float minPowermW;
+        private float maxPowermW;
+        private bool linearityRan;
+        private bool linearityPassed;
+        private bool calibrateRan;
+        private bool calibratePassed;
+        private bool amSamplingRan;
+        private List<LpfTestIndex> tableSamples;
+
+        public DateTime Date { get => date; }
+        public string Operator { get => operatorInitials; }
+        public bool MeterZeroed { get => meterZeroed; }
+        public int MeterBackgroundBiasuW { get => meterBackgroundBiasuW; }
+        public bool MeterAligned { get => meterAligned; }
+        public float XAlignMm { get => xAlignMm; }
+        public float YAlignMm { get => yAlignMm; }
+        public bool PowerStabilityRan { get => powerStabilityRan; }
+        public float StabilityMinPowermW { get => stabilityMinPowermW; }
+        public float StabilityMaxPowermW { get => stabilityMaxPowermW; }
+        public bool PowerStabilityPassed { get => powerStabilityPassed; }
+        public bool RangeTestRan { get => rangeTestRan; }
+        public bool RangeTestPassed { get => rangeTestPassed; }
+        public float MinPowermW { get => minPowermW; }
+        public float MaxPowermW { get => maxPowermW; }
+        public bool LinearityRan { get => linearityRan; }
+        public bool LinearityPassed { get => linearityPassed; }
+        public bool CalibrateRan { get => calibrateRan; }
+        public bool CalibratePassed { get => calibratePassed; }
+        public bool AmSamplingRan { get => amSamplingRan; }
+        public List<LpfTestIndex> TableSamples { get => tableSamples; }
 
         public EvoLpfData(string line)
         {
             string[] split = line.Split("\t");
             if(split.Length < 65)
             {
-                Date = new DateTime();
-                Operator = "";
-                MeterZeroed = false;
-                MeterBackgroundBiasuW = 0;
-                MeterAligned = false;
-                XAlignMm = 0f;
-                YAlignMm = 0f;
-                PowerStabilityRan = false;
-                StabilityMinPowermW = 0f;
-                StabilityMaxPowermW = 0f;
-                PowerStabilityPassed = false;
-                RangeTestRan = false;
-                RangeTestPassed = false;
-                MinPowermW = 0f;
-                MaxPowermW = 0f;
-                LinearityRan = false;
-                LinearityPassed = false;
-                CalibrateRan = false;
-                CalibratePassed = false;
-                AmSamplingRan = false;
-                TableSamples = new List<LpfTestIndex>();
+                date = new DateTime();
+                operatorInitials = "";
+                meterZeroed = false;
+                meterBackgroundBiasuW = 0;
+                meterAligned = false;
+                xAlignMm = 0f;
+                yAlignMm = 0f;
+                powerStabilityRan = false;
+                stabilityMinPowermW = 0f;
+                stabilityMaxPowermW = 0f;
+                powerStabilityPassed = false;
+                rangeTestRan = false;
+                rangeTestPassed = false;
+                minPowermW = 0f;
+                maxPowermW = 0f;
+                linearityRan = false;
+                linearityPassed = false;
+                calibrateRan = false;
+                calibratePassed = false;
+                amSamplingRan = false;
+                tableSamples = new List<LpfTestIndex>();
             }
             else
             {
-                if (!DateTime.TryParseExact($"{split[0]} {split[1]}", "MM/dd/yy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out Date)) { Date = new DateTime(); }
-                Operator = split[2];
-                MeterZeroed = split[6] == "Y";
-                if (!int.TryParse(split[7], out MeterBackgroundBiasuW)) { MeterBackgroundBiasuW = 0; }
-                MeterAligned = split[8] == "Y";
-                if (!float.TryParse(split[9], out XAlignMm)) { XAlignMm = 0f; }
-                if (!float.TryParse(split[10], out YAlignMm)) { YAlignMm = 0f; }
-                PowerStabilityRan = split[11] == "Y";
-                if (!float.TryParse(split[12], out StabilityMinPowermW)) { StabilityMinPowermW = 0f; }
-                if (!float.TryParse(split[13], out StabilityMaxPowermW)) { StabilityMaxPowermW = 0f; }
-                PowerStabilityPassed = split[14] == "Y";
-                RangeTestRan = split[15] == "Y";
-                RangeTestPassed = split[16] == "Y";
-                if (!float.TryParse(split[17], out MinPowermW)) { MinPowermW = 0f; }
-                if (!float.TryParse(split[18], out MaxPowermW)) { MaxPowermW = 0f; }
-                LinearityRan = split[19] == "Y";
-                LinearityPassed = split[20] == "Y";
-                CalibrateRan = split[21] == "Y";
-                CalibratePassed = split[22] == "Y";
-                AmSamplingRan = split[23] == "Y";
+                if (!DateTime.TryParseExact($"{split[0]} {split[1]}", "MM/dd/yy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out date)) { date = new DateTime(); }
+                operatorInitials = split[2];
+                meterZeroed = split[6] == "Y";
+                if (!int.TryParse(split[7], out meterBackgroundBiasuW)) { meterBackgroundBiasuW = 0; }
+                meterAligned = split[8] == "Y";
+                if (!float.TryParse(split[9], out xAlignMm)) { xAlignMm = 0f; }
+                if (!float.TryParse(split[10], out yAlignMm)) { yAlignMm = 0f; }
+                powerStabilityRan = split[11] == "Y";
+                if (!float.TryParse(split[12], out stabilityMinPowermW)) { stabilityMinPowermW = 0f; }
+                if (!float.TryParse(split[13], out stabilityMaxPowermW)) { stabilityMaxPowermW = 0f; }
+                powerStabilityPassed = split[14] == "Y";
+                rangeTestRan = split[15] == "Y";
+                rangeTestPassed = split[16] == "Y";
+                if (!float.TryParse(split[17], out minPowermW)) { minPowermW = 0f; }
+                if (!float.TryParse(split[18], out maxPowermW)) { maxPowermW = 0f; }
+                linearityRan = split[19] == "Y";
+                linearityPassed = split[20] == "Y";
+                calibrateRan = split[21] == "Y";
+                calibratePassed = split[22] == "Y";
+                amSamplingRan = split[23] == "Y";
                 List<LpfTestIndex> newSamples = new List<LpfTestIndex>();
                 for(int i = 24; i < split.Length; i++)
                 {
@@ -423,7 +459,7 @@ namespace HelixTroubleshootingWPF
                         newSamples.Add(new LpfTestIndex() { Index = index, PoweruW = power, PercentNominal = percent});
                     }
                 }
-                TableSamples = newSamples;
+                tableSamples = newSamples;
             }
         }
         public bool CheckComplete()
@@ -454,9 +490,13 @@ namespace HelixTroubleshootingWPF
 
     struct LpfTestIndex
     {
-        public int Index;
-        public int PoweruW;
-        public int PercentNominal;
+        private int index;
+        private int poweruW;
+        private int percentNominal;
+
+        public int Index { get => index; set => index = value; }
+        public int PoweruW { get => poweruW; set => poweruW = value; }
+        public int PercentNominal { get => percentNominal; set => percentNominal = value; }
 
         public bool CheckComplete()
         {
@@ -472,30 +512,36 @@ namespace HelixTroubleshootingWPF
 
     struct EvoPitchData
     {
-        public DateTime Date;
-        public string Operator;
-        public bool PitchTestRan;
-        public float XPixelsDelta;
-        public float YPixelsDelta;
+        private DateTime date;
+        private string operatorInitials;
+        private bool pitchTestRan;
+        private float xPixelsDelta;
+        private float yPixelsDelta;
+
+        public DateTime Date { get => date; }
+        public string Operator { get => operatorInitials; }
+        public bool PitchTestRan { get => pitchTestRan; }
+        public float XPixelsDelta { get => xPixelsDelta; }
+        public float YPixelsDelta { get => yPixelsDelta; }
 
         public EvoPitchData(string line)
         {
             string[] split = line.Split("\t");
             if (split.Length < 9)
             {
-                Date = new DateTime();
-                Operator = "";
-                PitchTestRan = false;
-                XPixelsDelta = 0f;
-                YPixelsDelta = 0f;
+                date = new DateTime();
+                operatorInitials = "";
+                pitchTestRan = false;
+                xPixelsDelta = 0f;
+                yPixelsDelta = 0f;
             }
             else
             {
-                if (!DateTime.TryParseExact($"{split[0]} {split[1]}", "MM/dd/yy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out Date)) { Date = new DateTime(); }
-                Operator = split[2];
-                PitchTestRan = split[6] == "Y";
-                if(!float.TryParse(split[7], out XPixelsDelta)) { XPixelsDelta = 0f; }
-                if(!float.TryParse(split[8], out YPixelsDelta)) { YPixelsDelta = 0f; }
+                if (!DateTime.TryParseExact($"{split[0]} {split[1]}", "MM/dd/yy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out date)) { date = new DateTime(); }
+                operatorInitials = split[2];
+                pitchTestRan = split[6] == "Y";
+                if(!float.TryParse(split[7], out xPixelsDelta)) { xPixelsDelta = 0f; }
+                if(!float.TryParse(split[8], out yPixelsDelta)) { yPixelsDelta = 0f; }
             }
         }
         public bool CheckComplete()
@@ -512,45 +558,55 @@ namespace HelixTroubleshootingWPF
 
     struct EvoUffData
     {
-        public DateTime Date;
-        public string Operator;
-        public float CameraTempC;
-        public bool MinTempOverridden;
-        public bool AlignTargetRan;
-        public float TargetMonitorAngle;
-        public bool FocusTestRan;
-        public bool FocusExposureGood;
-        public float FocusRow;
-        public float FocusScore;
+        public DateTime Date { get => date; }
+        private DateTime date;
+        public string Operator { get => operatorInitials; }
+        private string operatorInitials;
+        public float CameraTempC { get => cameraTempC; }
+        private float cameraTempC;
+        public bool MinTempOverridden { get => minTempOverridden; }
+        private bool minTempOverridden;
+        public bool AlignTargetRan { get => alignTargetRan; }
+        private bool alignTargetRan;
+        public float TargetMonitorAngle { get => targetMonitorAngle; }
+        private float targetMonitorAngle;
+        public bool FocusTestRan { get => focusTestRan; }
+        private bool focusTestRan;
+        public bool FocusExposureGood { get => focusExposureGood; }
+        private bool focusExposureGood;
+        public float FocusRow { get => focusRow; }
+        private float focusRow;
+        public float FocusScore { get => focusScore;}
+        private float focusScore;
 
         public EvoUffData(string line)
         {
             string[] split = line.Split("\t");
             if(split.Length < 15)
             {
-                Date = new DateTime();
-                Operator = "";
-                CameraTempC = 0f;
-                MinTempOverridden = false;
-                AlignTargetRan = false;
-                TargetMonitorAngle = 0f;
-                FocusTestRan = false;
-                FocusExposureGood = false;
-                FocusRow = 0;
-                FocusScore = 0;
+                date = new DateTime();
+                operatorInitials = "";
+                cameraTempC = 0f;
+                minTempOverridden = false;
+                alignTargetRan = false;
+                targetMonitorAngle = 0f;
+                focusTestRan = false;
+                focusExposureGood = false;
+                focusRow = 0;
+                focusScore = 0;
             }
             else
             {
-                if (!DateTime.TryParseExact($"{split[0]} {split[1]}", "MM/dd/yy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out Date)) { Date = new DateTime(); }
-                Operator = split[2];
-                if (!float.TryParse(split[7], out CameraTempC)) { CameraTempC = 0f; }
-                MinTempOverridden = split[8] == "Yes";
-                AlignTargetRan = split[9] == "Yes";
-                if (!float.TryParse(split[10], out TargetMonitorAngle)) { TargetMonitorAngle = 0f; }
-                FocusTestRan = split[11] == "Yes";
-                FocusExposureGood = split[12] == "Good";
-                if (!float.TryParse(split[13], out FocusRow)) { FocusRow = 0; }
-                if (!float.TryParse(split[14], out FocusScore)) { FocusScore = 0; }
+                if (!DateTime.TryParseExact($"{split[0]} {split[1]}", "MM/dd/yy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out date)) { date = new DateTime(); }
+                operatorInitials = split[2];
+                if (!float.TryParse(split[7], out cameraTempC)) { cameraTempC = 0f; }
+                minTempOverridden = split[8] == "Yes";
+                alignTargetRan = split[9] == "Yes";
+                if (!float.TryParse(split[10], out targetMonitorAngle)) { targetMonitorAngle = 0f; }
+                focusTestRan = split[11] == "Yes";
+                focusExposureGood = split[12] == "Good";
+                if (!float.TryParse(split[13], out focusRow)) { focusRow = 0; }
+                if (!float.TryParse(split[14], out focusScore)) { focusScore = 0; }
             }
         }
         public bool CheckComplete()
@@ -568,19 +624,33 @@ namespace HelixTroubleshootingWPF
 
     struct MirrorcleData
     {
-        public string SerialNumber;
-        public float ThetaX110;
-        public float ThetaY110;
-        public int FnX;
-        public int FnY;
-        public float PrcpMaxDiff;
-        public decimal FitC0;
-        public decimal FitC1;
-        public decimal FitC2;
-        public decimal FitC3;
-        public decimal FitC4;
-        public decimal FitC5;
-        public float LinError;
+        private string serialNumber;
+        private float thetaX110;
+        private float thetaY110;
+        private int fnX;
+        private int fnY;
+        private float prcpMaxDiff;
+        private decimal fitC0;
+        private decimal fitC1;
+        private decimal fitC2;
+        private decimal fitC3;
+        private decimal fitC4;
+        private decimal fitC5;
+        private float linError;
+
+        public string SerialNumber { get => serialNumber; }
+        public float ThetaX110 { get => thetaX110; }
+        public float ThetaY110 { get => thetaY110; }
+        public int FnX { get => fnX; }
+        public int FnY { get => fnY; }
+        public float PrcpMaxDiff { get => prcpMaxDiff; }
+        public decimal FitC0 { get => fitC0; }
+        public decimal FitC1 { get => fitC1; }
+        public decimal FitC2 { get => fitC2; }
+        public decimal FitC3 { get => fitC3; }
+        public decimal FitC4 { get => fitC4; }
+        public decimal FitC5 { get => fitC5; }
+        public float LinError { get => linError; }
         public bool IsAssigned;
 
         public MirrorcleData(string line)
@@ -588,36 +658,36 @@ namespace HelixTroubleshootingWPF
             string[] split = line.Split(",");
             if(split.Length < 31)
             {
-                SerialNumber = default;
-                ThetaX110 = default;
-                ThetaY110 = default;
-                FnX = default;
-                FnY = default;
-                PrcpMaxDiff = default;
-                FitC0 = default;
-                FitC1 = default;
-                FitC2 = default;
-                FitC3 = default;
-                FitC4 = default;
-                FitC5 = default;
-                LinError = default;
+                serialNumber = default;
+                thetaX110 = default;
+                thetaY110 = default;
+                fnX = default;
+                fnY = default;
+                prcpMaxDiff = default;
+                fitC0 = default;
+                fitC1 = default;
+                fitC2 = default;
+                fitC3 = default;
+                fitC4 = default;
+                fitC5 = default;
+                linError = default;
                 IsAssigned = false;
             }
             else
             {
-                SerialNumber = split[0];
-                if(!float.TryParse(split[17], out ThetaX110))   { ThetaX110 = default; }
-                if(!float.TryParse(split[18], out ThetaY110))   { ThetaY110 = default; }
-                if(!int.TryParse(split[19], out FnX))           { FnX = default; }
-                if(!int.TryParse(split[20], out FnY))           { FnY = default; }
-                if(!float.TryParse(split[21], out PrcpMaxDiff)) { PrcpMaxDiff = default; }
-                if (!decimal.TryParse(split[22], NumberStyles.Float, CultureInfo.InvariantCulture, out FitC0)) { FitC0 = default; }
-                if (!decimal.TryParse(split[23], NumberStyles.Float, CultureInfo.InvariantCulture, out FitC1)) { FitC1 = default; }
-                if (!decimal.TryParse(split[24], NumberStyles.Float, CultureInfo.InvariantCulture, out FitC2)) { FitC2 = default; }
-                if (!decimal.TryParse(split[25], NumberStyles.Float, CultureInfo.InvariantCulture, out FitC3)) { FitC3 = default; }
-                if (!decimal.TryParse(split[26], NumberStyles.Float, CultureInfo.InvariantCulture, out FitC4)) { FitC4 = default; }
-                if (!decimal.TryParse(split[27], NumberStyles.Float, CultureInfo.InvariantCulture, out FitC5)) { FitC5 = default; }
-                if (!float.TryParse(split[28], out LinError)) { LinError = default; }
+                serialNumber = split[0];
+                if(!float.TryParse(split[17], out thetaX110))   { thetaX110 = default; }
+                if(!float.TryParse(split[18], out thetaY110))   { thetaY110 = default; }
+                if(!int.TryParse(split[19], out fnX))           { fnX = default; }
+                if(!int.TryParse(split[20], out fnY))           { fnY = default; }
+                if(!float.TryParse(split[21], out prcpMaxDiff)) { prcpMaxDiff = default; }
+                if (!decimal.TryParse(split[22], NumberStyles.Float, CultureInfo.InvariantCulture, out fitC0)) { fitC0 = default; }
+                if (!decimal.TryParse(split[23], NumberStyles.Float, CultureInfo.InvariantCulture, out fitC1)) { fitC1 = default; }
+                if (!decimal.TryParse(split[24], NumberStyles.Float, CultureInfo.InvariantCulture, out fitC2)) { fitC2 = default; }
+                if (!decimal.TryParse(split[25], NumberStyles.Float, CultureInfo.InvariantCulture, out fitC3)) { fitC3 = default; }
+                if (!decimal.TryParse(split[26], NumberStyles.Float, CultureInfo.InvariantCulture, out fitC4)) { fitC4 = default; }
+                if (!decimal.TryParse(split[27], NumberStyles.Float, CultureInfo.InvariantCulture, out fitC5)) { fitC5 = default; }
+                if (!float.TryParse(split[28], out linError)) { linError = default; }
                 IsAssigned = true;
             }
         }
@@ -633,5 +703,15 @@ namespace HelixTroubleshootingWPF
         {
             return $"{ThetaX110}\t{ThetaY110}\t{FnX}\t{FnY}\t{PrcpMaxDiff}\t{FitC0}\t{FitC1}\t{FitC2}\t{FitC3}\t{FitC4}\t{FitC5}\t{LinError}";
         }
+    }
+    
+    //Solo Data
+    struct SoloFocusData
+    {
+
+    }
+    struct SoloLaserAlignData
+    {
+
     }
 }

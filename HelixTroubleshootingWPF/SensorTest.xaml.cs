@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HelixTroubleshootingWPF.Functions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,6 +31,8 @@ namespace HelixTroubleshootingWPF
         string OPAInit = "";
         string SensorXml = "";
         HelixSensor Sensor = new();
+        HelixEvoSensor EvoSensor = new();
+        HelixSoloSensor SoloSensor = new();
         public SensorTest(string sensorIp)
         {
             SensorIp = sensorIp;
@@ -203,9 +206,9 @@ namespace HelixTroubleshootingWPF
             try
             {
                 cam.Init(0);
-                cam.IO.Gpio.SetConfiguration(uEye.Defines.IO.GPIO.One, uEye.Defines.IO.GPIOConfiguration.Output, uEye.Defines.IO.State.Low);
+                //cam.IO.Gpio.SetConfiguration(uEye.Defines.IO.GPIO.One, uEye.Defines.IO.GPIOConfiguration.Output, uEye.Defines.IO.State.Low);
                 System.Threading.Thread.Sleep(50);
-                cam.IO.Gpio.SetConfiguration(uEye.Defines.IO.GPIO.One, uEye.Defines.IO.GPIOConfiguration.Input);
+                //cam.IO.Gpio.SetConfiguration(uEye.Defines.IO.GPIO.One, uEye.Defines.IO.GPIOConfiguration.Input);
 
                 uEye.Types.DeviceInformation info;
                 cam.Information.GetDeviceInfo(out info);
@@ -239,7 +242,39 @@ namespace HelixTroubleshootingWPF
                 }
             }
         }
-
+        private void FillSensorInfo()
+        {
+            InfoDate.Text = Sensor.Date;
+            InfoSerialNumber.Text = Sensor.SerialNumber;
+            InfoPartNumber.Text = Sensor.PartNumber;
+            InfoRev.Text = Sensor.SensorRev;
+            InfoImagerID.Text = Sensor.CameraSerial;
+            InfoLaserClass.Text = Sensor.LaserClass;
+            InfoLaserColor.Text = Sensor.Color;
+            InfoRectRev.Text = Sensor.RectRev;
+            InfoRectPosRev.Text = Sensor.RectPosRev;
+            InfoAccPosRev.Text = Sensor.AccPosRev;
+        }
+        private void FillFixtureInfo(string sn = "")
+        {
+            if (sn != "") { Sensor = new HelixSensor { SerialNumber = sn, PartNumber = TToolsFunctions.GetSensorPn(sn)}; }
+            if (Sensor.PartNumber.Contains("920-"))
+            {
+                SoloFixtureDataPanel.Visibility = Visibility.Collapsed;
+                EvoFixtureDataPanel.Visibility = Visibility.Visible;
+                if (sn == "") { EvoSensor = TToolsFunctions.AllEvoDataSingle(new HelixEvoSensor(SensorXml, true)); }
+                else { EvoSensor = TToolsFunctions.AllEvoDataSingle(new HelixEvoSensor() { SerialNumber = sn }); }
+                FixtureResultsSnEntry.Text = EvoSensor.SerialNumber;
+                UFFDataGrid.ItemsSource = new List<EvoUffData> { EvoSensor.UffData };
+                TuningDataGrid.ItemsSource = new List<EvoDacMemsData> { EvoSensor.DacMemsData };
+                MirrorcleDataGrid.ItemsSource = new List<MirrorcleData> { EvoSensor.Mirrorcle };
+                LPFDataGrid.ItemsSource = new List<EvoLpfData> { EvoSensor.LpfData };
+                SamplingDataGrid.ItemsSource =  EvoSensor.LpfData.TableSamples;
+                PitchDataGrid.ItemsSource = new List<EvoPitchData> { EvoSensor.PitchData };
+                AccuracyDataGrid.ItemsSource = new List<AccuracyResult> { EvoSensor.AccuracyResult };
+                VDEDataGrid.ItemsSource = new List<VDEResult> { EvoSensor.VDE };
+            }
+        }
         private void Highlight(string header, bool passed)
         {
             foreach(TreeViewItem item in SensorTestTree.Items)
@@ -279,6 +314,19 @@ namespace HelixTroubleshootingWPF
             CheckFiles();
             Client.Dispose();
             TestCamera();
+            if (SensorXml != "")
+            {
+                try
+                {
+                    Sensor = new HelixSensor(SensorXml, true);
+                    FillSensorInfo();
+                    FillFixtureInfo();
+                }
+                catch(System.Xml.XmlException exception)
+                {
+                    Log(exception.Message);
+                }
+            }
         }
         private void SensorTestTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
@@ -288,6 +336,11 @@ namespace HelixTroubleshootingWPF
             else if (header == "LaserPowerTable.dat") { SensorFileBox.Text = LaserPowerTable; }
             else if (header == "OPAInit.dat") { SensorFileBox.Text = OPAInit; }
             else if (header == "FPGAInit.dat") { SensorFileBox.Text = FPGAInit; }
+        }
+
+        private void FixtureResultsGetDataBtn_Click(object sender, RoutedEventArgs e)
+        {
+            FillFixtureInfo(FixtureResultsSnEntry.Text);
         }
     }
 }
