@@ -24,7 +24,7 @@ namespace HelixTroubleshootingWPF.Functions
 #nullable disable
             if(sn != "")
             {
-                sensor = AllSensorDataSingle(sn);
+                sensor = AllEvoDataSingle(new HelixEvoSensor() { SerialNumber = sn});
             }
             Config.LoadConfig();
             List<HelixEvoSensor> evoData = LoadEvoData();
