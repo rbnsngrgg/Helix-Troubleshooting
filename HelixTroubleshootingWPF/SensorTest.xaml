@@ -42,7 +42,6 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="20"/>
-                    <ColumnDefinition Width="250"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="20"/>
                 </Grid.ColumnDefinitions>
@@ -51,7 +50,7 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="30"/>
                 </Grid.RowDefinitions>
-                <GroupBox Header="sensor.xml" Grid.Row="1" Grid.Column="2">
+                <GroupBox Header="sensor.xml" Grid.Row="1" Grid.Column="1" Width="550">
                     <StackPanel Grid.Row="1" Grid.Column="2">
                         <DockPanel Background="WhiteSmoke" Margin="0,10,0,10">
                             <Label Content="Date" Width="125" HorizontalContentAlignment="Center" Margin="0,0,10,0"/>

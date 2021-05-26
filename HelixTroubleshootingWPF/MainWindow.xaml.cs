@@ -62,8 +62,7 @@ namespace HelixTroubleshootingWPF
             else if(item.Contains("Solo Laser Line Analysis"))
             {
                 DetailsBox.Text = "Analyzes the laser line images from the rectification images folder of a Helix Solo sensor. The results are placed in the analysis folder, " +
-                    "specified in the config.\n\nEnter a directory for rectification images and click \"Start\".\n\nAlternatively, generate data for all Solo sensors in the config" +
-                    " directories by clicking \"Analyze All\"";
+                    "specified in the config.\n\nEnter a directory for rectification images and click \"Start\".";
                 DetailsTextBox1.Visibility = System.Windows.Visibility.Visible;
                 DetailsTextBox2.Visibility = System.Windows.Visibility.Hidden;
                 DetailsButton1.Content = "Start";
@@ -120,7 +119,7 @@ namespace HelixTroubleshootingWPF
             }
             else if(item.Contains("Sensor Test"))
             {
-                DetailsBox.Text = "Test sensor functionality";
+                DetailsBox.Text = "Test sensor functionality and gather sensor fixture information.";
                 DataGatherSettings();
             }
             else if (item.Contains("Evo KNN Regression"))
