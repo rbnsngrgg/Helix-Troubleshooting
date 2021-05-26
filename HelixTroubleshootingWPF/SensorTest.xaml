@@ -151,7 +151,18 @@
                             </DockPanel>
                         </StackPanel>
                         <StackPanel x:Name="SoloFixtureDataPanel" Visibility="Collapsed">
-
+                            <DockPanel Background="WhiteSmoke" Margin="0,10,0,10">
+                                <Label Content="Focus Data" Width="125" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,0,10,0"/>
+                                <DataGrid x:Name="SoloFocusDataGrid" IsReadOnly="True" Height="70" HeadersVisibility="All" HorizontalScrollBarVisibility="Visible"/>
+                            </DockPanel>
+                            <DockPanel Background="WhiteSmoke" Margin="0,10,0,10">
+                                <Label Content="Laser Align Data" Width="125" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,0,10,0"/>
+                                <DataGrid x:Name="SoloLaserAlignDataGrid" IsReadOnly="True" Height="70" HeadersVisibility="All" HorizontalScrollBarVisibility="Visible"/>
+                            </DockPanel>
+                            <DockPanel Background="WhiteSmoke" Margin="0,10,0,10">
+                                <Label Content="Accuracy Data" Width="125" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,0,10,0"/>
+                                <DataGrid x:Name="SoloAccuracyDataGrid" IsReadOnly="True" Height="70" HeadersVisibility="All" HorizontalScrollBarVisibility="Visible"/>
+                            </DockPanel>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>

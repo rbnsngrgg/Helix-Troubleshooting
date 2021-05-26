@@ -22,7 +22,6 @@ namespace HelixTroubleshootingWPF
         public string Color { get; set; }
         public string LaserClass { get; set; }
         public AccuracyResult AccuracyResult { get; set; } = new AccuracyResult();
-        public VDEResult VDE { get; set; } = new VDEResult();
 
         //Constructors
         public HelixSensor()
@@ -95,6 +94,7 @@ namespace HelixTroubleshootingWPF
         public MirrorcleData Mirrorcle { get; set; }
         public EvoPitchData PitchData { get; set; }
         public EvoUffData UffData { get; set; }
+        public VDEResult VDE { get; set; } = new VDEResult();
         public HelixEvoSensor() :base() { }
         public HelixEvoSensor(string sensorXmlFolder, bool rawXml = false) : base(sensorXmlFolder, rawXml) { }
         public bool CheckComplete()
@@ -121,8 +121,10 @@ namespace HelixTroubleshootingWPF
 
     class HelixSoloSensor : HelixSensor
     {
+        public SoloFocusData FocusData { get; set; }
+        public SoloLaserAlign LaserAlign { get; set; }
         public HelixSoloSensor() : base() { }
-        public HelixSoloSensor(string sensorXmlFolder) : base(sensorXmlFolder) { }
+        public HelixSoloSensor(string sensorXmlFolder, bool rawXml = false) : base(sensorXmlFolder, rawXml) { }
     }
 
     class AccuracyResult
@@ -202,6 +204,7 @@ namespace HelixTroubleshootingWPF
         }
     }
 
+    //Evo data
     class VDEResult
     {
         private DateTime timestamp = new DateTime();
@@ -701,6 +704,148 @@ namespace HelixTroubleshootingWPF
         public override string ToString()
         {
             return $"{ThetaX110}\t{ThetaY110}\t{FnX}\t{FnY}\t{PrcpMaxDiff}\t{FitC0}\t{FitC1}\t{FitC2}\t{FitC3}\t{FitC4}\t{FitC5}\t{LinError}";
+        }
+    }
+
+    //Solo data
+    struct SoloFocusData
+    {
+        public DateTime Date { get => date; }
+        private DateTime date;
+        public string Operator { get => operatorInitials; }
+        private string operatorInitials;
+        public float CameraTempC { get => cameraTempC; }
+        private float cameraTempC;
+        public float XOffsetPixels { get => xOffsetPixels; }
+        private float xOffsetPixels;
+        public float YOffsetPixels { get => yOffsetPixels; }
+        private float yOffsetPixels;
+        public float ZRotationDeg { get => zRotationDeg; }
+        private float zRotationDeg;
+        public int FocusExposure { get => focusExposure; }
+        private int focusExposure;
+        public float FocusScore { get => focusScore; }
+        private float focusScore;
+        public float FocusRow { get => focusRow; }
+        private float focusRow;
+
+        public SoloFocusData(string line)
+        {
+            string[] split = line.Split("\t");
+            if (split.Length < 21)
+            {
+                date = new DateTime();
+                operatorInitials = "";
+                cameraTempC = 0f;
+                xOffsetPixels = 0f;
+                yOffsetPixels = 0f;
+                zRotationDeg = 0f;
+                focusExposure = 0;
+                focusRow = 0f;
+                focusScore = 0f;
+            }
+            else
+            {
+                if (!DateTime.TryParseExact($"{split[0]}", "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out date)) { date = new DateTime(); }
+                operatorInitials = split[2];
+                if (!float.TryParse(split[8], out cameraTempC)) { cameraTempC = 0f; }
+                if (!float.TryParse(split[14], out xOffsetPixels)) { xOffsetPixels = 0f; }
+                if (!float.TryParse(split[15], out yOffsetPixels)) { yOffsetPixels = 0f; }
+                if (!float.TryParse(split[16], out zRotationDeg)) { zRotationDeg = 0f; }
+                if (!int.TryParse(split[18], out focusExposure)) { focusExposure = 0; }
+                if (!float.TryParse(split[20], out focusScore)) { focusScore = 0f; }
+                if (!split[6].Contains("917") || !float.TryParse(split[21], out focusRow)) { focusRow = 0f; }
+            }
+        }
+        public bool CheckComplete()
+        {
+            if (Date == new DateTime() || Operator == "" || CameraTempC == 0f || XOffsetPixels == 0f || YOffsetPixels == 0f
+                || ZRotationDeg == 0f || FocusExposure == 0 || FocusScore == 0f)
+            { return false; }
+            else { return true; }
+        }
+        public override string ToString()
+        {
+            return $"{Operator}\t{CameraTempC}\t{XOffsetPixels}\t{YOffsetPixels}\t" +
+                $"{ZRotationDeg}\t{FocusExposure}\t{FocusScore}\t{FocusRow}";
+        }
+    }
+    struct SoloLaserAlign
+    {
+        public DateTime Date { get => date; }
+        private DateTime date;
+        public string Operator { get => operatorInitials; }
+        private string operatorInitials;
+        public float LeftCameraTempC { get => leftCameraTempC; }
+        private float leftCameraTempC;
+        public float RightCameraTempC { get => rightCameraTempC; }
+        private float rightCameraTempC;
+        public float LaserPowermW { get => laserPowermW; }
+        private float laserPowermW;
+        public float LaserPowerPercent { get => laserPowerPercent; }
+        private float laserPowerPercent;
+        public float LaserPitchDeg { get => laserPitchDeg; }
+        private float laserPitchDeg;
+        public float LaserRollDeg { get => laserRollDeg; }
+        private float laserRollDeg;
+        public float LaserOffsetmm { get => laserOffsetmm; }
+        private float laserOffsetmm;
+        public float AvgTpWidthLeft { get => avgTpWidthLeft; }
+        private float avgTpWidthLeft;
+        public float AvgTpWidthRight { get => avgTpWidthRight; }
+        private float avgTpWidthRight;
+        public float LinearityLeft { get => linearityLeft; }
+        private float linearityLeft;
+        public float LinearityRight { get => linearityRight; }
+        private float linearityRight;
+        public SoloLaserAlign(string line)
+        {
+            string[] split = line.Split("\t");
+            if (split.Length < 21)
+            {
+                date = new DateTime();
+                operatorInitials = "";
+                leftCameraTempC = 0f;
+                rightCameraTempC = 0f;
+                laserPowermW = 0f;
+                laserPowerPercent = 0f;
+                laserPitchDeg = 0f;
+                laserRollDeg = 0f;
+                laserOffsetmm = 0f;
+                avgTpWidthLeft = 0f;
+                avgTpWidthRight = 0f;
+                linearityLeft = 0f;
+                linearityRight = 0f;
+            }
+            else
+            {
+                if (!DateTime.TryParseExact($"{split[0]}", "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out date)) { date = new DateTime(); }
+                operatorInitials = split[2];
+                if (!float.TryParse(split[7], out leftCameraTempC)) { leftCameraTempC = 0f; }
+                if (!float.TryParse(split[8], out rightCameraTempC)) { rightCameraTempC = 0f; }
+                if (!float.TryParse(split[14], out laserPowermW)) { laserPowermW = 0f; }
+                if (!float.TryParse(split[15], out laserPowerPercent)) { laserPowerPercent = 0f; }
+                if (!float.TryParse(split[17], out laserPitchDeg)) { laserPitchDeg = 0f; }
+                if (!float.TryParse(split[18], out laserRollDeg)) { laserRollDeg = 0f; }
+                if (!float.TryParse(split[19], out laserOffsetmm)) { laserOffsetmm = 0f; }
+                if (!float.TryParse(split[22], out avgTpWidthLeft)) { avgTpWidthLeft = 0f; }
+                if (!float.TryParse(split[26], out avgTpWidthRight)) { avgTpWidthRight = 0f; }
+                if (!float.TryParse(split[28], out linearityLeft)) { linearityLeft = 0f; }
+                if (!float.TryParse(split[29], out linearityRight)) { linearityRight = 0f; }
+            }
+        }
+        public bool CheckComplete()
+        {
+            if (Date == new DateTime() || Operator == "" || leftCameraTempC == 0f || rightCameraTempC == 0f || laserPowermW == 0f
+                || laserPowerPercent == 0f || laserPitchDeg == 0f || laserRollDeg == 0f || laserOffsetmm == 0f || avgTpWidthLeft == 0f
+                || avgTpWidthRight == 0f || linearityLeft == 0f || linearityRight == 0f)
+            { return false; }
+            else { return true; }
+        }
+        public override string ToString()
+        {
+            return $"{Operator}\t{LeftCameraTempC}\t{RightCameraTempC}\t{LaserPowermW}\t{LaserPowerPercent}\t{LaserPitchDeg}" +
+                $"{LaserRollDeg}\t{LaserOffsetmm}\t{AvgTpWidthLeft}\t{AvgTpWidthRight}\t{LinearityLeft}\t{LinearityRight}";
         }
     }
 }

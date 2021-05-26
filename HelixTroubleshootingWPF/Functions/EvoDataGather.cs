@@ -290,7 +290,7 @@ namespace HelixTroubleshootingWPF.Functions
         {
             if (sensor.SerialNumber != "")
             {
-                return SingleSensorAccuracyResultsFromLog(
+                return SingleEvoAccuracyFromLog(
                         SingleSensorUff(
                             SingleSensorPitch(
                                 SingleSensorLpf(
@@ -404,7 +404,7 @@ namespace HelixTroubleshootingWPF.Functions
             }
             return sensor;
         }
-        static public HelixEvoSensor SingleSensorAccuracyResultsFromLog(HelixEvoSensor sensor, bool first = false)
+        static public HelixEvoSensor SingleEvoAccuracyFromLog(HelixEvoSensor sensor, bool first = false)
         {
             List<string> resultsLog = new List<string>();
             resultsLog.AddRange(File.ReadAllLines($@"{Config.RectDataDir}\HelixRectResults.log"));

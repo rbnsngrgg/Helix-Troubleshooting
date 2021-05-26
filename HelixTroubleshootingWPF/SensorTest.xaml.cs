@@ -258,7 +258,6 @@ namespace HelixTroubleshootingWPF
         private void FillFixtureInfo(string sn = "")
         {
             if (sn != "") { Sensor = new HelixSensor { SerialNumber = sn, PartNumber = TToolsFunctions.GetSensorPn(sn)}; }
-            //TODO: Handler method for finding whether a sn belongs to an evo or solo sensor. Can search HelixRectResults.log
             if (Sensor.PartNumber.Contains("920-"))
             {
                 SoloFixtureDataPanel.Visibility = Visibility.Collapsed;
@@ -274,6 +273,17 @@ namespace HelixTroubleshootingWPF
                 PitchDataGrid.ItemsSource = new List<EvoPitchData> { EvoSensor.PitchData };
                 AccuracyDataGrid.ItemsSource = new List<AccuracyResult> { EvoSensor.AccuracyResult };
                 VDEDataGrid.ItemsSource = new List<VDEResult> { EvoSensor.VDE };
+            }
+            else if (Sensor.PartNumber.Contains("917-") || Sensor.PartNumber.Contains("916-"))
+            {
+                EvoFixtureDataPanel.Visibility = Visibility.Collapsed;
+                SoloFixtureDataPanel.Visibility = Visibility.Visible;
+                if (sn == "") { SoloSensor = TToolsFunctions.AllSoloDataSingle(new HelixSoloSensor(SensorXml, true)); }
+                else { SoloSensor = TToolsFunctions.AllSoloDataSingle(new HelixSoloSensor() { SerialNumber = sn }); }
+                FixtureResultsSnEntry.Text = SoloSensor.SerialNumber;
+                SoloFocusDataGrid.ItemsSource = new List<SoloFocusData> { SoloSensor.FocusData };
+                SoloLaserAlignDataGrid.ItemsSource = new List<SoloLaserAlign> { SoloSensor.LaserAlign };
+                SoloAccuracyDataGrid.ItemsSource = new List<AccuracyResult> { SoloSensor.AccuracyResult };
             }
         }
         private void Highlight(string header, bool passed)
