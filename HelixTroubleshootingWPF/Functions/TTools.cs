@@ -45,7 +45,6 @@ namespace HelixTroubleshootingWPF.Functions
             {
                 sn = sn.Remove(5);
                 sn += "XXX";
-                Debug.WriteLine($@"{directory}\{sn}");
                 if (Directory.Exists($@"{directory}\{sn}"))
                 {
                     folder = $@"{directory}\{sn}";

@@ -11,7 +11,7 @@ namespace HelixTroubleshootingWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        public readonly string Version = "2.1.0";
+        public readonly string Version = "3.0.0";
         public MainWindow()
         {
             InitializeComponent();

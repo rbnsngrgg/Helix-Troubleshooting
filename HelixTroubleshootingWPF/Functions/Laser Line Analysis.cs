@@ -82,7 +82,6 @@ namespace HelixTroubleshootingWPF.Functions
         private static List<CGInfo> GetCgInfo(SoloLaserImage image)
         {
             List<CGInfo> cgList = new List<CGInfo>();
-            Debug.WriteLine(image.Name);
             var pixels = image.Magick.GetPixels();
             List<IPixel<byte>> cgPixels = new List<IPixel<byte>>();
             for (int col = 0; col < image.Magick.Width; col++)
