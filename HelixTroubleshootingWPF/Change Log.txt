@@ -1,3 +1,14 @@
+3.0.0
+	-Sensor testing function to check and display the expected on-board files for Evo and Solo sensors.
+	-Tab in the sensor testing window to display key information from the sensor.xml.
+	-Fixture data gathering tab in the sensor testing window to show the fixture results for a sensor.
+		-A serial number can be input manually.
+		-When the sensor test is run on a connected sensor, the fixture data is gathered for that sensor automatically.
+	-Config updates
+		-Added fixture log file locations in Helix_Troubleshooting_Config > Directories > FixtureResults.
+		-Added "SensorTest" node with "sensorIp" attribute.
+		-Adjusted config file loading for future backward compatibility.
+
 2.0.0
 	-Refactor to C#/WPF
 	-Improvements to algorithm errors fix and temperature adjust.

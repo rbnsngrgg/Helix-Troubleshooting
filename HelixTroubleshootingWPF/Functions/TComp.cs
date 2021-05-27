@@ -84,7 +84,7 @@ namespace HelixTroubleshootingWPF.Functions
                 //Backup the original file, write and save the new lines with ".txt" file extension
                 if (file.ToLower().Contains(".day2"))
                 {
-                    string backupFile = $"{tcompBackupDir}\\{System.IO.Path.GetFileName(file)}";
+                    string backupFile = $"{Config.TcompBackupDir}\\{System.IO.Path.GetFileName(file)}";
                     if (File.Exists(backupFile))
                     {
                         File.Delete(backupFile);
@@ -99,11 +99,10 @@ namespace HelixTroubleshootingWPF.Functions
                 MessageBox.Show($"Algorithm errors fixed for {sn}", "Done", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
-
         public static void TempAdjust(string sn, string tempString)
         {
             float setTemp;
-            List<string> tcompFiles = GetFilesWith(GetGroupFolder(tcompDir, sn), sn);
+            List<string> tcompFiles = GetFilesWith(GetGroupFolder(Config.TcompDir, sn), sn);
             if (tcompFiles.Count == 0)
             {
                 MessageBox.Show($"No tcomp file found for \"{sn}\".", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -157,13 +156,13 @@ namespace HelixTroubleshootingWPF.Functions
             string restoreTo = "";
 
             //Find tcomp file for sn
-            List<string> files = GetFilesWith(tcompBackupDir, sn);
-            if (files.Count == 0) { MessageBox.Show($"No backup found for {sn} in {tcompBackupDir}.", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
+            List<string> files = GetFilesWith(Config.TcompBackupDir, sn);
+            if (files.Count == 0) { MessageBox.Show($"No backup found for {sn} in {Config.TcompBackupDir}.", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
             else
             { backupFile = files[0]; }
 
             //Find sn group folder to copy the file into
-            string groupFolder = GetGroupFolder(tcompDir, sn);
+            string groupFolder = GetGroupFolder(Config.TcompDir, sn);
             if (groupFolder == "") { MessageBox.Show($"Could not find results folder for {sn}.", "Folder Not Found", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
             restoreTo = $@"{groupFolder}\{System.IO.Path.GetFileName(backupFile)}";
 
@@ -177,7 +176,6 @@ namespace HelixTroubleshootingWPF.Functions
                 MessageBox.Show($"{ex}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
         private static List<int> GetAlgoErrorLines(List<string> lines)
         {
             List<int> errorLines = new List<int>();
@@ -205,7 +203,7 @@ namespace HelixTroubleshootingWPF.Functions
         private static string GetTcompFile(string sn)
         {
             //Get t-comp results folder that matches the entered SN (e.g. SN138XXX for SN138265)
-            string snGroupFolder = GetGroupFolder(tcompDir, sn);
+            string snGroupFolder = GetGroupFolder(Config.TcompDir, sn);
             if (snGroupFolder == "") 
             {
                 MessageBox.Show($"Could not find the t-comp file for {sn}.", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -240,7 +238,8 @@ namespace HelixTroubleshootingWPF.Functions
             referenceAvg /= 5.0f;
             return true;
         }
-        //Recursively check lines for algo errors. Return line number + 1 (will equal the number of lines in the original list) if all next lines contain algo errors.
+        //Recursively check lines for algo errors. Return line number + 1
+        //(will equal the number of lines in the original list) if all next lines contain algo errors.
         private static int CheckNext(List<int> linesWithAlgoError, int ln, int lastLineNum)
         {
             if (ln == lastLineNum)

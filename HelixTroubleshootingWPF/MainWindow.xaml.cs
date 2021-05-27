@@ -1,6 +1,9 @@
 ﻿using HelixTroubleshootingWPF.Functions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Diagnostics;
+using System;
+
 namespace HelixTroubleshootingWPF
 {
     /// <summary>
@@ -8,20 +11,21 @@ namespace HelixTroubleshootingWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        public readonly string Version = "2.0.0";
+        public readonly string Version = "2.1.0";
         public MainWindow()
         {
             InitializeComponent();
             Title = $"{Title} {Version}";
-            TToolsFunctions.LoadConfig();
+            TToolsFunctions.Config.LoadConfig();
             AddFunctions();
             ToggleDataGather();
         }
 
-        //Updates Details Groupbox based on the item that was selected
+        
         private void UpdateDetails(string item)
         {
-            if(item.Contains("ALS Point Removal"))
+            /// <summary>Updates Details Groupbox based on the item that was selected</summary>
+            if (item.Contains("ALS Point Removal"))
             {
                 DetailsBox.Text = "Removes erroneous entries in the CG text files for Evo sensors that cause ALS Point errors during rectification." +
                     "\nEnter the directory of a rectification images folder, then click \"Start\".";
@@ -58,8 +62,7 @@ namespace HelixTroubleshootingWPF
             else if(item.Contains("Solo Laser Line Analysis"))
             {
                 DetailsBox.Text = "Analyzes the laser line images from the rectification images folder of a Helix Solo sensor. The results are placed in the analysis folder, " +
-                    "specified in the config.\n\nEnter a directory for rectification images and click \"Start\".\n\nAlternatively, generate data for all Solo sensors in the config" +
-                    " directories by clicking \"Analyze All\"";
+                    "specified in the config.\n\nEnter a directory for rectification images and click \"Start\".";
                 DetailsTextBox1.Visibility = System.Windows.Visibility.Visible;
                 DetailsTextBox2.Visibility = System.Windows.Visibility.Hidden;
                 DetailsButton1.Content = "Start";
@@ -113,6 +116,34 @@ namespace HelixTroubleshootingWPF
             {
                 DetailsBox.Text = "Gather data from each fixture for each Evo sensor, paired with accuracy test 0 degree 2RMS and Max Deviation.";
                 DataGatherSettings();
+            }
+            else if(item.Contains("Sensor Test"))
+            {
+                DetailsBox.Text = "Test sensor functionality and gather sensor fixture information.";
+                DataGatherSettings();
+            }
+            else if (item.Contains("Evo KNN Regression"))
+            {
+                DetailsBox.Text = "K-Nearest Neighbors regression for Helix Evo Sensors. Enter a serial number, then start.";
+                DataGatherSettings();
+                DetailsTextBox1.Visibility = Visibility.Visible;
+            }
+            else if (item.Contains("Evo KNN"))
+            {
+                DetailsBox.Text = "K-Nearest Neighbors algorithm for Helix Evo Sensors. Enter a model number, or leave blank to include all Evo models.";
+                DataGatherSettings();
+                DetailsTextBox1.Visibility = Visibility.Visible;
+            }
+            else if (item.Contains("KNN Validation"))
+            {
+                DetailsBox.Text = "Find and validate the best combination of data for the KNN.";
+                DataGatherSettings();
+            }
+            else if (item.Contains("Test ML.net"))
+            {
+                DetailsBox.Text = "Test the ML.net regression algorithm with data from the specified Evo sensor. Enter serial number without \"SN\" prefix.";
+                DataGatherSettings();
+                DetailsTextBox1.Visibility = Visibility.Visible;
             }
         }
 
@@ -174,8 +205,27 @@ namespace HelixTroubleshootingWPF
             {
                 TToolsFunctions.GatherEvoData();
             }
+            else if (function.Contains("Sensor Test"))
+            {
+                TToolsFunctions.RunSensorTest();
+            }
+            else if (function == ("Evo KNN"))
+            {
+                TToolsFunctions.RunKnn("", DetailsTextBox1.Text);
+            }
+            else if (function.Contains("Evo KNN Regression"))
+            {
+                TToolsFunctions.RunKnn(DetailsTextBox1.Text,"");
+            }
+            else if(function.Contains("KNN Validation"))
+            {
+                TToolsFunctions.RunCombos();
+            }
+            else if(function.Contains("Test ML.net"))
+            {
+                TToolsFunctions.TestML();
+            }
         }
-
         private void DetailsButton2_Click(object sender, RoutedEventArgs e)
         {
             if (FunctionList.SelectedItems.Count == 0) { return; }
@@ -212,7 +262,6 @@ namespace HelixTroubleshootingWPF
                 }
             }
         }
-
         private void DataGatherSettings()
         {
             DetailsTextBox1.Visibility = System.Windows.Visibility.Hidden;
@@ -222,15 +271,22 @@ namespace HelixTroubleshootingWPF
             DetailsButton2.Content = "";
             DetailsButton2.Visibility = System.Windows.Visibility.Hidden;
         }
-
         private void FileMenuExit_Click(object sender, RoutedEventArgs e)
         {
             HelixTroubleshootingMainWindow.Close();
         }
-
         private void ToolsMenuToggleDataGather_Click(object sender, RoutedEventArgs e)
         {
             ToggleDataGather();
+        }
+
+        private void HelixTroubleshootingMainWindow_Closed(object sender, EventArgs e)
+        {
+            var processes = Process.GetProcessesByName("HelixTroubleshootingWPF");
+            foreach (Process p in processes)
+            {
+                p.Kill();
+            }
         }
     }
 }

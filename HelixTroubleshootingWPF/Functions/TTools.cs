@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using uEye;
 //namespace Helix_Troubleshooting_CS
 namespace HelixTroubleshootingWPF.Functions
 {
@@ -13,25 +12,17 @@ namespace HelixTroubleshootingWPF.Functions
         //Array of strings to be added to function list
         public static readonly string[] functionList = new string[] {"ALS Point Removal","Fix Algorithm Errors","Illuminated Sphere Summary",
             "Solo Laser Line Analysis","Staring Dot Removal","Temperature Adjust", "DACMEMS Data Gather", "UFF Data Gather", "LPF Data Gather",
-            "Pitch Data Gather","Evo Data Gather"};
+            "Pitch Data Gather","Evo Data Gather", "Sensor Test" };// "Evo KNN", "Evo KNN Regression", "KNN Validation", "Test ML.net"};
 
-        //Private variables for config file loading
-        private static string configName = "HTconfig.xml";
-        private static string tcompBackupDir = "";
-        private static string tcompDir = "";
-        private static string rectDataDir = "";
-        private static string resultsDir = "";
-        private static int lineThresholdPercent = 20;
-        private static int alsSensitivity = 3;
-
-
+        public static TToolsConfig Config = new();
         //Private Helper Functions----------------------------------------------------------------------------------------
+
         //Find all files in directory that contain a certain string. Return empty list if none found.
         private static List<string> GetFilesWith(string directory, string find)
         {
             find = find.Insert(0, "*");
             find += "*";
-            List<string> files = new List<string>();
+            List<string> files = new();
             try
             {
                 files.AddRange(Directory.GetFiles(directory, find));
@@ -46,7 +37,6 @@ namespace HelixTroubleshootingWPF.Functions
             }
             return files;
         }
-
         //Get folder that corresponds to a SN group (e.g. "SN137XXX"). Return empty string if none found.
         private static string GetGroupFolder(string directory, string sn)
         {
