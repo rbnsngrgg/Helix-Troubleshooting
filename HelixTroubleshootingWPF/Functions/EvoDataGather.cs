@@ -81,11 +81,12 @@ namespace HelixTroubleshootingWPF.Functions
         {
             List<HelixEvoSensor> sensorList = GetEvoData();
             List<string> logLines = new List<string>() { ComboHeader };
-
+            int i = 0;
             foreach(HelixEvoSensor s in sensorList)
             {
                 if (s.CheckComplete())
                 { logLines.Add(s.GetDataString()); }
+                i++;
             }
             string filePath;
             if (pathFolder == "")
@@ -225,7 +226,7 @@ namespace HelixTroubleshootingWPF.Functions
         {
             List<HelixEvoSensor> sensors = new List<HelixEvoSensor>();
             if(preSensors != null) { sensors = preSensors; }
-            foreach (string line in File.ReadAllLines(Config.EvoLpfLog))
+            foreach (string line in File.ReadAllLines(Config.EvoPitchLog))
             {
                 string[] split = line.Split("\t");
                 if (split.Length < 9 | split[4].Length < 6) { continue; }
@@ -255,7 +256,7 @@ namespace HelixTroubleshootingWPF.Functions
         {
             List<HelixEvoSensor> sensors = new List<HelixEvoSensor>();
             if(preSensors != null) { sensors = preSensors; }
-            foreach (string line in File.ReadAllLines(Config.EvoLpfLog))
+            foreach (string line in File.ReadAllLines(Config.EvoUffLog))
             {
                 string[] split = line.Split("\t");
                 if (split.Length < 15) { continue; }
