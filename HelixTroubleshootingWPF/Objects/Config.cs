@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Xml;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace HelixTroubleshootingWPF.Functions
 {
@@ -115,55 +116,72 @@ namespace HelixTroubleshootingWPF.Functions
             //Load xml, assign specified values to the class properties, for use in the public functions.
             XmlDocument config = new XmlDocument();
             config.Load(configPath);
-            int node = 0;
-            //Check if auto-formatting from xml-notepad occurred, in which case the node with config info will be 1 (instead of 0).
-            if (config.ChildNodes[0].ChildNodes.Count < 3) { node = 1; }
 
-            TcompBackupDir = config.ChildNodes[node].ChildNodes[0].Attributes[0].Value;
-            TcompDir = config.ChildNodes[node].ChildNodes[0].Attributes[1].Value;
-            RectDataDir = config.ChildNodes[node].ChildNodes[0].Attributes[2].Value;
-            ResultsDir = config.ChildNodes[node].ChildNodes[0].Attributes[3].Value;
-            MirrorcleDataPath = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[0].Value;
-            EvoTuningFixtureLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[1].Value;
-            EvoLpfLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[2].Value;
-            EvoPitchLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[3].Value;
-            EvoUffLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[4].Value;
-            SoloLaserAlignLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[5].Value;
-            SoloFocusLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[6].Value;
-            HelixRectResultsLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[7].Value;
-
-            if (Int32.TryParse(config.ChildNodes[node].ChildNodes[1].Attributes[0].Value, out int lineThresholdPercent))
-            { LineThresholdPercent = lineThresholdPercent; }
-            else
-            { MessageBox.Show("Cannot parse lineThresholdPercent value to int in config.", "Config Parse Error", MessageBoxButton.OK, MessageBoxImage.Warning); }
-            if (Int32.TryParse(config.ChildNodes[node].ChildNodes[2].Attributes[0].Value, out int alsSensitivity))
-            { AlsSensitivity = alsSensitivity; }
-            else
-            { MessageBox.Show("Cannot parse alsSensitivity value to int in config.", "Config Parse Error", MessageBoxButton.OK, MessageBoxImage.Warning); }
-
-            foreach(string col in config.ChildNodes[node].ChildNodes[3].Attributes[0].Value.Split(","))
+            //Directories
+            var elements = config.GetElementsByTagName("Directories");
+            if (elements != null)
             {
-                if (int.TryParse(col, out int intCol)) { KnnDataColumns.Add(intCol); }
+                TcompBackupDir = elements[0].Attributes.GetNamedItem("tcompBackupDir").Value;
+                TcompDir = elements[0].Attributes.GetNamedItem("tcompDir").Value;
+                RectDataDir = elements[0].Attributes.GetNamedItem("rectDataDir").Value;
+                ResultsDir = elements[0].Attributes.GetNamedItem("resultsDir").Value;
             }
-            foreach (string col in config.ChildNodes[node].ChildNodes[3].Attributes[1].Value.Split(","))
+            elements = config.GetElementsByTagName("FixtureResults");
+            if (elements != null)
             {
-                if (int.TryParse(col, out int intCol)) { AllKnnCols.Add(intCol); }
+                MirrorcleDataPath = elements[0].Attributes.GetNamedItem("mirrorcleDataDir").Value;
+                EvoTuningFixtureLog = elements[0].Attributes.GetNamedItem("evoTuningFixtureLog").Value;
+                EvoLpfLog = elements[0].Attributes.GetNamedItem("evoLpfLog").Value;
+                EvoPitchLog = elements[0].Attributes.GetNamedItem("evoPitchLog").Value;
+                EvoUffLog = elements[0].Attributes.GetNamedItem("evoUffLog").Value;
+                SoloLaserAlignLog = elements[0].Attributes.GetNamedItem("soloLaserAlignLog").Value;
+                SoloFocusLog = elements[0].Attributes.GetNamedItem("soloFocusLog").Value;
+                HelixRectResultsLog = elements[0].Attributes.GetNamedItem("helixRectResultsLog").Value;
             }
-            string groupString = config.ChildNodes[node].ChildNodes[3].Attributes[2].Value;
-            if (groupString.Length > 1)
+            elements = config.GetElementsByTagName("LineAnalysis");
+            if (elements != null)
             {
-                foreach (string group in groupString.Split("_"))
+                if (Int32.TryParse(elements[0].Attributes.GetNamedItem("lineThresholdPercent").Value, out int lineThresholdPercent))
+                { LineThresholdPercent = lineThresholdPercent; }
+                else
+                { MessageBox.Show("Cannot parse config lineThresholdPercent value to int.", "Config Parse Error", MessageBoxButton.OK, MessageBoxImage.Warning); }
+            }
+            elements = config.GetElementsByTagName("ALSPointRemover");
+            if (elements != null)
+            {
+                if (Int32.TryParse(elements[0].Attributes.GetNamedItem("alsSensitivity").Value, out int alsSensitivity))
+                { AlsSensitivity = alsSensitivity; }
+                else
+                { MessageBox.Show("Cannot parse config alsSensitivity value to int.", "Config Parse Error", MessageBoxButton.OK, MessageBoxImage.Warning); }
+            }
+            elements = config.GetElementsByTagName("KNN");
+            if (elements != null)
+            {
+                foreach (string col in elements[0].Attributes.GetNamedItem("dataCols").Value.Split(","))
                 {
-                    List<int> groupList = new List<int>();
-                    foreach (string col in group.Split(","))
+                    if (int.TryParse(col, out int intCol)) { KnnDataColumns.Add(intCol); }
+                }
+                foreach (string col in elements[0].Attributes.GetNamedItem("allCols").Value.Split(","))
+                {
+                    if (int.TryParse(col, out int intCol)) { AllKnnCols.Add(intCol); }
+                }
+                string groupString = elements[0].Attributes.GetNamedItem("dataGrouping").Value;
+                if (groupString.Length > 1)
+                {
+                    foreach (string group in groupString.Split("_"))
                     {
-                        groupList.Add(int.Parse(col));
+                        List<int> groupList = new List<int>();
+                        foreach (string col in group.Split(","))
+                        {
+                            groupList.Add(int.Parse(col));
+                        }
+                        KnnDataGroups.Add(groupList);
                     }
-                    KnnDataGroups.Add(groupList);
                 }
             }
-            SensorIp = config.ChildNodes[node].ChildNodes[4].Attributes[0].Value;
-
+            elements = config.GetElementsByTagName("SensorTest");
+            if (elements != null)
+            { SensorIp = elements[0].Attributes.GetNamedItem("sensorIp").Value; }
         }
     }
 }
