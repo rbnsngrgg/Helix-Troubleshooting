@@ -223,7 +223,7 @@ namespace HelixTroubleshootingWPF
             }
             else if(function.Contains("Test ML.net"))
             {
-                TToolsFunctions.TestML(DetailsTextBox1.Text);
+                TToolsFunctions.TestML();
             }
         }
         private void DetailsButton2_Click(object sender, RoutedEventArgs e)

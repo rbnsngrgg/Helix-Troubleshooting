@@ -23,8 +23,7 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public HelixSoloSensor SingleSensorSoloLaser(HelixSoloSensor sensor)
         {
-            string lpfLog = @"\\castor\Production\Manufacturing\MfgSoftware\HelixSoloLaserAlignFixture\200-0654\Results\HelixSoloLaserAlignFixtureMasterLog.txt";
-            foreach (string line in File.ReadAllLines(lpfLog))
+            foreach (string line in File.ReadAllLines(Config.SoloLaserAlignLog))
             {
                 string[] split = line.Split("\t");
                 if (split.Length < 30) { continue; }
@@ -38,8 +37,7 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public HelixSoloSensor SingleSensorSoloFocus(HelixSoloSensor sensor)
         {
-            string uffLog = @"\\castor\Production\Manufacturing\MfgSoftware\HelixSoloFocusFixture\200-0655\Results\HelixSoloFocusFixtureMasterLog.txt";
-            foreach (string line in File.ReadAllLines(uffLog))
+            foreach (string line in File.ReadAllLines(Config.SoloFocusLog))
             {
                 string[] split = line.Split("\t");
                 if (split.Length < 20) { continue; }
@@ -52,8 +50,8 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public HelixSoloSensor SingleSoloAccuracyFromLog(HelixSoloSensor sensor, bool first = false)
         {
-            List<string> resultsLog = new List<string>();
-            resultsLog.AddRange(File.ReadAllLines($@"{Config.RectDataDir}\HelixRectResults.log"));
+            List<string> resultsLog = new();
+            resultsLog.AddRange(File.ReadAllLines(Config.HelixRectResultsLog));
 
             foreach (string line in resultsLog)
             {

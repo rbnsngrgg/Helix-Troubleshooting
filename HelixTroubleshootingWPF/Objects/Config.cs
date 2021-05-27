@@ -15,6 +15,13 @@ namespace HelixTroubleshootingWPF.Functions
         public List<List<int>> KnnDataGroups { get; private set; } = new List<List<int>>();
         public int LineThresholdPercent { get; private set; } = 20;
         public string MirrorcleDataPath { get; private set; } = "";
+        public string EvoTuningFixtureLog { get; private set; } = "";
+        public string EvoLpfLog { get; private set; } = "";
+        public string EvoPitchLog { get; private set; } = "";
+        public string EvoUffLog { get; private set; } = "";
+        public string SoloLaserAlignLog { get; private set; } = "";
+        public string SoloFocusLog { get; private set; } = "";
+        public string HelixRectResultsLog { get; private set; } = "";
         public string RectDataDir { get; private set; } = "";
         public string ResultsDir { get; private set; } = "";
         public string TcompBackupDir { get; private set; } = "";
@@ -27,11 +34,15 @@ namespace HelixTroubleshootingWPF.Functions
             {
                 //Generate file and write first lines
                 string[] lines = { "<Helix_Troubleshooting_Config>",
-                        "\t<Directories tcompBackupDir = \"\" tcompDir = \"\" rectDataDir = \"\" resultsDir = \"\" mirrorcleDataDir = \"\"/>",
+                        "\t<Directories tcompBackupDir = \"\" tcompDir = \"\" rectDataDir = \"\" resultsDir = \"\">",
+                        "\t\t<FixtureResults mirrorcleDataDir = \"\" evoTuningFixtureLog = \"\" evoLpfLog = \"\" " +
+                        "evoPitchLog = \"\" evoUffLog = \"\" soloLaserAlignLog = \"\" soloFocusLog = \"\" helixRectResultsLog = \"\"/>",
+                        "\t</Directories>",
                         "\t<LineAnalysis lineThresholdPercent = \"\"/>",
                         "\t<ALSPointRemover alsSensitivity = \"\"/>",
                         "\t<KNN dataCols = \"6,12,13,21,23,24,25,28\" " +
-                        "allCols = \"6,9,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,37,39,40,41,42,45,46,51,54,57,60,63,66,69,72,75,78,81,84,87,90,93,94\" " +
+                        "allCols = \"6,9,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34," +
+                        "37,39,40,41,42,45,46,51,54,57,60,63,66,69,72,75,78,81,84,87,90,93,94\" " +
                         "dataGrouping = \"\"/>",
                         "\t<SensorTest sensorIp = \"10.0.4.96\"/>",
                     "</Helix_Troubleshooting_Config>" };
@@ -43,7 +54,18 @@ namespace HelixTroubleshootingWPF.Functions
                 config.FirstChild.ChildNodes[0].Attributes[1].Value = @"\\castor\Production\Manufacturing\MfgSoftware\ThermalTest\200-0526\Results";
                 config.FirstChild.ChildNodes[0].Attributes[2].Value = @"\\castor\Ftproot\RectData";
                 config.FirstChild.ChildNodes[0].Attributes[3].Value = @"\\castor\Production\Manufacturing\MFGENG SW Tools\Helix Troubleshooting\Results";
-                config.FirstChild.ChildNodes[0].Attributes[4].Value = @"\\MOBIUS\ftpgen\LocalUser\Mirrorcle\PRCPYieldTable.csv";
+                //Helix_Troubleshooting_Config > Directories > FixtureResults
+                config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[0].Value = @"\\MOBIUS\ftpgen\LocalUser\Mirrorcle\PRCPYieldTable.csv";
+                config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[1].Value = @"\\castor\Production\Manufacturing\MfgSoftware\DACMEMSTuningFixture\200-0530\Results\MEMSDACTuningFixtureResults.txt";
+                config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[2].Value = @"\\castor\Production\Manufacturing\MfgSoftware\HelixEvoLaserPowerFixture\200-0638\Results\HelixEvoLaserPowerFixtureResultsLog.txt";
+                config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[3].Value = @"\\castor\Production\Manufacturing\MfgSoftware\HelixEvoCameraPitchFixture\200-0632\Results\HelixEvoCameraPitchFixtureMasterLog.txt";
+                config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[4].Value = @"\\castor\Production\Manufacturing\MfgSoftware\UniversalFocusFixture\200-0539\Results\UniversalFocusFixtureMasterLog.txt";
+                config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[5].Value = @"\\castor\Production\Manufacturing\MfgSoftware\HelixSoloLaserAlignFixture\200-0654\Results\HelixSoloLaserAlignFixtureMasterLog.txt";
+                config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[6].Value = @"\\castor\Production\Manufacturing\MfgSoftware\HelixSoloFocusFixture\200-0655\Results\HelixSoloFocusFixtureMasterLog.txt";
+                config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[7].Value = @"\\castor\Ftproot\RectData\HelixRectResults.log";
+
+
+                //config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[0]
                 config.FirstChild.ChildNodes[1].Attributes[0].Value = "20";
                 config.FirstChild.ChildNodes[2].Attributes[0].Value = "3";
                 config.Save(ConfigName);
@@ -64,6 +86,13 @@ namespace HelixTroubleshootingWPF.Functions
             RectDataDir = "";
             ResultsDir = "";
             MirrorcleDataPath = "";
+            EvoTuningFixtureLog = "";
+            EvoLpfLog = "";
+            EvoPitchLog = "";
+            EvoUffLog = "";
+            SoloLaserAlignLog = "";
+            SoloFocusLog = "";
+            HelixRectResultsLog = "";
             AllKnnCols = new List<int>();
             KnnDataColumns = new List<int>();
             KnnDataGroups = new List<List<int>>();
@@ -94,7 +123,15 @@ namespace HelixTroubleshootingWPF.Functions
             TcompDir = config.ChildNodes[node].ChildNodes[0].Attributes[1].Value;
             RectDataDir = config.ChildNodes[node].ChildNodes[0].Attributes[2].Value;
             ResultsDir = config.ChildNodes[node].ChildNodes[0].Attributes[3].Value;
-            MirrorcleDataPath = config.ChildNodes[node].ChildNodes[0].Attributes[4].Value;
+            MirrorcleDataPath = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[0].Value;
+            EvoTuningFixtureLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[1].Value;
+            EvoLpfLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[2].Value;
+            EvoPitchLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[3].Value;
+            EvoUffLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[4].Value;
+            SoloLaserAlignLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[5].Value;
+            SoloFocusLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[6].Value;
+            HelixRectResultsLog = config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[7].Value;
+
             if (Int32.TryParse(config.ChildNodes[node].ChildNodes[1].Attributes[0].Value, out int lineThresholdPercent))
             { LineThresholdPercent = lineThresholdPercent; }
             else

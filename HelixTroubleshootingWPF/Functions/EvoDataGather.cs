@@ -40,7 +40,7 @@ namespace HelixTroubleshootingWPF.Functions
         public static string GetSensorPn(string sn)
         {
             List<string> resultsLog = new List<string>();
-            resultsLog.AddRange(File.ReadAllLines($@"{Config.RectDataDir}\HelixRectResults.log"));
+            resultsLog.AddRange(File.ReadAllLines(Config.HelixRectResultsLog));
             List<string[]> resultsLogSplit = new List<string[]>();
             foreach (string line in resultsLog)
             {
@@ -163,10 +163,9 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public List<HelixEvoSensor> EvoSensorsFromDacMems(List<HelixEvoSensor> preSensors = null)
         {
-            List<HelixEvoSensor> sensors = new List<HelixEvoSensor>();
+            List<HelixEvoSensor> sensors = new();
             if(preSensors != null) { sensors = preSensors; }
-            string tuningFixtureLog = @"\\castor\Production\Manufacturing\MfgSoftware\DACMEMSTuningFixture\200-0530\Results\MEMSDACTuningFixtureResults.txt";
-            foreach (string line in File.ReadAllLines(tuningFixtureLog))
+            foreach (string line in File.ReadAllLines(Config.EvoTuningFixtureLog))
             {
                 string[] split = line.Split("\t");
                 if(split.Length < 65 | split[4].Length < 6) { continue; }
@@ -194,10 +193,9 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public List<HelixEvoSensor> EvoSensorsFromLpf(List<HelixEvoSensor> preSensors = null)
         {
-            List<HelixEvoSensor> sensors = new List<HelixEvoSensor>();
+            List<HelixEvoSensor> sensors = new();
             if(preSensors != null) { sensors = preSensors; }
-            string lpfLog = @"\\castor\Production\Manufacturing\MfgSoftware\HelixEvoLaserPowerFixture\200-0638\Results\HelixEvoLaserPowerFixtureResultsLog.txt";
-            foreach (string line in File.ReadAllLines(lpfLog))
+            foreach (string line in File.ReadAllLines(Config.EvoLpfLog))
             {
                 string[] split = line.Split("\t");
                 if (split.Length < 65 | split[4].Length < 6) { continue; }
@@ -227,8 +225,7 @@ namespace HelixTroubleshootingWPF.Functions
         {
             List<HelixEvoSensor> sensors = new List<HelixEvoSensor>();
             if(preSensors != null) { sensors = preSensors; }
-            string lpfLog = @"\\castor\Production\Manufacturing\MfgSoftware\HelixEvoCameraPitchFixture\200-0632\Results\HelixEvoCameraPitchFixtureMasterLog.txt";
-            foreach (string line in File.ReadAllLines(lpfLog))
+            foreach (string line in File.ReadAllLines(Config.EvoLpfLog))
             {
                 string[] split = line.Split("\t");
                 if (split.Length < 9 | split[4].Length < 6) { continue; }
@@ -258,8 +255,7 @@ namespace HelixTroubleshootingWPF.Functions
         {
             List<HelixEvoSensor> sensors = new List<HelixEvoSensor>();
             if(preSensors != null) { sensors = preSensors; }
-            string uffLog = @"\\castor\Production\Manufacturing\MfgSoftware\UniversalFocusFixture\200-0539\Results\UniversalFocusFixtureMasterLog.txt";
-            foreach (string line in File.ReadAllLines(uffLog))
+            foreach (string line in File.ReadAllLines(Config.EvoLpfLog))
             {
                 string[] split = line.Split("\t");
                 if (split.Length < 15) { continue; }
@@ -302,8 +298,7 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public HelixEvoSensor SingleSensorDacMems(HelixEvoSensor sensor)
         {
-            string tuningFixtureLog = @"\\castor\Production\Manufacturing\MfgSoftware\DACMEMSTuningFixture\200-0530\Results\MEMSDACTuningFixtureResults.txt";
-            foreach (string line in File.ReadAllLines(tuningFixtureLog))
+            foreach (string line in File.ReadAllLines(Config.EvoTuningFixtureLog))
             {
                 string[] split = line.Split("\t");
                 if (split.Length < 65 | split[4].Length < 6) { continue; }
@@ -317,8 +312,7 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public HelixEvoSensor SingleSensorLpf(HelixEvoSensor sensor)
         {
-            string lpfLog = @"\\castor\Production\Manufacturing\MfgSoftware\HelixEvoLaserPowerFixture\200-0638\Results\HelixEvoLaserPowerFixtureResultsLog.txt";
-            foreach (string line in File.ReadAllLines(lpfLog))
+            foreach (string line in File.ReadAllLines(Config.EvoLpfLog))
             {
                 string[] split = line.Split("\t");
                 if (split.Length < 65 | split[4].Length < 6) { continue; }
@@ -351,8 +345,7 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public HelixEvoSensor SingleSensorPitch(HelixEvoSensor sensor)
         {
-            string lpfLog = @"\\castor\Production\Manufacturing\MfgSoftware\HelixEvoCameraPitchFixture\200-0632\Results\HelixEvoCameraPitchFixtureMasterLog.txt";
-            foreach (string line in File.ReadAllLines(lpfLog))
+            foreach (string line in File.ReadAllLines(Config.EvoPitchLog))
             {
                 string[] split = line.Split("\t");
                 if (split.Length < 9 | split[4].Length < 6) { continue; }
@@ -366,8 +359,7 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public HelixEvoSensor SingleSensorUff(HelixEvoSensor sensor)
         {
-            string uffLog = @"\\castor\Production\Manufacturing\MfgSoftware\UniversalFocusFixture\200-0539\Results\UniversalFocusFixtureMasterLog.txt";
-            foreach (string line in File.ReadAllLines(uffLog))
+            foreach (string line in File.ReadAllLines(Config.EvoUffLog))
             {
                 string[] split = line.Split("\t");
                 if (split.Length < 15) { continue; }
@@ -382,9 +374,9 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public HelixEvoSensor SingleSensorAccuracy(HelixEvoSensor sensor)
         {
-            string rectDataFolder = $"SN{sensor.SerialNumber.Substring(0, 3)}XXX";
-            if (!Directory.Exists(Path.Join(@"\\castor\Ftproot\RectData", rectDataFolder))) { return sensor; }
-            foreach (string folder in Directory.EnumerateDirectories(Path.Join(@"\\castor\Ftproot\RectData", rectDataFolder)))
+            string snRectDataFolder = Path.Join(Config.RectDataDir, $"SN{sensor.SerialNumber.Substring(0, 3)}XXX");
+            if (!Directory.Exists(snRectDataFolder)) { return sensor; }
+            foreach (string folder in Directory.EnumerateDirectories(snRectDataFolder))
             {
                 if (folder.Contains(sensor.SerialNumber) && Directory.Exists(folder))
                 {
@@ -406,8 +398,8 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public HelixEvoSensor SingleEvoAccuracyFromLog(HelixEvoSensor sensor, bool first = false)
         {
-            List<string> resultsLog = new List<string>();
-            resultsLog.AddRange(File.ReadAllLines($@"{Config.RectDataDir}\HelixRectResults.log"));
+            List<string> resultsLog = new();
+            resultsLog.AddRange(File.ReadAllLines(Config.HelixRectResultsLog));
 
             foreach (string line in resultsLog)
             {
@@ -425,7 +417,7 @@ namespace HelixTroubleshootingWPF.Functions
             }
             return sensor;
         }
-        static public void TestML(string sn)
+        static public void TestML()
         {
             string[] headers = ComboHeader.Split("\t");
             //string[] data = AllSensorDataSingle(sn).GetDataList().ToArray();
@@ -479,16 +471,17 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public void GetAccuracyResults(ref List<HelixEvoSensor> sensors)
         {
-            List<string> rectDataFolders = new List<string>();
+            List<string> rectDataFolders = new();
             foreach(HelixEvoSensor sensor in sensors)
             {
                 string rectDataFolder = $"SN{sensor.SerialNumber.Substring(0, 3)}XXX";
-                if (!Directory.Exists(Path.Join(@"\\castor\Ftproot\RectData", rectDataFolder))) { continue; }
+                string snRectdataFolder = Path.Join(Config.RectDataDir,rectDataFolder);
+                if (!Directory.Exists(snRectdataFolder)) { continue; }
                 if (!rectDataFolders.Contains(rectDataFolder)) { rectDataFolders.Add(rectDataFolder); }
             }
             foreach (string rectDataFolder in rectDataFolders)
             {
-                foreach (string folder in Directory.EnumerateDirectories(Path.Join(@"\\castor\Ftproot\RectData", rectDataFolder)))
+                foreach (string folder in Directory.EnumerateDirectories(Path.Join(Config.RectDataDir, rectDataFolder)))
                 {
                     foreach (HelixEvoSensor sensor in sensors)
                     {
@@ -513,8 +506,8 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public void GetAccuracyResultsFromLog(ref List<HelixEvoSensor> sensors, bool first = false)
         {
-            List<string> resultsLog = new List<string>();
-            resultsLog.AddRange(File.ReadAllLines($@"{Config.RectDataDir}\HelixRectResults.log"));
+            List<string> resultsLog = new();
+            resultsLog.AddRange(File.ReadAllLines(Config.HelixRectResultsLog));
             List<string[]> resultsLogSplit = new List<string[]>();
             foreach (string line in resultsLog)
             {
