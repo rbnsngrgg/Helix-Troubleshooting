@@ -19,7 +19,7 @@ namespace HelixTroubleshootingWPF.Functions
         private static readonly string PitchDataHeader = "PitchOperator\tPitchTestRan\tXPixelsDelta\tYPixelsDelta";
         private static readonly string MirrorcleHeader = "ThetaX_110V\tThetaY_110V\tFnX\tFnY\tPRCPMaxDiff\tFitC0\tFitC1\tFitC2\tFitC3\tFitC4\tFitC5\tLinError";
         private static readonly string UffDataHeader = "UFFOperator\tCameraTempC\tMinTempOverridden\tAlignTargetRan\tMonitorAngle\tFocusTestRan\tExposureGood\tFocusRow\tFocusScore";
-        private static List<string> ComboHeaderList = new Func<List<string>>(() =>
+        private static readonly List<string> ComboHeaderList = new Func<List<string>>(() =>
        {
            string header = $"{BaseDataHeader}\t{VDEDataHeader}\t{UffDataHeader}\t{DacMemsDataHeader}\t{MirrorcleHeader}\t{LpfDataHeader}";
            for (int i = 1; i <= 14; i++) { header = header + $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
@@ -28,7 +28,7 @@ namespace HelixTroubleshootingWPF.Functions
            headerList.AddRange(header.Split("\t"));
            return headerList;
        })();
-        private static string ComboHeader = new Func<string>( () => 
+        private static readonly string ComboHeader = new Func<string>( () => 
         {
             string header = $"{BaseDataHeader}\t{VDEDataHeader}\t{UffDataHeader}\t{DacMemsDataHeader}\t{MirrorcleHeader}\t{LpfDataHeader}";
             for (int i = 1; i <= 14; i++) { header = header + $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
@@ -39,13 +39,7 @@ namespace HelixTroubleshootingWPF.Functions
 
         public static string GetSensorPn(string sn)
         {
-            List<string> resultsLog = new List<string>();
-            resultsLog.AddRange(File.ReadAllLines(Config.HelixRectResultsLog));
-            List<string[]> resultsLogSplit = new List<string[]>();
-            foreach (string line in resultsLog)
-            {
-                resultsLogSplit.Add(line.Split("\t"));
-            }
+            List<string[]> resultsLogSplit = GetResultsLogSplit();
             string pn = "";
             foreach (string[] line in resultsLogSplit)
             {
@@ -80,7 +74,7 @@ namespace HelixTroubleshootingWPF.Functions
         public static void GatherEvoData(string pathFolder = "")
         {
             List<HelixEvoSensor> sensorList = GetEvoData();
-            List<string> logLines = new List<string>() { ComboHeader };
+            List<string> logLines = new() { ComboHeader };
             int i = 0;
             foreach(HelixEvoSensor s in sensorList)
             {
@@ -110,7 +104,7 @@ namespace HelixTroubleshootingWPF.Functions
                         EvoSensorsFromUff())));
             GetMirrorcleData(ref sensorList);
             GetAccuracyResultsFromLog(ref sensorList);
-            //GetAccuracyResults(ref sensorList);
+            //GetAfterThermalAccuracy(ref sensorList);
             return sensorList;
         }
         public static void DacMemsDataGather()
@@ -507,13 +501,7 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public void GetAccuracyResultsFromLog(ref List<HelixEvoSensor> sensors, bool first = false)
         {
-            List<string> resultsLog = new();
-            resultsLog.AddRange(File.ReadAllLines(Config.HelixRectResultsLog));
-            List<string[]> resultsLogSplit = new List<string[]>();
-            foreach (string line in resultsLog)
-            {
-                resultsLogSplit.Add(line.Split("\t"));
-            }
+            List<string[]> resultsLogSplit = GetResultsLogSplit();
             foreach(HelixEvoSensor sensor in sensors)
             {
                 foreach (string[] line in resultsLogSplit)
@@ -529,6 +517,38 @@ namespace HelixTroubleshootingWPF.Functions
                     }
                 }
             }
+        }
+        static public void GetAfterThermalAccuracy(ref List<HelixEvoSensor> sensors)
+        {
+            List<string[]> resultsLogSplit = GetResultsLogSplit();
+            foreach (HelixEvoSensor sensor in sensors)
+            {
+                int resultNum = 0;
+                for (int i = resultsLogSplit.Count-1; i > 0; i--)
+                {
+                    if (resultsLogSplit[i][0] == sensor.SerialNumber && resultNum == 0) { resultNum++; }
+                    else if (resultsLogSplit[i][0] == sensor.SerialNumber && resultNum == 1)
+                    {
+                        if (resultsLogSplit[i].Length < 190) { continue; }
+                        if (resultsLogSplit[i][187] == "Finished" & float.TryParse(resultsLogSplit[i][45], out float rms2))
+                        {
+                            if (rms2! < 0) { continue; }
+                            if (sensor.AccuracyResult.UpdateFromLog(resultsLogSplit[i]) & sensor.VDE.UpdateFromLog(resultsLogSplit[i])) { break; }
+                        }
+                    }
+                }
+            }
+        }
+        static public List<string[]> GetResultsLogSplit()
+        {
+            List<string> resultsLog = new();
+            resultsLog.AddRange(File.ReadAllLines(Config.HelixRectResultsLog));
+            List<string[]> resultsLogSplit = new List<string[]>();
+            foreach (string line in resultsLog)
+            {
+                resultsLogSplit.Add(line.Split("\t"));
+            }
+            return resultsLogSplit;
         }
         static public void WriteAndOpen(string folderPath, string filePath, List<string> lines)
         {

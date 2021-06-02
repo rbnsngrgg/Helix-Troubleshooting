@@ -50,12 +50,9 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public HelixSoloSensor SingleSoloAccuracyFromLog(HelixSoloSensor sensor, bool first = false)
         {
-            List<string> resultsLog = new();
-            resultsLog.AddRange(File.ReadAllLines(Config.HelixRectResultsLog));
-
-            foreach (string line in resultsLog)
+            List<string[]> resultSplit = GetResultsLogSplit();
+            foreach (string[] lineSplit in resultSplit)
             {
-                string[] lineSplit = line.Split("\t");
                 if (lineSplit[0] == sensor.SerialNumber)
                 {
                     if (lineSplit.Length < 190) { continue; }
