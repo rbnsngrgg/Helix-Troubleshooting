@@ -18,8 +18,7 @@ namespace HelixTroubleshootingWPF.Functions
             HelixSensor sensor = new HelixSensor(imagesFolder);
             List<string> laserImages = GetLaserLineImages(imagesFolder);
             List<string> zValues = ListZValues(laserImages);
-            ProgressBar progressBar = new ProgressBar
-            { Visibility = Visibility.Visible };
+            ProgressBar progressBar = new(){ Visibility = Visibility.Visible };
             progressBar.Show();
             progressBar.mainProgressBar.Visibility = Visibility.Visible;
             float progressTick = 100f / (float)zValues.Count;
@@ -82,7 +81,10 @@ namespace HelixTroubleshootingWPF.Functions
             box["bl"][1] += 5;
             box["tr"][0] += 5;
             if (box["tr"][1] > 5) { box["tr"][1] -= 5; }
-
+            image1.Magick.Dispose();
+            image2.Magick.Dispose();
+            img1Pixels.Dispose();
+            img2Pixels.Dispose();
             return box;
         }
         private static List<string> GetLaserLineImages(string folder)
@@ -132,6 +134,8 @@ namespace HelixTroubleshootingWPF.Functions
                         }
                     }
                     image.SaveImage(true);
+                    image.Magick.Dispose();
+                    pixels.Dispose();
                 }
             }
         }
