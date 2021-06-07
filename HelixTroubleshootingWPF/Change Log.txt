@@ -1,3 +1,8 @@
+3.0.1
+	-Fixed a bug that caused ImageMagick objects to pile up in memory during staring dot removal. (Issue 19)
+	-Added function to get an Evo sensor's after thermal rectification results. Not implemented in GUI.
+	-Fixed a typo that caused EvoSensorsFromUff and EvoSensorsFromPitch to attempt to grab data from the LPF log.
+
 3.0.0
 	-Sensor testing function to check and display the expected on-board files for Evo and Solo sensors.
 	-Tab in the sensor testing window to display key information from the sensor.xml.
