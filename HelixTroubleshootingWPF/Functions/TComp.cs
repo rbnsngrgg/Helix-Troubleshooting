@@ -25,7 +25,7 @@ namespace HelixTroubleshootingWPF.Functions
             foreach (int lineNum in linesWithAlgoError)
             {
                 string line = lines[lineNum];
-                List<string> entries = new List<string>(line.Split('\t'));
+                List<string> entries = new(line.Split('\t'));
                 foreach (string entry in entries)
                 {
                     if (entries.IndexOf(entry) == 0) //Time column

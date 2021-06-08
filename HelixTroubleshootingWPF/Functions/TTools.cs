@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using HelixTroubleshootingWPF.Objects;
 //namespace Helix_Troubleshooting_CS
 namespace HelixTroubleshootingWPF.Functions
 {
@@ -12,7 +13,7 @@ namespace HelixTroubleshootingWPF.Functions
         //Array of strings to be added to function list
         public static readonly string[] functionList = new string[] {"ALS Point Removal","Fix Algorithm Errors","Illuminated Sphere Summary",
             "Solo Laser Line Analysis","Staring Dot Removal","Temperature Adjust", "DACMEMS Data Gather", "UFF Data Gather", "LPF Data Gather",
-            "Pitch Data Gather","Evo Data Gather", "Sensor Test" };// "Evo KNN", "Evo KNN Regression", "KNN Validation", "Test ML.net"};
+            "Pitch Data Gather","Evo Data Gather", "Sensor Test", "Test"};// "Evo KNN", "Evo KNN Regression", "KNN Validation", "Test ML.net"};
 
         public static TToolsConfig Config = new();
         //Private Helper Functions----------------------------------------------------------------------------------------
@@ -53,6 +54,9 @@ namespace HelixTroubleshootingWPF.Functions
             return folder;
         }
 
-
+        public static void DebugFunction()
+        {
+            TCompData data = new(@"\\castor\Production\Manufacturing\MfgSoftware\ThermalTest\200-0526\Results\SN139XXX\SN139140.txt");
+        }
     }
 }

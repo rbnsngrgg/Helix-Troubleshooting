@@ -145,12 +145,20 @@ namespace HelixTroubleshootingWPF
                 DataGatherSettings();
                 DetailsTextBox1.Visibility = Visibility.Visible;
             }
+            else if (item == "Test")
+            {
+                DetailsBox.Text = "Test function";
+                DetailsTextBox1.Visibility = Visibility.Visible;
+                DetailsTextBox2.Visibility = Visibility.Visible;
+                DetailsButton1.Visibility = Visibility.Visible;
+                DetailsButton2.Visibility = Visibility.Visible;
+            }
         }
 
         //Event handlers
         private void FunctionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            UpdateDetails(e.AddedItems[0].ToString());
+            UpdateDetails((string)((ListViewItem)e.AddedItems[0]).Content);
         }
 
         private void DetailsButton1_Click(object sender, RoutedEventArgs e)
@@ -159,7 +167,7 @@ namespace HelixTroubleshootingWPF
             {
                 return;
             }
-            string function = FunctionList.SelectedItem.ToString();
+            string function = (string)((ListViewItem)FunctionList.SelectedItem).Content;
 
             if (function.Contains("ALS Point Removal"))
             {
@@ -225,6 +233,10 @@ namespace HelixTroubleshootingWPF
             {
                 TToolsFunctions.TestML();
             }
+            else if (function == "Test")
+            {
+                TToolsFunctions.DebugFunction();
+            }
         }
         private void DetailsButton2_Click(object sender, RoutedEventArgs e)
         {
@@ -245,7 +257,16 @@ namespace HelixTroubleshootingWPF
             foreach (string function in TToolsFunctions.functionList)
             {
                 ListViewItem newItem = new ListViewItem() { Content = function };
-                FunctionList.Items.Add(newItem);
+                if((string)newItem.Content != "Test")
+                {
+                    FunctionList.Items.Add(newItem);
+                }
+                else
+                {
+#if DEBUG
+                    FunctionList.Items.Add(newItem);
+#endif
+                }
             }
             FunctionList.SelectedItem = FunctionList.Items.GetItemAt(0);
         }
