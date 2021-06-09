@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -56,7 +57,10 @@ namespace HelixTroubleshootingWPF.Functions
 
         public static void DebugFunction()
         {
-            TCompData data = new(@"\\castor\Production\Manufacturing\MfgSoftware\ThermalTest\200-0526\Results\SN139XXX\SN139140.txt");
+            //TCompData data = new(@"\\castor\Production\Manufacturing\MfgSoftware\ThermalTest\200-0526\Results\SN139XXX\SN139140.txt");
+            TCompData template = GenerateTemplate();
+            List<string> lines = template.GetLines();
+            WriteAndOpen(Config.ResultsDir, Path.Join(Config.ResultsDir, $"{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_X0200_template.txt"), lines);
         }
     }
 }

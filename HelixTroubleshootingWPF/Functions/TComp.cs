@@ -14,8 +14,8 @@ namespace HelixTroubleshootingWPF.Functions
 
             string file = GetTcompFile(sn);
             if(file == "") { return; }
-            List<string> lines = new List<string>(File.ReadAllLines(file));
-            List<string> originalLines = new List<string>();
+            List<string> lines = new(File.ReadAllLines(file));
+            List<string> originalLines = new();
             originalLines.AddRange(lines);
 
             //Find indexes of lines with algorithm errors
@@ -31,7 +31,7 @@ namespace HelixTroubleshootingWPF.Functions
                     if (entries.IndexOf(entry) == 0) //Time column
                     { continue; }
                     //Split current line and get index of the current entry
-                    List<string> currentLine = new List<string>(lines[lineNum].Split('\t'));
+                    List<string> currentLine = new(lines[lineNum].Split('\t'));
                     int currentIndex = currentLine.IndexOf(entry);
                     double current = default;
                     Double.TryParse(entry, out current);
@@ -47,13 +47,13 @@ namespace HelixTroubleshootingWPF.Functions
                         {
                             continue;
                         }
-                        List<string> nextLine = new List<string>(lines[nextLineNum].Split('\t'));
+                        List<string> nextLine = new(lines[nextLineNum].Split('\t'));
                         lines[lineNum] = regex.Replace(lines[lineNum], nextLine[currentIndex], 1);
                     }
                     else
                     {
                         //Assign "previous" to the number in the same column on the previous line.
-                        List<string> previousLine = new List<string>(lines[lineNum - 1].Split('\t'));
+                        List<string> previousLine = new(lines[lineNum - 1].Split('\t'));
                         double previous = default;
                         Double.TryParse(previousLine[currentIndex], out previous);
                         //If not algo error
@@ -70,7 +70,7 @@ namespace HelixTroubleshootingWPF.Functions
                         }
                         else
                         {
-                            List<string> nextLine = new List<string>(lines[nextLineNum].Split('\t'));
+                            List<string> nextLine = new(lines[nextLineNum].Split('\t'));
                             Double.TryParse(nextLine[currentIndex], out next);
                             double newValue = Math.Round((previous + next) / 2, 6);
 
@@ -115,7 +115,7 @@ namespace HelixTroubleshootingWPF.Functions
             }
 
             string file = tcompFiles[0];
-            List<string> lines = new List<string>(File.ReadAllLines(file));
+            List<string> lines = new(File.ReadAllLines(file));
             if (lines.Count < 85)
             { MessageBox.Show($"The t-comp file at: \"{file}\" is incomplete.", "Incomplete T-Comp File", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
 
@@ -126,7 +126,7 @@ namespace HelixTroubleshootingWPF.Functions
             { return; }
             tempOffset = setTemp - referenceAvg;
 
-            List<string> newLines = new List<string>();
+            List<string> newLines = new();
             //Change col 1 values so that reference average matches the desired temperature
             foreach (string line in lines)
             {
@@ -178,12 +178,12 @@ namespace HelixTroubleshootingWPF.Functions
         }
         private static List<int> GetAlgoErrorLines(List<string> lines)
         {
-            List<int> errorLines = new List<int>();
+            List<int> errorLines = new();
             foreach (string line in lines)
             {
                 if (line == lines[0])
                 { continue; }
-                List<string> entries = new List<string>(line.Split('\t'));
+                List<string> entries = new(line.Split('\t'));
                 foreach (string entry in entries)
                 {
                     if (entries.IndexOf(entry) == 0)
@@ -256,7 +256,7 @@ namespace HelixTroubleshootingWPF.Functions
 
         private static bool PlotBeforeAndAfter(List<string> before, List<string> after, float refAvgBefore = 0.0f, float refAvgAfter = 0.0f)
         {
-            TCompCompare compareWindow = new TCompCompare();
+            TCompCompare compareWindow = new();
             if(refAvgBefore > 0.0f & refAvgAfter > 0.0f)
             {
                 compareWindow.BeforePlot.plt.Title($"Before: Reference Average {refAvgBefore}");

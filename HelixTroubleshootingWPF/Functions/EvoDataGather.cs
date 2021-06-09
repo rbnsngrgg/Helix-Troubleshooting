@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using HelixTroubleshootingML.Model;
-//using System.Windows.Shapes;
+using HelixTroubleshootingWPF.Objects;
 
 namespace HelixTroubleshootingWPF.Functions
 {
@@ -22,17 +22,17 @@ namespace HelixTroubleshootingWPF.Functions
         private static readonly List<string> ComboHeaderList = new Func<List<string>>(() =>
        {
            string header = $"{BaseDataHeader}\t{VDEDataHeader}\t{UffDataHeader}\t{DacMemsDataHeader}\t{MirrorcleHeader}\t{LpfDataHeader}";
-           for (int i = 1; i <= 14; i++) { header = header + $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
-           header = header + $"\t{PitchDataHeader}";
-           List<string> headerList = new List<string>();
+           for (int i = 1; i <= 14; i++) { header += $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
+           header += $"\t{PitchDataHeader}";
+           List<string> headerList = new();
            headerList.AddRange(header.Split("\t"));
            return headerList;
        })();
         private static readonly string ComboHeader = new Func<string>( () => 
         {
             string header = $"{BaseDataHeader}\t{VDEDataHeader}\t{UffDataHeader}\t{DacMemsDataHeader}\t{MirrorcleHeader}\t{LpfDataHeader}";
-            for (int i = 1; i <= 14; i++) { header = header + $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
-            header = header + $"\t{PitchDataHeader}";
+            for (int i = 1; i <= 14; i++) { header += $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
+            header += $"\t{PitchDataHeader}";
             return header;
         })();
 
@@ -110,50 +110,50 @@ namespace HelixTroubleshootingWPF.Functions
         public static void DacMemsDataGather()
         {
             List<HelixEvoSensor> sensorList = EvoSensorsFromDacMems();
-            List<string> logLines = new List<string>() {$"{BaseDataHeader}\t{DacMemsDataHeader}"};
+            List<string> logLines = new() {$"{BaseDataHeader}\t{DacMemsDataHeader}"};
             GetAccuracyResultsFromLog(ref sensorList);
             foreach (HelixEvoSensor sensor in sensorList)
             {
                 logLines.Add($"{sensor.SerialNumber}\t{sensor.PartNumber}\t{sensor.AccuracyResult}\t{sensor.DacMemsData}");
             }
-            string filePath = @$"{dataGatherFolder}\{DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm-ss")}_DACMEMSDataGather.txt";
+            string filePath = @$"{dataGatherFolder}\{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_DACMEMSDataGather.txt";
             WriteAndOpen(dataGatherFolder, filePath, logLines);
         }
         public static void UffDataGather()
         {
             List<HelixEvoSensor> sensorList = EvoSensorsFromUff();
-            List<string> logLines = new List<string>() {$"{BaseDataHeader}\t{UffDataHeader}"};
+            List<string> logLines = new() {$"{BaseDataHeader}\t{UffDataHeader}"};
             GetAccuracyResultsFromLog(ref sensorList);
             foreach (HelixEvoSensor s in sensorList)
             {
                 logLines.Add($"{s.SerialNumber}\t{s.PartNumber}\t{s.AccuracyResult}\t{s.UffData}");
             }
-            string filePath = $@"{dataGatherFolder}\{DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm-ss")}_UFFDataGather.txt";
+            string filePath = $@"{dataGatherFolder}\{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_UFFDataGather.txt";
             WriteAndOpen(dataGatherFolder, filePath, logLines);
         }
         public static void LpfDataGather()
         {
             List<HelixEvoSensor> sensorList = EvoSensorsFromLpf();
-            List<string> logLines = new List<string>() { LpfDataHeader };
+            List<string> logLines = new() { LpfDataHeader };
             for(int i = 1; i <= 14; i++) { logLines[0] = logLines[0] + $"\tTableIndex{i}\tPoweruW{i}\tPercentNominal{i}"; }
             GetAccuracyResultsFromLog(ref sensorList);
             foreach (HelixEvoSensor s in sensorList)
             {
                 logLines.Add($"{s.SerialNumber}\t{s.PartNumber}\t{s.AccuracyResult}\t{s.LpfData}");
             }
-            string filePath = $@"{dataGatherFolder}\{DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm-ss")}_LPFDataGather.txt";
+            string filePath = $@"{dataGatherFolder}\{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_LPFDataGather.txt";
             WriteAndOpen(dataGatherFolder, filePath, logLines);
         }
         public static void PitchDataGather()
         {
             List<HelixEvoSensor> sensorList = EvoSensorsFromPitch();
-            List<string> logLines = new List<string>() {$"{BaseDataHeader}\t{PitchDataHeader}"};
+            List<string> logLines = new() {$"{BaseDataHeader}\t{PitchDataHeader}"};
             GetAccuracyResultsFromLog(ref sensorList);
             foreach (HelixEvoSensor s in sensorList)
             {
                 logLines.Add($"{s.SerialNumber}\t{s.PartNumber}\t{s.AccuracyResult}\t{s.PitchData}");
             }
-            string filePath = $@"{dataGatherFolder}\{DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm-ss")}_PitchDataGather.txt";
+            string filePath = $@"{dataGatherFolder}\{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_PitchDataGather.txt";
             WriteAndOpen(dataGatherFolder, filePath, logLines);
         }
         static public List<HelixEvoSensor> EvoSensorsFromDacMems(List<HelixEvoSensor> preSensors = null)
@@ -177,7 +177,7 @@ namespace HelixTroubleshootingWPF.Functions
                 }
                 if (!sensorFound)
                 {
-                    HelixEvoSensor sensor = new HelixEvoSensor();
+                    HelixEvoSensor sensor = new();
                     sensor.SerialNumber = split[4];
                     sensor.PartNumber = split[9];
                     sensor.DacMemsData = new EvoDacMemsData(line);
@@ -207,7 +207,7 @@ namespace HelixTroubleshootingWPF.Functions
                 }
                 if (!sensorFound)
                 {
-                    HelixEvoSensor sensor = new HelixEvoSensor();
+                    HelixEvoSensor sensor = new();
                     sensor.SerialNumber = split[4];
                     sensor.PartNumber = split[5];
                     sensor.LpfData = new EvoLpfData(line);
@@ -218,7 +218,7 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public List<HelixEvoSensor> EvoSensorsFromPitch(List<HelixEvoSensor> preSensors = null)
         {
-            List<HelixEvoSensor> sensors = new List<HelixEvoSensor>();
+            List<HelixEvoSensor> sensors = new();
             if(preSensors != null) { sensors = preSensors; }
             foreach (string line in File.ReadAllLines(Config.EvoPitchLog))
             {
@@ -237,7 +237,7 @@ namespace HelixTroubleshootingWPF.Functions
                 }
                 if (!sensorFound)
                 {
-                    HelixEvoSensor sensor = new HelixEvoSensor();
+                    HelixEvoSensor sensor = new();
                     sensor.SerialNumber = split[4];
                     sensor.PartNumber = split[5];
                     sensor.PitchData = new EvoPitchData(line);
@@ -248,7 +248,7 @@ namespace HelixTroubleshootingWPF.Functions
         }
         static public List<HelixEvoSensor> EvoSensorsFromUff(List<HelixEvoSensor> preSensors = null)
         {
-            List<HelixEvoSensor> sensors = new List<HelixEvoSensor>();
+            List<HelixEvoSensor> sensors = new();
             if(preSensors != null) { sensors = preSensors; }
             foreach (string line in File.ReadAllLines(Config.EvoUffLog))
             {
@@ -268,7 +268,7 @@ namespace HelixTroubleshootingWPF.Functions
                 }
                 if (!sensorFound)
                 {
-                    HelixEvoSensor sensor = new HelixEvoSensor();
+                    HelixEvoSensor sensor = new();
                     sensor.SerialNumber = split[4];
                     sensor.PartNumber = split[6];
                     sensor.UffData = new EvoUffData(line);
@@ -539,11 +539,28 @@ namespace HelixTroubleshootingWPF.Functions
                 }
             }
         }
+        static public void GetTcompData(ref List<HelixEvoSensor> sensors)
+        {
+            foreach (HelixEvoSensor sensor in sensors)
+            {
+                string tcompDataFolder = $"SN{sensor.SerialNumber.Substring(0, 3)}XXX";
+                string snTcompDataFolder = Path.Join(Config.TcompDir, tcompDataFolder);
+                string file = "";
+                string day2 = Path.Join(snTcompDataFolder, $"SN{sensor.SerialNumber}.day2");
+                string complete = Path.Join(snTcompDataFolder, $"SN{sensor.SerialNumber}.txt");
+                if (File.Exists(day2)) { file = day2; }
+                if (File.Exists(complete)) { file = complete; }
+
+                if (file == "") { continue; }
+                sensor.TComp.ParseTCompData(file);
+
+            }
+        }
         static public List<string[]> GetResultsLogSplit()
         {
             List<string> resultsLog = new();
             resultsLog.AddRange(File.ReadAllLines(Config.HelixRectResultsLog));
-            List<string[]> resultsLogSplit = new List<string[]>();
+            List<string[]> resultsLogSplit = new();
             foreach (string line in resultsLog)
             {
                 resultsLogSplit.Add(line.Split("\t"));

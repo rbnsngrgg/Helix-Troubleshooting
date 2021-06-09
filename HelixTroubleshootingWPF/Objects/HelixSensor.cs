@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Xml;
+using HelixTroubleshootingWPF.Objects;
 
 namespace HelixTroubleshootingWPF
 {
@@ -95,6 +96,7 @@ namespace HelixTroubleshootingWPF
         public EvoPitchData PitchData { get; set; }
         public EvoUffData UffData { get; set; }
         public VDEResult VDE { get; set; } = new VDEResult();
+        public TCompData TComp { get; set; } = new TCompData();
         public HelixEvoSensor() :base() { }
         public HelixEvoSensor(string sensorXmlFolder, bool rawXml = false) : base(sensorXmlFolder, rawXml) { }
         public bool CheckComplete()
