@@ -117,10 +117,10 @@ namespace HelixTroubleshootingWPF.Objects
             lines.Add(header);
             for(int i = 0; i < TimeData.Count; i++)
             {
-                string line = $"{TimeData[i]:HH:mm:ss}\t{TempData[i]}";
+                string line = $"{TimeData[i]:HH:mm:ss}\t{Math.Round(TempData[i],3)}";
                 foreach(string key in MeasurementData.Keys)
                 {
-                    line += $"\t{MeasurementData[key][i]}";
+                    line += $"\t{Math.Round(MeasurementData[key][i],6)}";
                 }
                 lines.Add(line);
             }

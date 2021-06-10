@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29201.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelixTroubleshootingWPF", "HelixTroubleshootingWPF\HelixTroubleshootingWPF.csproj", "{1540E095-32F1-4436-9018-FC63A29DF1AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelixTroubleshooting", "HelixTroubleshooting\HelixTroubleshooting.csproj", "{1540E095-32F1-4436-9018-FC63A29DF1AD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelixTroubleshootingML.Model", "HelixTroubleshootingML.Model\HelixTroubleshootingML.Model.csproj", "{1499062E-8D95-4901-8BA4-3CC9CD8E984E}"
 EndProject

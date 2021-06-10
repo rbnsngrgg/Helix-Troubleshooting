@@ -9,28 +9,29 @@ namespace HelixTroubleshootingWPF.Functions
 {
     static partial class TToolsFunctions
     {
-        public static TCompData GenerateTemplate(string model = "920-0201")
+        public static void Template(string model, int months)
+        {
+            Tuple<TCompData, int> templateData = GenerateTemplate(model, months);
+            TCompData template = templateData.Item1;
+            List<string> lines = template.GetLines();
+            string templateFolder = Path.Join(Config.ResultsDir, "\\TComp_Templates");
+            Directory.CreateDirectory(templateFolder);
+            WriteAndOpen(templateFolder, Path.Join(templateFolder, $"{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_{model}_Template.txt"), lines);
+            MessageBox.Show($"{model} template generated using the data from {templateData.Item2} sensors from the past {months} months.",
+                "Template Generated",MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public static Tuple<TCompData,int> GenerateTemplate(string model, int months)
         {
             List<HelixEvoSensor> sensors = GetEvoData();
             TCompData template = new();
             Dictionary<string, List<double>> deltas = new(); //Deltas begin after reference cycle
             int datacount = 0;
-            //Only include sensors within the last 6 months
-            DateTime newest = new();
+            //Only include sensors within the last x months
             for(int i = sensors.Count-1; i >=0; i--)
             {
-                if (!sensors[i].PartNumber.Contains(model)) { sensors.RemoveAt(i); }
-                else
-                {
-                    if(sensors[i].AccuracyResult.Timestamp > newest)
-                    {
-                        newest = sensors[i].AccuracyResult.Timestamp;
-                    }
-                }
-            }
-            for(int i = sensors.Count-1; i >=0; i--)
-            {
-                if(sensors[i].AccuracyResult.Timestamp < newest.AddMonths(-6)) { sensors.RemoveAt(i); }
+                if (!sensors[i].PartNumber.Contains(model) || sensors[i].AccuracyResult.Timestamp < DateTime.Now.AddMonths(-months))
+                { sensors.RemoveAt(i); }
             }
 
             GetTcompData(ref sensors);
@@ -97,7 +98,7 @@ namespace HelixTroubleshootingWPF.Functions
                 }
             }
             ApplyDeltas(ref template, ref deltas);
-            return template;
+            return new Tuple<TCompData,int> (template, datacount);
         }
 
         public static void ApplyDeltas(ref TCompData template, ref Dictionary<string, List<double>> deltas)

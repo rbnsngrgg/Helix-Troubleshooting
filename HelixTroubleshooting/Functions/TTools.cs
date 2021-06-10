@@ -14,7 +14,7 @@ namespace HelixTroubleshootingWPF.Functions
         //Array of strings to be added to function list
         public static readonly string[] functionList = new string[] {"ALS Point Removal","Fix Algorithm Errors","Illuminated Sphere Summary",
             "Solo Laser Line Analysis","Staring Dot Removal","Temperature Adjust", "DACMEMS Data Gather", "UFF Data Gather", "LPF Data Gather",
-            "Pitch Data Gather","Evo Data Gather", "Sensor Test", "Test"};// "Evo KNN", "Evo KNN Regression", "KNN Validation", "Test ML.net"};
+            "Pitch Data Gather","Evo Data Gather", "Sensor Test", "Generate TComp Template","Test"};// "Evo KNN", "Evo KNN Regression", "KNN Validation", "Test ML.net"};
 
         public static TToolsConfig Config = new();
         //Private Helper Functions----------------------------------------------------------------------------------------
@@ -57,10 +57,6 @@ namespace HelixTroubleshootingWPF.Functions
 
         public static void DebugFunction()
         {
-            //TCompData data = new(@"\\castor\Production\Manufacturing\MfgSoftware\ThermalTest\200-0526\Results\SN139XXX\SN139140.txt");
-            TCompData template = GenerateTemplate();
-            List<string> lines = template.GetLines();
-            WriteAndOpen(Config.ResultsDir, Path.Join(Config.ResultsDir, $"{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_X0200_template.txt"), lines);
         }
     }
 }

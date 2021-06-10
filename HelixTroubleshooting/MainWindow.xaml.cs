@@ -11,7 +11,7 @@ namespace HelixTroubleshootingWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        public readonly string Version = "3.0.1";
+        public readonly string Version = "3.1.0";
         public MainWindow()
         {
             InitializeComponent();
@@ -74,23 +74,23 @@ namespace HelixTroubleshootingWPF
             {
                 DetailsBox.Text = "Cleans the staring dots from rectification images of Evo sensors, providing a workaround for laser model errors caused by these dots." +
                     "\nEnter the directory of a rectification images folder, then click \"Start\".";
-                DetailsTextBox1.Visibility = System.Windows.Visibility.Visible;
-                DetailsTextBox2.Visibility = System.Windows.Visibility.Hidden;
+                DetailsTextBox1.Visibility = Visibility.Visible;
+                DetailsTextBox2.Visibility = Visibility.Hidden;
                 DetailsButton1.Content = "Start";
-                DetailsButton1.Visibility = System.Windows.Visibility.Visible;
+                DetailsButton1.Visibility = Visibility.Visible;
                 DetailsButton2.Content = "";
-                DetailsButton2.Visibility = System.Windows.Visibility.Hidden;
+                DetailsButton2.Visibility = Visibility.Hidden;
             }
             else if(item.Contains("Temperature Adjust"))
             {
                 DetailsBox.Text = "Adjust the temperature column of a t-comp file, so that the reference cycle average is equal to the sensor's current operating temperature." +
                     "\n\nEnter the serial number (SNXXXXXX) in the first box, the desired reference average in the 2nd box, then click \"start\".";
-                DetailsTextBox1.Visibility = System.Windows.Visibility.Visible;
-                DetailsTextBox2.Visibility = System.Windows.Visibility.Visible;
+                DetailsTextBox1.Visibility = Visibility.Visible;
+                DetailsTextBox2.Visibility = Visibility.Visible;
                 DetailsButton1.Content = "Start";
-                DetailsButton1.Visibility = System.Windows.Visibility.Visible;
+                DetailsButton1.Visibility = Visibility.Visible;
                 DetailsButton2.Content = "";
-                DetailsButton2.Visibility = System.Windows.Visibility.Hidden;
+                DetailsButton2.Visibility = Visibility.Hidden;
             }
             else if(item.Contains("DACMEMS Data Gather"))
             {
@@ -144,6 +144,16 @@ namespace HelixTroubleshootingWPF
                 DetailsBox.Text = "Test the ML.net regression algorithm with data from the specified Evo sensor. Enter serial number without \"SN\" prefix.";
                 DataGatherSettings();
                 DetailsTextBox1.Visibility = Visibility.Visible;
+            }
+            else if (item == "Generate TComp Template")
+            {
+                DetailsBox.Text = "Generate a Tcomp template for a given Evo sensor model." +
+                    " Enter the first 7 digits of the part number in the format \"XXX-XXXX\"" +
+                    " and enter a number of months for the range of t-comp templates to include.";
+                DetailsTextBox1.Visibility = Visibility.Visible;
+                DetailsTextBox2.Visibility = Visibility.Visible;
+                DetailsButton1.Visibility = Visibility.Visible;
+                DetailsButton2.Visibility = Visibility.Hidden;
             }
             else if (item == "Test")
             {
@@ -232,6 +242,17 @@ namespace HelixTroubleshootingWPF
             else if(function.Contains("Test ML.net"))
             {
                 TToolsFunctions.TestML();
+            }
+            else if(function == "Generate TComp Template")
+            {
+                try
+                {
+                    TToolsFunctions.Template(DetailsTextBox1.Text, int.Parse(DetailsTextBox2.Text));
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Template Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             else if (function == "Test")
             {

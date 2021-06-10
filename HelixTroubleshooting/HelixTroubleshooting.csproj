@@ -5,14 +5,14 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>bar.ico</ApplicationIcon>
-    <Version>3.0.1</Version>
+    <Version>3.1.0</Version>
     <Company>Perceptron, Inc.</Company>
     <Authors>Gregg Robinson</Authors>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     <RuntimeIdentifier>win-x86</RuntimeIdentifier>
-    <FileVersion>3.0.1.0</FileVersion>
+    <FileVersion>3.1.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
