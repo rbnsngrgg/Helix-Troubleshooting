@@ -13,6 +13,22 @@ namespace HelixTroubleshootingWPF.Objects
         public readonly List<DateTime> TimeData = new(); //Header = "unit"
         public readonly List<double> TempData = new(); //Header = "mm"
         public readonly Dictionary<string, List<double>> MeasurementData = new();
+        public double RefCycleAvg
+        {
+            get
+            {
+                double avg = 0.0;
+                if(TempData.Count > 5)
+                {
+                    for(int i = 0; i < 5; i++)
+                    {
+                        avg += TempData[i];
+                    }
+                    avg /= 5;
+                }
+                return avg;
+            }
+        }
 
         public TCompData() { }
         public TCompData(string filePath)

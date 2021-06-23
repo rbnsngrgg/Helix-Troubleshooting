@@ -18,7 +18,7 @@ namespace HelixTroubleshootingWPF.Functions
             {MessageBox.Show("The specified directory doesn't exist.","Directory Not Found",MessageBoxButton.OK,MessageBoxImage.Error); return; }
 
             HelixSoloSensor sensor = new HelixSoloSensor(rectFolder);
-            List<SoloLaserImage> images = GetSoloLineImages(rectFolder);
+            List<HelixImage> images = GetSoloLineImages(rectFolder);
             if(images.Count == 0) //If no images
             { MessageBox.Show("No unfiltered laser images found", "No Laser Images", MessageBoxButton.OK, MessageBoxImage.Error); return; }
 
@@ -35,7 +35,7 @@ namespace HelixTroubleshootingWPF.Functions
             pb.SetProgressTick(images.Count + 1);
             pb.SetLabel($"Writing log (1/{images.Count+1}): Focus_Summary.txt");
             WriteSummaryLog(ref sensor, images, resultFolder);
-            foreach (SoloLaserImage image in images)
+            foreach (HelixImage image in images)
             {
                 if (pb.Canceled) { pb.Close(); break; }
                 pb.SetLabel($"Writing log ({images.IndexOf(image)+2}/{images.Count+1}): {Path.GetFileNameWithoutExtension(image.Name)}.txt");
@@ -46,20 +46,20 @@ namespace HelixTroubleshootingWPF.Functions
             pb.Close();
             MessageBox.Show("Line analysis complete.", "Done", MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        private static List<SoloLaserImage> GetSoloLineImages(string folder)
+        private static List<HelixImage> GetSoloLineImages(string folder)
         {
             //Get unfiltered laser line images by regex match
-            List<SoloLaserImage> images = new List<SoloLaserImage>();
+            List<HelixImage> images = new List<HelixImage>();
             foreach(string file in Directory.GetFiles(folder))
             {
                 if(Regex.IsMatch(Path.GetFileName(file), @"TZ-?\d+Y-?\d+X\d+\.tif$"))
                 {
-                    images.Add(new SoloLaserImage(file));
+                    images.Add(new HelixImage(file));
                 }
             }
             return SortNearFar(images);
         }
-        private static bool GetCgs(ref List<SoloLaserImage> images) //Get CG info for each image in list
+        private static bool GetCgs(ref List<HelixImage> images) //Get CG info for each image in list
         {
             ProgressBar pb = new ProgressBar()
             { 
@@ -67,7 +67,7 @@ namespace HelixTroubleshootingWPF.Functions
                 Visibility = Visibility.Visible 
             };
             pb.SetProgressTick(images.Count);
-            foreach(SoloLaserImage image in images)
+            foreach(HelixImage image in images)
             {
                 if (pb.Canceled) { pb.Close(); return false; }
                 pb.SetLabel($"Image ({images.IndexOf(image) + 1}/{images.Count}): {image.Name}");
@@ -79,7 +79,7 @@ namespace HelixTroubleshootingWPF.Functions
             pb.Close();
             return true;
         }
-        private static List<CGInfo> GetCgInfo(SoloLaserImage image)
+        private static List<CGInfo> GetCgInfo(HelixImage image)
         {
             List<CGInfo> cgList = new List<CGInfo>();
             var pixels = image.Magick.GetPixels();
@@ -150,7 +150,7 @@ namespace HelixTroubleshootingWPF.Functions
             float score = (float)Math.Round(score1 + score2, 2);
             return new Tuple<int, float>(peak, score);
         }
-        private static List<SoloLaserImage> SortNearFar(List<SoloLaserImage> images)
+        private static List<HelixImage> SortNearFar(List<HelixImage> images)
         {
             bool sorted = false;
             while (!sorted)
@@ -162,7 +162,7 @@ namespace HelixTroubleshootingWPF.Functions
                     {
                         if (int.Parse(images[i].ZValue) > int.Parse(images[i + 1].ZValue))
                         {
-                            SoloLaserImage popImage = images[i + 1];
+                            HelixImage popImage = images[i + 1];
                             images.RemoveAt(i + 1);
                             images.Insert(i, popImage);
                             sorted = false;
@@ -172,7 +172,7 @@ namespace HelixTroubleshootingWPF.Functions
             }
             return images;
         }
-        private static bool WriteLineLog(ref HelixSoloSensor sensor, SoloLaserImage image, string resultFolder)
+        private static bool WriteLineLog(ref HelixSoloSensor sensor, HelixImage image, string resultFolder)
         {
             List<string> logLines = new List<string>();
             logLines.AddRange(new string[] {$"{sensor.SerialNumber}\t{sensor.PartNumber}\t{sensor.Date}", image.Name,
@@ -204,11 +204,11 @@ namespace HelixTroubleshootingWPF.Functions
             File.WriteAllLines(path, logLines);
             return true;
         }
-        private static bool WriteSummaryLog(ref HelixSoloSensor sensor, List<SoloLaserImage> images, string resultFolder)
+        private static bool WriteSummaryLog(ref HelixSoloSensor sensor, List<HelixImage> images, string resultFolder)
         {
             List<string> logLines = new List<string>();
             logLines.AddRange(new string[] { $"{sensor.SerialNumber}\t{sensor.PartNumber}\t{sensor.Date}\n", "Z_Values\t Focus_Score" });
-            foreach(SoloLaserImage image in images)
+            foreach(HelixImage image in images)
             {
                 logLines.Add($"{image.ZValue}\t{image.FocusScore}");
             }
