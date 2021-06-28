@@ -330,5 +330,26 @@ namespace HelixTroubleshootingWPF
                 p.Kill();
             }
         }
+
+        private void HelixTroubleshootingMainWindow_StateChanged(object sender, EventArgs e)
+        {
+            switch (WindowState)
+            {
+                case WindowState.Minimized:
+                    ShowInTaskbar = false;
+                    break;
+            }
+        }
+
+        private void ContextMenuOpenApp_Click(object sender, RoutedEventArgs e)
+        {
+            ShowInTaskbar = true;
+            WindowState = WindowState.Normal;
+        }
+
+        private void ContextMenuExit_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }

@@ -46,15 +46,15 @@ namespace HelixTroubleshootingWPF.Functions
                 { "bl", new int[2]{ 1600,0} },
                 { "br", new int[2]{ 0,0} }
             };
-            EvoLaserImage image1 = null;
-            EvoLaserImage image2 = null;
+            HelixImage image1 = null;
+            HelixImage image2 = null;
             foreach(string img in images) //Get 2 different images of same z value
             {
                 string zValue = GetImageZValue(img);
                 if (zValue == z)
                 {
-                    if (image1 == null) { image1 = new EvoLaserImage(img); }
-                    else if (Path.GetFileNameWithoutExtension(img) != image1.Name & image2 == null) { image2 = new EvoLaserImage(img); break; }
+                    if (image1 == null) { image1 = new HelixImage(img); }
+                    else if (Path.GetFileNameWithoutExtension(img) != image1.Name & image2 == null) { image2 = new HelixImage(img); break; }
                 }
             }
             IPixelCollection<byte> img1Pixels = image1.Magick.GetPixels();
@@ -124,7 +124,7 @@ namespace HelixTroubleshootingWPF.Functions
             {
                 if (GetImageZValue(laserImage) == zValue)
                 {
-                    EvoLaserImage image = new EvoLaserImage(laserImage);
+                    HelixImage image = new HelixImage(laserImage);
                     IPixelCollection<byte> pixels = image.Magick.GetPixels();
                     for (int x = box["bl"][0]; x <= box["tr"][0]; x++)
                     {

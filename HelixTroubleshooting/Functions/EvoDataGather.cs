@@ -665,6 +665,30 @@ namespace HelixTroubleshootingWPF.Functions
             }
             return resultsLogSplit;
         }
+        public static Dictionary<string, List<string>> GetEvoRectDataFolders(ref List<HelixEvoSensor> sensors)
+        {
+            Dictionary<string, List<string>> folders = new();
+            foreach(HelixSensor sensor in sensors)
+            {
+                if (!folders.ContainsKey(sensor.RectDataFolder))
+                {
+                    folders.Add(sensor.RectDataFolder, new());
+                }
+            }
+            foreach(string folder in folders.Keys)
+            {
+                string rectDataFolder = Path.Join(Config.RectDataDir, folder);
+                if(Directory.Exists(rectDataFolder))
+                {
+                    folders[folder].AddRange(Directory.GetDirectories(rectDataFolder));
+                }
+                else
+                {
+                    folders.Remove(folder);
+                }
+            }
+            return folders;
+        }
         public static void WriteAndOpen(string folderPath, string filePath, List<string> lines)
         {
             Directory.CreateDirectory(folderPath);

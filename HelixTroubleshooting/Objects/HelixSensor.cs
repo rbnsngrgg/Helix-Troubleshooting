@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Xml;
@@ -10,9 +11,21 @@ namespace HelixTroubleshootingWPF
     //Represents an instance of a sensor as it is represented in a particular sensor.xml file
     class HelixSensor
     {
-        
+        private string serialNumber = "";
         //Properties
-        public string SerialNumber { get; set; } //Should include "SN" prefix
+        public string SerialNumber
+        {
+            get => serialNumber;
+            set
+            {
+                serialNumber = value;
+                if (serialNumber.Length >= 6)
+                {
+                    RectDataFolder = $"SN{serialNumber.Substring(0, 3)}XXX";
+                }
+            }
+        } //Should not contain "SN" prefix
+        public string RectDataFolder { get; private set; } = "";
         public string CameraSerial { get; set; }
         public string PartNumber { get; set; }
         public string SensorRev { get; set; }
@@ -95,8 +108,9 @@ namespace HelixTroubleshootingWPF
         public MirrorcleData Mirrorcle { get; set; }
         public EvoPitchData PitchData { get; set; }
         public EvoUffData UffData { get; set; }
-        public VDEResult VDE { get; set; } = new VDEResult();
-        public TCompData TComp { get; set; } = new TCompData();
+        public VDEResult VDE { get; set; } = new();
+        public TCompData TComp { get; set; } = new();
+        public EvoRectificationData RectData { get; set; } = new();
         public HelixEvoSensor() :base() { }
         public HelixEvoSensor(string sensorXmlFolder, bool rawXml = false) : base(sensorXmlFolder, rawXml) { }
         public bool CheckComplete()
@@ -127,6 +141,123 @@ namespace HelixTroubleshootingWPF
         public SoloLaserAlign LaserAlign { get; set; }
         public HelixSoloSensor() : base() { }
         public HelixSoloSensor(string sensorXmlFolder, bool rawXml = false) : base(sensorXmlFolder, rawXml) { }
+    }
+
+    class EvoRectificationData
+    {
+        public float Minus45DegreeMaxLinearity { get; private set; } = float.MinValue;
+        public float ZeroDegreeMaxLinearity { get; private set; } = float.MinValue;
+        public float Plus45DegreeMaxLinearity { get; private set; } = float.MinValue;
+
+
+        public float Minus45DegreeMaxFlatness { get; private set; } = float.MinValue;
+        public float ZeroDegreeMaxFlatness { get; private set; } = float.MinValue;
+        public float Plus45DegreeMaxFlatness { get; private set; } = float.MinValue;
+        public DateTime Timestamp { get; private set; } = new();
+
+        public EvoRectificationData() { }
+
+        public void Update(string filePath)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                try
+                {
+                    string[] lines = File.ReadAllLines(filePath);
+                    foreach (string line in lines)
+                    {
+                        DateTime newTimestamp = new DateTime();
+                        if (line.Contains("Started at"))
+                        {
+                            newTimestamp = DateTime.ParseExact(line.Replace("Started at ", ""), "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture);
+                            
+                        }
+                        if (newTimestamp > Timestamp)
+                        {
+                            Timestamp = newTimestamp;
+                        }
+                    }
+                    bool linearityFlatness = false;
+                    bool latest = false;
+                    string currentMode = "";
+                    Dictionary<string, float> linearityResults = new()
+                    {
+                        { "-45", float.MinValue },
+                        { "0", float.MinValue },
+                        { "45", float.MinValue }
+                    };
+                    Dictionary<string, float> flatnessResults = new()
+                    {
+                        { "-45", float.MinValue },
+                        { "0", float.MinValue },
+                        { "45", float.MinValue }
+                    };
+                    foreach (string line in lines)
+                    {
+                        if (!latest && line.Contains("Started at") &&
+                            DateTime.ParseExact(line.Replace("Started at ", ""), "M/d/yyyy h:m:s tt", CultureInfo.InvariantCulture) == Timestamp)
+                        { latest = true; }
+                        if (latest)
+                        {
+
+                            if (!linearityFlatness && line.Contains("Starting validate model processing"))
+                            {
+                                linearityFlatness = true;
+                            }
+                            else if (linearityFlatness)
+                            {
+                                if (line.Contains("[-45]")) { currentMode = "-45"; continue; }
+                                else if (line.Contains("[0]")) { currentMode = "0"; continue; }
+                                else if (line.Contains("[45]")) { currentMode = "45"; continue; }
+                                else if (line.Contains("Max. Linearity Error")) { break; }
+
+                                string[] lineSplit = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);//flatness index 19, linearity index 14
+                                try
+                                {
+                                    float linearity = float.Parse(lineSplit[14]);
+                                    float flatness = float.Parse(lineSplit[19]);
+
+                                    if (linearity > linearityResults[currentMode]) { linearityResults[currentMode] = linearity; }
+                                    if (flatness > flatnessResults[currentMode]) { flatnessResults[currentMode] = flatness; }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine(ex.Message);
+                                }
+                            }
+                        }
+                    }
+                    if(!linearityResults.ContainsValue(float.MinValue) && !flatnessResults.ContainsValue(float.MinValue))
+                    {
+                        Minus45DegreeMaxLinearity = linearityResults["-45"];
+                        ZeroDegreeMaxLinearity = linearityResults["0"];
+                        Plus45DegreeMaxLinearity = linearityResults["45"];
+
+                        Minus45DegreeMaxFlatness = flatnessResults["-45"];
+                        ZeroDegreeMaxFlatness = flatnessResults["0"];
+                        Plus45DegreeMaxFlatness = flatnessResults["45"];
+                    }
+                    return;
+                }
+                catch (IOException)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    continue;
+                }
+            }
+        }
+        public bool CheckComplete()
+        {
+            float min = float.MinValue;
+            return
+                Minus45DegreeMaxFlatness != min &&
+                ZeroDegreeMaxFlatness != min &&
+                Plus45DegreeMaxFlatness != min &&
+                Minus45DegreeMaxLinearity != min &&
+                ZeroDegreeMaxLinearity != min &&
+                Plus45DegreeMaxLinearity != min &&
+                Timestamp != default;
+        }
     }
 
     class AccuracyResult
@@ -171,7 +302,7 @@ namespace HelixTroubleshootingWPF
                     }
                     return false;
                 }
-                catch (System.IO.IOException)
+                catch (IOException)
                 {
                     System.Threading.Thread.Sleep(1000);
                     continue;
@@ -258,7 +389,7 @@ namespace HelixTroubleshootingWPF
                     }
                     return false;
                 }
-                catch (System.IO.IOException)
+                catch (IOException)
                 {
                     System.Threading.Thread.Sleep(1000);
                     continue;

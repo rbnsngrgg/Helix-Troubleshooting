@@ -57,8 +57,10 @@ namespace HelixTroubleshootingWPF.Functions
 
         public static void DebugFunction()
         {
-            List<HelixEvoSensor> sensors = GetEvoData("920-0201");
-            GetRectificationTemps(ref sensors, "920-0201");
+            //HelixEvoSensor sensor = new();
+            //sensor.RectData.Update(@"\\castor\Ftproot\RectData\SN139XXX\SN139169\SN139169.log");
+            LinearityFlatnessResults();
+            Debug.WriteLine("Done.");
         }
     }
 }

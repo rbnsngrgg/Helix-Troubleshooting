@@ -28,6 +28,7 @@ namespace HelixTroubleshootingWPF.Functions
         public string TcompBackupDir { get; private set; } = "";
         public string TcompDir { get; private set; } = "";
         public string SensorIp { get; private set; } = "";
+        public bool GenerateReports { get; private set; }
         private bool CreateConfig(string configPath)
         {
             ///Create new config with default values, return true if success
@@ -46,6 +47,7 @@ namespace HelixTroubleshootingWPF.Functions
                         "37,39,40,41,42,45,46,51,54,57,60,63,66,69,72,75,78,81,84,87,90,93,94\" " +
                         "dataGrouping = \"\"/>",
                         "\t<SensorTest sensorIp = \"10.0.4.96\"/>",
+                        "\t<RectDataReport generateReports = \"true\"/>",
                     "</Helix_Troubleshooting_Config>" };
                 File.WriteAllLines(configPath, lines);
                 XmlDocument config = new XmlDocument();
@@ -65,14 +67,13 @@ namespace HelixTroubleshootingWPF.Functions
                 config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[6].Value = @"\\castor\Production\Manufacturing\MfgSoftware\HelixSoloFocusFixture\200-0655\Results\HelixSoloFocusFixtureMasterLog.txt";
                 config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[7].Value = @"\\castor\Ftproot\RectData\HelixRectResults.log";
 
-
                 //config.FirstChild.ChildNodes[0].ChildNodes[0].Attributes[0]
                 config.FirstChild.ChildNodes[1].Attributes[0].Value = "20";
                 config.FirstChild.ChildNodes[2].Attributes[0].Value = "3";
                 config.Save(ConfigName);
                 return true;
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show($"Error creating config file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
@@ -100,6 +101,7 @@ namespace HelixTroubleshootingWPF.Functions
             LineThresholdPercent = 20;
             AlsSensitivity = 3;
             SensorIp = "";
+            GenerateReports = false;
         }
         public void LoadConfig()
         {
@@ -182,6 +184,9 @@ namespace HelixTroubleshootingWPF.Functions
             elements = config.GetElementsByTagName("SensorTest");
             if (elements != null)
             { SensorIp = elements[0].Attributes.GetNamedItem("sensorIp").Value; }
+            elements = config.GetElementsByTagName("RectDataReport");
+            if (elements != null)
+            { GenerateReports = elements[0].Attributes.GetNamedItem("generateReports").Value.ToLower() == "true"; }
         }
     }
 }
