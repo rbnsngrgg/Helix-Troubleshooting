@@ -4,6 +4,7 @@ using System.Windows;
 using System.Xml;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace HelixTroubleshootingWPF.Functions
 {
@@ -28,7 +29,16 @@ namespace HelixTroubleshootingWPF.Functions
         public string TcompBackupDir { get; private set; } = "";
         public string TcompDir { get; private set; } = "";
         public string SensorIp { get; private set; } = "";
-        public bool GenerateReports { get; private set; }
+        public bool GenerateReports { get; private set; } = false;
+        public string RectDataReportDir { get; private set; } = "";
+        public int ReportIntervalMinutes { get; private set; } = 1440;
+        public DateTime ReportStartTime { get ; private set; } = new Func<DateTime>(() =>
+        {
+            DateTime time = DateTime.Today;
+            time.AddHours(16);
+            time.AddMinutes(30);
+            return time;
+        })();
         private bool CreateConfig(string configPath)
         {
             ///Create new config with default values, return true if success
@@ -47,7 +57,7 @@ namespace HelixTroubleshootingWPF.Functions
                         "37,39,40,41,42,45,46,51,54,57,60,63,66,69,72,75,78,81,84,87,90,93,94\" " +
                         "dataGrouping = \"\"/>",
                         "\t<SensorTest sensorIp = \"10.0.4.96\"/>",
-                        "\t<RectDataReport generateReports = \"true\"/>",
+                        "\t<RectDataReport generateReports = \"false\" reportDirectory = \"\" intervalMinutes = \"1440\" startTime = \"16:30\"/>",
                     "</Helix_Troubleshooting_Config>" };
                 File.WriteAllLines(configPath, lines);
                 XmlDocument config = new XmlDocument();
@@ -186,7 +196,18 @@ namespace HelixTroubleshootingWPF.Functions
             { SensorIp = elements[0].Attributes.GetNamedItem("sensorIp").Value; }
             elements = config.GetElementsByTagName("RectDataReport");
             if (elements != null)
-            { GenerateReports = elements[0].Attributes.GetNamedItem("generateReports").Value.ToLower() == "true"; }
+            {
+                GenerateReports = elements[0].Attributes.GetNamedItem("generateReports").Value.ToLower() == "true";
+                RectDataReportDir = elements[0].Attributes.GetNamedItem("reportDirectory").Value;
+                ReportIntervalMinutes = int.Parse(elements[0].Attributes.GetNamedItem("intervalMinutes").Value);
+                DateTime time = default;
+                DateTime.TryParseExact(elements[0].Attributes.GetNamedItem("startTime").Value,
+                    "HH:mm",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out time);
+                if(time != default) { ReportStartTime = time; }
+            }
         }
     }
 }

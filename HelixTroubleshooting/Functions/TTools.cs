@@ -14,7 +14,7 @@ namespace HelixTroubleshootingWPF.Functions
         //Array of strings to be added to function list
         public static readonly string[] functionList = new string[] {"ALS Point Removal","Fix Algorithm Errors","Illuminated Sphere Summary",
             "Solo Laser Line Analysis","Staring Dot Removal","Temperature Adjust", "DACMEMS Data Gather", "UFF Data Gather", "LPF Data Gather",
-            "Pitch Data Gather","Evo Data Gather", "Sensor Test", "Generate TComp Template","Test"};// "Evo KNN", "Evo KNN Regression", "KNN Validation", "Test ML.net"};
+            "Pitch Data Gather","Evo Data Gather", "Sensor Test", "Generate TComp Template", "Evo Performance Reports", "Test"};// "Evo KNN", "Evo KNN Regression", "KNN Validation", "Test ML.net"};
 
         public static TToolsConfig Config = new();
         //Private Helper Functions----------------------------------------------------------------------------------------
@@ -57,10 +57,6 @@ namespace HelixTroubleshootingWPF.Functions
 
         public static void DebugFunction()
         {
-            //HelixEvoSensor sensor = new();
-            //sensor.RectData.Update(@"\\castor\Ftproot\RectData\SN139XXX\SN139169\SN139169.log");
-            LinearityFlatnessResults();
-            Debug.WriteLine("Done.");
         }
     }
 }

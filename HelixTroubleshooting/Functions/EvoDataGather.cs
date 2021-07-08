@@ -86,12 +86,12 @@ namespace HelixTroubleshootingWPF.Functions
             if (pathFolder == "")
             {
                 filePath = @$"{dataGatherFolder}\{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_EvoFixtureDataGather.txt";
-                WriteAndOpen(dataGatherFolder, filePath, logLines);
+                WriteFile(dataGatherFolder, filePath, logLines);
             }
             else
             {
                 filePath = @$"{dataGatherFolder}\{pathFolder}\{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_EvoFixtureDataGather.txt";
-                WriteAndOpen(@$"{dataGatherFolder}\{pathFolder}", filePath, logLines);
+                WriteFile(@$"{dataGatherFolder}\{pathFolder}", filePath, logLines);
             }
 
         }
@@ -121,7 +121,7 @@ namespace HelixTroubleshootingWPF.Functions
                 logLines.Add($"{sensor.SerialNumber}\t{sensor.PartNumber}\t{sensor.AccuracyResult}\t{sensor.DacMemsData}");
             }
             string filePath = @$"{dataGatherFolder}\{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_DACMEMSDataGather.txt";
-            WriteAndOpen(dataGatherFolder, filePath, logLines);
+            WriteFile(dataGatherFolder, filePath, logLines);
         }
         public static void UffDataGather()
         {
@@ -133,7 +133,7 @@ namespace HelixTroubleshootingWPF.Functions
                 logLines.Add($"{s.SerialNumber}\t{s.PartNumber}\t{s.AccuracyResult}\t{s.UffData}");
             }
             string filePath = $@"{dataGatherFolder}\{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_UFFDataGather.txt";
-            WriteAndOpen(dataGatherFolder, filePath, logLines);
+            WriteFile(dataGatherFolder, filePath, logLines);
         }
         public static void LpfDataGather()
         {
@@ -146,7 +146,7 @@ namespace HelixTroubleshootingWPF.Functions
                 logLines.Add($"{s.SerialNumber}\t{s.PartNumber}\t{s.AccuracyResult}\t{s.LpfData}");
             }
             string filePath = $@"{dataGatherFolder}\{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_LPFDataGather.txt";
-            WriteAndOpen(dataGatherFolder, filePath, logLines);
+            WriteFile(dataGatherFolder, filePath, logLines);
         }
         public static void PitchDataGather()
         {
@@ -158,7 +158,7 @@ namespace HelixTroubleshootingWPF.Functions
                 logLines.Add($"{s.SerialNumber}\t{s.PartNumber}\t{s.AccuracyResult}\t{s.PitchData}");
             }
             string filePath = $@"{dataGatherFolder}\{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_PitchDataGather.txt";
-            WriteAndOpen(dataGatherFolder, filePath, logLines);
+            WriteFile(dataGatherFolder, filePath, logLines);
         }
         public static List<HelixEvoSensor> EvoSensorsFromDacMems(List<HelixEvoSensor> preSensors = null)
         {
@@ -586,7 +586,7 @@ namespace HelixTroubleshootingWPF.Functions
             }
             string folder = Path.Join(Config.ResultsDir, "\\RectificationTemps");
             string filePath = Path.Join(folder, $"\\{DateTime.Now:yyyy-MM-dd-HH-mm-ss}_RectificationTemps.txt");
-            WriteAndOpen(folder, filePath, lines);
+            WriteFile(folder, filePath, lines);
         }
         public static Tuple<string, double, double, double> GetTempsFromFile(string sn, string file)
         {
@@ -689,11 +689,11 @@ namespace HelixTroubleshootingWPF.Functions
             }
             return folders;
         }
-        public static void WriteAndOpen(string folderPath, string filePath, List<string> lines)
+        public static void WriteFile(string folderPath, string filePath, List<string> lines, bool open = true)
         {
             Directory.CreateDirectory(folderPath);
             File.WriteAllLines(filePath, lines);
-            Process.Start("explorer.exe", folderPath);
+            if (open) { Process.Start("explorer.exe", folderPath); }
         }
     }
 }

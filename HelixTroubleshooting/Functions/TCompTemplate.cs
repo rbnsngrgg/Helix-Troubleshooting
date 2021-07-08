@@ -16,7 +16,7 @@ namespace HelixTroubleshootingWPF.Functions
             List<string> lines = template.GetLines();
             string templateFolder = Path.Join(Config.ResultsDir, "\\TComp_Templates");
             Directory.CreateDirectory(templateFolder);
-            WriteAndOpen(templateFolder, Path.Join(templateFolder, $"{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_{model}_Template.txt"), lines);
+            WriteFile(templateFolder, Path.Join(templateFolder, $"{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_{model}_Template.txt"), lines);
             MessageBox.Show($"{model} template generated using the data from {templateData.Item2} sensors from the past {months} months.",
                 "Template Generated",MessageBoxButton.OK, MessageBoxImage.Information);
         }

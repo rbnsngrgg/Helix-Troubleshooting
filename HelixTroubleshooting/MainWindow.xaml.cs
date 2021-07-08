@@ -2,7 +2,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Diagnostics;
+using System.Timers;
 using System;
+using System.IO;
 
 namespace HelixTroubleshootingWPF
 {
@@ -11,7 +13,9 @@ namespace HelixTroubleshootingWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        public readonly string Version = "3.1.0";
+        public readonly string Version = "3.2.0";
+       
+
         public MainWindow()
         {
             InitializeComponent();
@@ -19,8 +23,18 @@ namespace HelixTroubleshootingWPF
             TToolsFunctions.Config.LoadConfig();
             AddFunctions();
             ToggleDataGather();
+            TToolsFunctions.LogLocation = Path.Join(TToolsFunctions.Config.ResultsDir, @"ReportGeneration\EvoReportLog.txt");
+            if (TToolsFunctions.Config.GenerateReports)
+            {
+                TToolsFunctions.Timer = new Timer(300000);
+                TToolsFunctions.Timer.Elapsed += TToolsFunctions.AllEvoReportsTimerElapsed;
+                TToolsFunctions.Timer.AutoReset = false;
+                TToolsFunctions.Timer.Enabled = true;
+            }
+            ShowInTaskbar = false;
+            WindowState = WindowState.Minimized;
+            Hide();
         }
-
         
         private void UpdateDetails(string item)
         {
@@ -155,6 +169,16 @@ namespace HelixTroubleshootingWPF
                 DetailsButton1.Visibility = Visibility.Visible;
                 DetailsButton2.Visibility = Visibility.Hidden;
             }
+            else if (item == "Evo Performance Reports")
+            {
+                DetailsBox.Text = "Generate performance reports for Evo sensors." +
+                    " Enter a serial number, or leave blank to generate reports for all Evo sensors." +
+                    $"\nAutomatic reports are currently {(TToolsFunctions.Config.GenerateReports ? "ENABLED" : "DISABLED")}.";
+                DetailsTextBox1.Visibility = Visibility.Visible;
+                DetailsTextBox2.Visibility = Visibility.Hidden;
+                DetailsButton1.Visibility = Visibility.Visible;
+                DetailsButton2.Visibility = Visibility.Hidden;
+            }
             else if (item == "Test")
             {
                 DetailsBox.Text = "Test function";
@@ -254,6 +278,17 @@ namespace HelixTroubleshootingWPF
                     MessageBox.Show(ex.Message, "Template Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+            else if (function == "Evo Performance Reports")
+            {
+                if(DetailsTextBox1.Text != "")
+                {
+                    TToolsFunctions.SingleEvoReport(DetailsTextBox1.Text);
+                }
+                else
+                {
+                    TToolsFunctions.AllEvoReports(true);
+                }
+            }
             else if (function == "Test")
             {
                 TToolsFunctions.DebugFunction();
@@ -345,6 +380,7 @@ namespace HelixTroubleshootingWPF
         {
             ShowInTaskbar = true;
             WindowState = WindowState.Normal;
+            if (!IsVisible) { Show(); }
         }
 
         private void ContextMenuExit_Click(object sender, RoutedEventArgs e)

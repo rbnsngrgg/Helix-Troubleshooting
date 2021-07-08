@@ -12,6 +12,7 @@ namespace HelixTroubleshootingWPF
     class HelixSensor
     {
         private string serialNumber = "";
+        private string partNumber = "";
         //Properties
         public string SerialNumber
         {
@@ -27,7 +28,22 @@ namespace HelixTroubleshootingWPF
         } //Should not contain "SN" prefix
         public string RectDataFolder { get; private set; } = "";
         public string CameraSerial { get; set; }
-        public string PartNumber { get; set; }
+        public string PartNumber { get => partNumber; set
+            {
+                partNumber = value;
+                if (partNumber.Length >= 13)
+                {
+                    if (partNumber[9].ToString().ToUpper() == "M")
+                    {
+                        LaserClass = "2M";
+                    }
+                    else if (partNumber[9].ToString().ToUpper() == "R")
+                    {
+                        LaserClass = "3R";
+                    }
+                }
+            }
+        }
         public string SensorRev { get; set; }
         public string RectRev { get; set; }
         public string RectPosRev { get; set; }
@@ -57,7 +73,10 @@ namespace HelixTroubleshootingWPF
             string xmlPath = "";
             foreach(string file in Directory.GetFiles(containingFolder))
             {
-                if (System.IO.Path.GetFileName(file).Contains(".xml") & System.IO.Path.GetFileName(file).Contains("SN") & System.IO.Path.GetFileName(file).Length==12) { xmlPath = file;}
+                if (Path.GetFileName(file).Contains(".xml") &&
+                    Path.GetFileName(file).Contains("SN") &&
+                    Path.GetFileName(file).Length==12 &&
+                    Path.GetFileName(file).Contains(SerialNumber)) { xmlPath = file; break; }
             }
 
             if (xmlPath == "") { return false; }
@@ -76,7 +95,6 @@ namespace HelixTroubleshootingWPF
             LaserClass = xml.LastChild.ChildNodes[0].ChildNodes[0].Attributes[15].Value;
 
             CameraSerial = xml.LastChild.ChildNodes[1].ChildNodes[0].Attributes[0].Value; //RECT_OUTPUT > IMAGERS > IMAGER > Imager_UID
-
             return true;
         }
         public bool GetSensorDataFromString(string xmlString)
@@ -133,6 +151,55 @@ namespace HelixTroubleshootingWPF
             }
             return data;
         }
+        public void GetRectData(string filePath)
+        {
+            GetLimits(RectData.Update(filePath));
+        }
+        public void GetLimits(string configPath)
+        {
+            if (File.Exists(configPath))
+            {
+                XmlDocument config = new XmlDocument();
+                config.Load(configPath);
+                var elements = config.GetElementsByTagName("FIT_CRITERIA");
+                if (elements != null)
+                {
+                    RectData.ZeroDegreeFlatnessLimit = float.Parse(elements[0].Attributes.GetNamedItem("Flatness_1Sigma_Error").Value);
+                    RectData.ZeroDegreeLinearityLimit = float.Parse(elements[0].Attributes.GetNamedItem("Linearity_Error").Value);
+                }
+                elements = config.GetElementsByTagName("ACCURACY_TEST");
+                if (elements != null)
+                {
+                    foreach(XmlNode subElement in elements)
+                    {
+                        if (subElement.Attributes.GetNamedItem("Feature_Type").Value == "VDE2634")
+                        {
+                            if (VDE.SphereSpacingErrorLimit == default)
+                            { VDE.SphereSpacingErrorLimit = float.Parse(subElement.Attributes.GetNamedItem("Max_SphereSpacingError").Value) / 1000f; }
+                            if (VDE.SphereProbingErrorSizeLimit == default)
+                            { VDE.SphereProbingErrorSizeLimit = float.Parse(subElement.Attributes.GetNamedItem("Max_SphereProbingError_Size").Value) / 1000f; }
+                            if (VDE.SphereProbingErrorFormLimit == default)
+                            { VDE.SphereProbingErrorFormLimit = float.Parse(subElement.Attributes.GetNamedItem("Max_SphereProbingError_Form").Value) / 1000f; }
+                            if (VDE.PlaneProbingErrorFormLimit == default)
+                            { VDE.PlaneProbingErrorFormLimit = float.Parse(subElement.Attributes.GetNamedItem("Max_PlaneProbingError_Form").Value) / 1000f; }
+                            break;
+                        }
+                    }
+                }
+                elements = config.GetElementsByTagName("ACCURACY_TEST");
+                if (elements != null)
+                {
+                    foreach (XmlNode subElement in elements)
+                    {
+                        if (subElement.Attributes.GetNamedItem("Feature_Type").Value == "Solid_Sphere")
+                        {
+                            AccuracyResult.ZeroDegree2RmsLimit = float.Parse(subElement.Attributes.GetNamedItem("Max_2_Sigma_Error").Value);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     class HelixSoloSensor : HelixSensor
@@ -147,18 +214,21 @@ namespace HelixTroubleshootingWPF
     {
         public float Minus45DegreeMaxLinearity { get; private set; } = float.MinValue;
         public float ZeroDegreeMaxLinearity { get; private set; } = float.MinValue;
+        public float ZeroDegreeLinearityLimit { get; set; } = 80f;
         public float Plus45DegreeMaxLinearity { get; private set; } = float.MinValue;
 
 
         public float Minus45DegreeMaxFlatness { get; private set; } = float.MinValue;
         public float ZeroDegreeMaxFlatness { get; private set; } = float.MinValue;
+        public float ZeroDegreeFlatnessLimit { get; set; } = 300f;
         public float Plus45DegreeMaxFlatness { get; private set; } = float.MinValue;
         public DateTime Timestamp { get; private set; } = new();
 
         public EvoRectificationData() { }
 
-        public void Update(string filePath)
+        public string Update(string filePath)
         {
+            string configPath = "";
             for (int i = 0; i < 4; i++)
             {
                 try
@@ -199,7 +269,14 @@ namespace HelixTroubleshootingWPF
                         { latest = true; }
                         if (latest)
                         {
-
+                            if(line.Contains("Using Config. File:"))
+                            {
+                                configPath = line.Replace("Using Config. File: ","");
+                                if(configPath.Contains("R:"))
+                                {
+                                    configPath = configPath.Replace("R:", @"\\castor\ftproot");
+                                }
+                            }
                             if (!linearityFlatness && line.Contains("Starting validate model processing"))
                             {
                                 linearityFlatness = true;
@@ -237,7 +314,7 @@ namespace HelixTroubleshootingWPF
                         ZeroDegreeMaxFlatness = flatnessResults["0"];
                         Plus45DegreeMaxFlatness = flatnessResults["45"];
                     }
-                    return;
+                    return configPath;
                 }
                 catch (IOException)
                 {
@@ -245,17 +322,17 @@ namespace HelixTroubleshootingWPF
                     continue;
                 }
             }
+            return configPath;
         }
         public bool CheckComplete()
         {
-            float min = float.MinValue;
             return
-                Minus45DegreeMaxFlatness != min &&
-                ZeroDegreeMaxFlatness != min &&
-                Plus45DegreeMaxFlatness != min &&
-                Minus45DegreeMaxLinearity != min &&
-                ZeroDegreeMaxLinearity != min &&
-                Plus45DegreeMaxLinearity != min &&
+                Minus45DegreeMaxFlatness != float.MinValue &&
+                ZeroDegreeMaxFlatness != float.MinValue &&
+                Plus45DegreeMaxFlatness != float.MinValue &&
+                Minus45DegreeMaxLinearity != float.MinValue &&
+                ZeroDegreeMaxLinearity != float.MinValue &&
+                Plus45DegreeMaxLinearity != float.MinValue &&
                 Timestamp != default;
         }
     }
@@ -268,7 +345,7 @@ namespace HelixTroubleshootingWPF
         public DateTime Timestamp { get => timestamp; }
         public float ZeroDegree2Rms { get => zeroDegree2Rms; }
         public float ZeroDegreeMaxDev { get => zeroDegreeMaxDev; }
-
+        public float ZeroDegree2RmsLimit { get; set; } = 150f;
         public AccuracyResult()
         {
 
@@ -346,11 +423,20 @@ namespace HelixTroubleshootingWPF
         private float sphereProbingErrorForm = 0f;
         private float planeProbingError = 0f;
 
+        private float sphereSpacingErrorLimit = default;
+        private float sphereProbingErrorSizeLimit = default;
+        private float sphereProbingErrorFormLimit = default;
+        private float planeProbingErrorFormLimit = default;
+
         public DateTime Timestamp { get => timestamp; }
         public float SphereSpacingError { get => sphereSpacingError; }
         public float SphereProbingErrorSize { get => sphereProbingErrorSize; }
         public float SphereProbingErrorForm { get => sphereProbingErrorForm; }
         public float PlaneProbingError { get => planeProbingError; }
+        public float SphereSpacingErrorLimit { get => sphereSpacingErrorLimit; set => sphereSpacingErrorLimit = value; }
+        public float SphereProbingErrorSizeLimit { get => sphereProbingErrorSizeLimit; set => sphereProbingErrorSizeLimit = value; }
+        public float SphereProbingErrorFormLimit { get => sphereProbingErrorFormLimit; set => sphereProbingErrorFormLimit = value; }
+        public float PlaneProbingErrorFormLimit { get => planeProbingErrorFormLimit; set => planeProbingErrorFormLimit = value; }
 
         public VDEResult()
         {
@@ -379,13 +465,26 @@ namespace HelixTroubleshootingWPF
                         else if (line.Contains("VDE-2634 Accuracy Test: Inspection Results"))
                         { results = true; }
                         else if (line.Contains("Sphere Spacing Error (SD)") & results)
-                        { float.TryParse(line.Split(" ")[4], out sphereSpacingError); }
+                        {
+                            float.TryParse(line.Split(" ")[4], out sphereSpacingError);
+                            float.TryParse(line.Split(" ")[5], out sphereSpacingErrorLimit);
+                        }
                         else if (line.Contains("Sphere Probing Error - Size (Ps)") & results)
-                        { float.TryParse(line.Split("=")[6], out sphereProbingErrorSize); }
+                        {
+                            float.TryParse(line.Split("=")[6], out sphereProbingErrorSize);
+                            float.TryParse(line.Split("=")[7], out sphereProbingErrorSizeLimit);
+                        }
                         else if (line.Contains("Sphere Probing Error - Form (Pf)") & results)
-                        { float.TryParse(line.Split("=")[6], out sphereProbingErrorForm); }
+                        {
+                            float.TryParse(line.Split("=")[6], out sphereProbingErrorForm);
+                            float.TryParse(line.Split("=")[7], out sphereProbingErrorFormLimit);
+                        }
                         else if (line.Contains("Plane Probing Error  - Form (F)") & results)
-                        { float.TryParse(line.Split("=")[6], out planeProbingError); return true; }
+                        {
+                            float.TryParse(line.Split("=")[6], out planeProbingError);
+                            float.TryParse(line.Split("=")[7], out planeProbingErrorFormLimit);
+                            return true;
+                        }
                     }
                     return false;
                 }
@@ -406,9 +505,13 @@ namespace HelixTroubleshootingWPF
             }
             catch { return false; }
             float.TryParse(line[176], out sphereSpacingError);
+            float.TryParse(line[177], out sphereSpacingErrorLimit);
             float.TryParse(line[179], out sphereProbingErrorForm);
+            float.TryParse(line[180], out sphereProbingErrorFormLimit);
             float.TryParse(line[182], out sphereProbingErrorSize);
+            float.TryParse(line[183], out sphereProbingErrorSizeLimit);
             float.TryParse(line[185], out planeProbingError);
+            float.TryParse(line[186], out planeProbingErrorFormLimit);
             if (sphereSpacingError == 0f || sphereProbingErrorForm == 0f) { return false; }
             timestamp = newTimestamp;
             return true;
