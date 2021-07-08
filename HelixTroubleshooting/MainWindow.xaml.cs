@@ -31,9 +31,12 @@ namespace HelixTroubleshootingWPF
                 TToolsFunctions.Timer.AutoReset = false;
                 TToolsFunctions.Timer.Enabled = true;
             }
-            ShowInTaskbar = false;
-            WindowState = WindowState.Minimized;
-            Hide();
+            if(TToolsFunctions.Config.StartMinimized)
+            {
+                ShowInTaskbar = false;
+                WindowState = WindowState.Minimized;
+                Hide();
+            }
         }
         
         private void UpdateDetails(string item)

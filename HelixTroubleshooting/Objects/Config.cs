@@ -32,20 +32,21 @@ namespace HelixTroubleshootingWPF.Functions
         public bool GenerateReports { get; private set; } = false;
         public string RectDataReportDir { get; private set; } = "";
         public int ReportIntervalMinutes { get; private set; } = 1440;
-        public DateTime ReportStartTime { get ; private set; } = new Func<DateTime>(() =>
+        public DateTime ReportStartTime { get; private set; } = new Func<DateTime>(() =>
         {
             DateTime time = DateTime.Today;
             time.AddHours(16);
             time.AddMinutes(30);
             return time;
         })();
+        public bool StartMinimized { get; private set; } = false;
         private bool CreateConfig(string configPath)
         {
             ///Create new config with default values, return true if success
             try
             {
                 //Generate file and write first lines
-                string[] lines = { "<Helix_Troubleshooting_Config>",
+                string[] lines = { "<Helix_Troubleshooting_Config startMinimized = \"false\">",
                         "\t<Directories tcompBackupDir = \"\" tcompDir = \"\" rectDataDir = \"\" resultsDir = \"\">",
                         "\t\t<FixtureResults mirrorcleDataDir = \"\" evoTuningFixtureLog = \"\" evoLpfLog = \"\" " +
                         "evoPitchLog = \"\" evoUffLog = \"\" soloLaserAlignLog = \"\" soloFocusLog = \"\" helixRectResultsLog = \"\"/>",
@@ -112,6 +113,8 @@ namespace HelixTroubleshootingWPF.Functions
             AlsSensitivity = 3;
             SensorIp = "";
             GenerateReports = false;
+            ReportIntervalMinutes = 1440;
+            StartMinimized = false;
         }
         public void LoadConfig()
         {
@@ -208,6 +211,10 @@ namespace HelixTroubleshootingWPF.Functions
                     out time);
                 if(time != default) { ReportStartTime = time; }
             }
+            elements = config.GetElementsByTagName("Helix_Troubleshooting_Config");
+            if (elements != null)
+            { StartMinimized = elements[0].Attributes.GetNamedItem("startMinimized").Value.ToLower() == "true"; }
+
         }
     }
 }
