@@ -57,6 +57,8 @@ namespace HelixTroubleshootingWPF.Functions
 
         public static void DebugFunction()
         {
+            List<HelixEvoSensor> sensors = GetEvoData();
+            GetRectificationTemps(ref sensors, "920-0201");
         }
     }
 }

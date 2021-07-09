@@ -291,6 +291,7 @@ namespace HelixTroubleshootingWPF
                 {
                     TToolsFunctions.AllEvoReports(true);
                 }
+                MessageBox.Show("Report(s) Generated", "Evo Performance Reports", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else if (function == "Test")
             {

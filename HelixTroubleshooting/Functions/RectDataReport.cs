@@ -135,22 +135,22 @@ namespace HelixTroubleshootingWPF.Functions
                     "==============================================================================",
                     "\tSENSOR PERFORMANCE RESULTS",
                     "\t--------------------------",
-                    $"\tSENSOR PART NUMBER:\t{sensor.PartNumber}",
-                    $"\tSENSOR REVISION LEVEL:\t{sensor.SensorRev}",
-                    $"\tLASER CLASS:\t{sensor.LaserClass}\n",
+                    $"\tSENSOR PART NUMBER:    {sensor.PartNumber}",
+                    $"\tSENSOR REVISION LEVEL: {sensor.SensorRev}",
+                    $"\tLASER CLASS:           {sensor.LaserClass}\n",
                     "------------------------------------------------------------------------------",
-                    $"\tSensor Serial Number:\t{sensor.SerialNumber}",
-                    $"\tSensor Type:\tALS",
-                    $"\tPeceptron Part Number: {sensor.PartNumber}",
-                    $"\tPerceptron Revision: {sensor.SensorRev}",
+                    $"\tSensor Serial Number:   {sensor.SerialNumber}",
+                    $"\tSensor Type:            ALS",
+                    $"\tPeceptron Part Number:  {sensor.PartNumber}",
+                    $"\tPerceptron Revision:    {sensor.SensorRev}",
                     $"\tRectification Revision: {sensor.RectRev}",
                     "------------------------------------------------------------------------------",
-                    $"\tTime:\t{sensor.RectData.Timestamp:M/d/yyyy h:m:s tt}\n",
+                    $"\tTime:    {sensor.RectData.Timestamp:M/d/yyyy h:m:s tt}\n",
                     "VALIDATION DATA:",
-                    "\tResidual Sigma\t\t\t\t\tActual\tLimit",
-                    "\t--------------\t\t\t\t\t------\t-----",
-                    $"\tMax. Linearity Error (microns)\t{sensor.RectData.ZeroDegreeMaxLinearity}\t\t{sensor.RectData.ZeroDegreeLinearityLimit}",
-                    $"\tMax. Flatness Sigma (microns)\t{sensor.RectData.ZeroDegreeMaxFlatness}\t{sensor.RectData.ZeroDegreeFlatnessLimit}\n",
+                    "\tResidual Sigma                  Actual  Limit",
+                    "\t--------------                  ------  -----",
+                    $"\tMax. Linearity Error (microns)  {string.Format("{0,6:F2}", sensor.RectData.ZeroDegreeMaxLinearity)}   {sensor.RectData.ZeroDegreeLinearityLimit}",
+                    $"\tMax. Flatness Sigma (microns)   {string.Format("{0,6:F2}", sensor.RectData.ZeroDegreeMaxFlatness)}   {sensor.RectData.ZeroDegreeFlatnessLimit}\n",
                     $"\tSensor " +
                     (sensor.RectData.ZeroDegreeMaxFlatness < sensor.RectData.ZeroDegreeFlatnessLimit
                     && sensor.RectData.ZeroDegreeMaxLinearity < sensor.RectData.ZeroDegreeLinearityLimit ? "PASSES" : "FAILS") +
@@ -160,20 +160,20 @@ namespace HelixTroubleshootingWPF.Functions
                     $"ACCURACY DATA: VDE-2634",
                     "\tVDE-2634 Accuracy Test: Inspection Results\n",
                     "\tPoint Deviation Statistic: Maximum Average Point-to-Fit Distance",
-                    "\tTest\t\t\t\t\t\t\t\tMeasured\tLimit\tTest",
-                    "\t----------\t\t\t\t\t\t\t---------\t-----\t----",
-                    $"\tSphere Spacing Error (SD)\t\t\t{(sensor.VDE.SphereSpacingError * 1000f):F}" +
-                    $"\t\t{sensor.VDE.SphereSpacingErrorLimit * 1000f}" +
-                    $"\t\t{(sensor.VDE.SphereSpacingError * 1000f < sensor.VDE.SphereSpacingErrorLimit * 1000f ? "PASS" : "FAIL")}",
-                    $"\tSphere Probing Error - Size (Ps)\t{(sensor.VDE.SphereProbingErrorSize * 1000f):F}" +
-                    $"\t\t{sensor.VDE.SphereProbingErrorSizeLimit * 1000f}" +
-                    $"\t\t{(sensor.VDE.SphereProbingErrorSize * 1000f < sensor.VDE.SphereProbingErrorSizeLimit * 1000f ? "PASS" : "FAIL")}",
-                    $"\tSphere Probing Error - Form (Pf)\t{(sensor.VDE.SphereProbingErrorForm * 1000f):F}" +
-                    $"\t\t{sensor.VDE.SphereProbingErrorFormLimit * 1000f}" +
-                    $"\t\t{(sensor.VDE.SphereProbingErrorForm * 1000f < sensor.VDE.SphereProbingErrorFormLimit * 1000f ? "PASS" : "FAIL")}",
-                    $"\tPlane Probing Error - Form (F)\t\t{(sensor.VDE.PlaneProbingError * 1000f):F}" +
-                    $"\t\t{sensor.VDE.PlaneProbingErrorFormLimit * 1000f}" +
-                    $"\t\t{(sensor.VDE.PlaneProbingError * 1000f < sensor.VDE.PlaneProbingErrorFormLimit * 1000f ? "PASS" : "FAIL")}"
+                    "\tTest                                Measured    Limit    Test",
+                    "\t--------------------------------    ---------   -----    ----",
+                    $"\tSphere Spacing Error (SD)           {string.Format("{0,6:F2}", (sensor.VDE.SphereSpacingError * 1000f))}" +
+                    $"       {sensor.VDE.SphereSpacingErrorLimit * 1000f}" +
+                    $"     {(sensor.VDE.SphereSpacingError * 1000f < sensor.VDE.SphereSpacingErrorLimit * 1000f ? "PASS" : "FAIL")}",
+                    $"\tSphere Probing Error - Size (Ps)    {string.Format("{0,6:F2}", (sensor.VDE.SphereProbingErrorSize * 1000f))}" +
+                    $"       {sensor.VDE.SphereProbingErrorSizeLimit * 1000f}" +
+                    $"     {(sensor.VDE.SphereProbingErrorSize * 1000f < sensor.VDE.SphereProbingErrorSizeLimit * 1000f ? "PASS" : "FAIL")}",
+                    $"\tSphere Probing Error - Form (Pf)    {string.Format("{0,6:F2}", (sensor.VDE.SphereProbingErrorForm * 1000f))}" +
+                    $"       {sensor.VDE.SphereProbingErrorFormLimit * 1000f}" +
+                    $"     {(sensor.VDE.SphereProbingErrorForm * 1000f < sensor.VDE.SphereProbingErrorFormLimit * 1000f ? "PASS" : "FAIL")}",
+                    $"\tPlane Probing Error - Form (F)      {string.Format("{0,6:F2}", (sensor.VDE.PlaneProbingError * 1000f))}" +
+                    $"       {sensor.VDE.PlaneProbingErrorFormLimit * 1000f}" +
+                    $"     {(sensor.VDE.PlaneProbingError * 1000f < sensor.VDE.PlaneProbingErrorFormLimit * 1000f ? "PASS" : "FAIL")}"
                 };
                 string folder = GetReportResultsFolder(sensor.RectDataFolder);
                 string file = Path.Join(folder, $"SN{sensor.SerialNumber}.txt");
