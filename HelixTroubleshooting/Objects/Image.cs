@@ -51,7 +51,7 @@ namespace HelixTroubleshootingWPF.Objects
         }
         public HelixImage(string path)
         {
-            settings.SetDefine("tiff:ignore-tags", "37373");
+            settings.SetDefine("tiff:ignore-tags", "37373,37374");
             if (File.Exists(path))
             {
                 this.path = path;
