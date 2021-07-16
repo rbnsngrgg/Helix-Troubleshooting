@@ -71,9 +71,9 @@ namespace HelixTroubleshootingWPF.Functions
                 }
             }
         }
-        public static void GatherEvoData(string pathFolder = "")
+        public static void GatherEvoData(string pathFolder = "", bool firstAccuracy = false)
         {
-            List<HelixEvoSensor> sensorList = GetEvoData();
+            List<HelixEvoSensor> sensorList = GetEvoData("", firstAccuracy);
             List<string> logLines = new() { ComboHeader };
             int i = 0;
             foreach (HelixEvoSensor s in sensorList)
@@ -95,7 +95,7 @@ namespace HelixTroubleshootingWPF.Functions
             }
 
         }
-        public static List<HelixEvoSensor> GetEvoData(string filter = "")
+        public static List<HelixEvoSensor> GetEvoData(string filter = "", bool firstAccuracy = false)
         {
             //Return list of Evo sensor data
             List<HelixEvoSensor> sensorList = EvoSensorsFromPitch(
@@ -103,7 +103,7 @@ namespace HelixTroubleshootingWPF.Functions
                     EvoSensorsFromDacMems(
                         EvoSensorsFromUff())));
             GetMirrorcleData(ref sensorList);
-            GetAccuracyResultsFromLog(ref sensorList);
+            GetAccuracyResultsFromLog(ref sensorList, firstAccuracy);
             //GetAfterThermalAccuracy(ref sensorList);
             if (filter != "")
             {

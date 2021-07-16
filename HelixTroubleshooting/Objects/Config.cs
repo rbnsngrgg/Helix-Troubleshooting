@@ -32,6 +32,7 @@ namespace HelixTroubleshootingWPF.Functions
         public bool GenerateReports { get; private set; } = false;
         public string RectDataReportDir { get; private set; } = "";
         public int ReportIntervalMinutes { get; private set; } = 1440;
+        public bool OneInstance { get; private set; } = true;
         public DateTime ReportStartTime { get; private set; } = new Func<DateTime>(() =>
         {
             DateTime time = DateTime.Today;
@@ -46,7 +47,7 @@ namespace HelixTroubleshootingWPF.Functions
             try
             {
                 //Generate file and write first lines
-                string[] lines = { "<Helix_Troubleshooting_Config startMinimized = \"false\">",
+                string[] lines = { "<Helix_Troubleshooting_Config startMinimized = \"false\" oneInstance = \"true\">",
                         "\t<Directories tcompBackupDir = \"\" tcompDir = \"\" rectDataDir = \"\" resultsDir = \"\">",
                         "\t\t<FixtureResults mirrorcleDataDir = \"\" evoTuningFixtureLog = \"\" evoLpfLog = \"\" " +
                         "evoPitchLog = \"\" evoUffLog = \"\" soloLaserAlignLog = \"\" soloFocusLog = \"\" helixRectResultsLog = \"\"/>",
@@ -213,8 +214,10 @@ namespace HelixTroubleshootingWPF.Functions
             }
             elements = config.GetElementsByTagName("Helix_Troubleshooting_Config");
             if (elements != null)
-            { StartMinimized = elements[0].Attributes.GetNamedItem("startMinimized").Value.ToLower() == "true"; }
-
+            {
+                StartMinimized = elements[0].Attributes.GetNamedItem("startMinimized").Value.ToLower() == "true";
+                OneInstance = elements[0].Attributes.GetNamedItem("oneInstance").Value.ToLower() == "true";
+            }
         }
     }
 }

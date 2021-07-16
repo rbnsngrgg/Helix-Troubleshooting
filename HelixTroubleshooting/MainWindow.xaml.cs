@@ -37,6 +37,10 @@ namespace HelixTroubleshootingWPF
                 WindowState = WindowState.Minimized;
                 Hide();
             }
+            if(TToolsFunctions.Config.OneInstance)
+            {
+                CheckInstances();
+            }
         }
         
         private void UpdateDetails(string item)
@@ -189,6 +193,17 @@ namespace HelixTroubleshootingWPF
                 DetailsTextBox2.Visibility = Visibility.Visible;
                 DetailsButton1.Visibility = Visibility.Visible;
                 DetailsButton2.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void CheckInstances()
+        {
+            var processes = Process.GetProcessesByName("HelixTroubleshooting");
+            if (processes.Length > 1)
+            {
+                MessageBox.Show("There is another instance of Helix Troubleshooting running. OneInstance in the config is set to \"true\".",
+                    "One Instance", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                Environment.Exit(0);
             }
         }
 
@@ -363,7 +378,7 @@ namespace HelixTroubleshootingWPF
 
         private void HelixTroubleshootingMainWindow_Closed(object sender, EventArgs e)
         {
-            var processes = Process.GetProcessesByName("HelixTroubleshootingWPF");
+            var processes = Process.GetProcessesByName("HelixTroubleshooting");
             foreach (Process p in processes)
             {
                 p.Kill();

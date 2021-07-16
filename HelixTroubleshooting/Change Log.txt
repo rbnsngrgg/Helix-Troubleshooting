@@ -1,3 +1,7 @@
+3.2.2
+	-Fixed bug that caused a crash due to tiff tag 37374
+	-Added configurable option to only allow one instance of the application to run.
+
 3.2.1
 	-Adjusted formatting of Evo Performance Reports.
 	-Added messagebox upon completion of report generation.
