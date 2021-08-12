@@ -1,3 +1,9 @@
+3.2.3
+	-Improvement for the staring dot removal function.
+		-The staring dot bounding box is found only using 0-degree images, as the dots appear brighter in these images.
+		-Added configurable parameters for minimum intensity, x scan percentage, and y scan percentage.
+			-X and Y scan percentage determine how many pixels on each axis to exclude when searching for a staring dot.
+
 3.2.2
 	-Fixed bug that caused a crash due to tiff tag 37374
 	-Added configurable option to only allow one instance of the application to run.

@@ -41,32 +41,38 @@ namespace HelixTroubleshootingWPF.Functions
         {
             Dictionary<string, int[]> box = new Dictionary<string, int[]>() 
             { 
-                { "tl", new int[2]{ 0,0} },
                 { "tr", new int[2]{ 0,1200} },
                 { "bl", new int[2]{ 1600,0} },
-                { "br", new int[2]{ 0,0} }
             };
             HelixImage image1 = null;
             HelixImage image2 = null;
             foreach(string img in images) //Get 2 different images of same z value
             {
                 string zValue = GetImageZValue(img);
-                if (zValue == z)
+                if (zValue == z && Path.GetFileNameWithoutExtension(img).Contains("A0"))
                 {
                     if (image1 == null) { image1 = new HelixImage(img); }
-                    else if (Path.GetFileNameWithoutExtension(img) != image1.Name & image2 == null) { image2 = new HelixImage(img); break; }
+                    else if (Path.GetFileNameWithoutExtension(img) != image1.Name && image2 == null) { image2 = new HelixImage(img); break; }
                 }
             }
             IPixelCollection<byte> img1Pixels = image1.Magick.GetPixels();
             IPixelCollection<byte> img2Pixels = image2.Magick.GetPixels();
+            box["tr"][1] = image1.Magick.Height;
+            box["bl"][0] = image1.Magick.Width;
+
+            int intensityThreshold = (int)(255f * Config.StaringDotSensitivityPercent);
+            int xStart = (int)((Config.StaringDotExcludeXPercent * image1.Magick.Width) / 2);
+            int xEnd = image1.Magick.Width - xStart;
+            int yStart = (int)((Config.StaringDotExcludeYPercent * image1.Magick.Height) / 2);
+            int yEnd = image1.Magick.Height - yStart;
+
             //Create coords for box corners
-            for (int x = image1.Magick.Width / 4; x < (image1.Magick.Width / 4) * 3; x++)
+            for (int x = xStart; x < xEnd; x++)
             {
-                for (int y = image1.Magick.Height / 3; y < (image1.Magick.Height / 3) * 2; y++)
+                for (int y = yStart; y < yEnd; y++)
                 {
-                    int img1Value = img1Pixels.GetPixel(x, y).GetChannel(0);
-                    int img2Value = img2Pixels.GetPixel(x, y).GetChannel(0);
-                    if (img1Value > 51 & img2Value > 51)
+                    if(img1Pixels.GetPixel(x, y).GetChannel(0) > intensityThreshold &&
+                        img2Pixels.GetPixel(x, y).GetChannel(0) > intensityThreshold)
                     {
                         if (x < box["bl"][0]) { box["bl"][0] = x; }
                         if (x > box["tr"][0]) { box["tr"][0] = x; }

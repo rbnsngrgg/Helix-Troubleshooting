@@ -57,16 +57,16 @@ namespace HelixTroubleshootingWPF.Functions
 
         public static void DebugFunction()
         {
-            //List<HelixEvoSensor> sensorsFirstRun = GetEvoData("",true);
+            //List<HelixEvoSensor> sensorsFirstRun = GetEvoData("", true);
             //List<HelixEvoSensor> sensorsLastRun = GetEvoData();
             //List<string> lines = new() { "SN\tModel\tFirstAccuracyTime\tFirst2RMS\tFirstMaxDev\tLastAccuracyTime\tLast2RMS\tLastMaxDev" };
-            //foreach(HelixEvoSensor sensor in sensorsFirstRun)
+            //foreach (HelixEvoSensor sensor in sensorsFirstRun)
             //{
             //    string line = $"{sensor.SerialNumber}\t{sensor.PartNumber}\t{sensor.AccuracyResult.Timestamp}" +
             //        $"\t{sensor.AccuracyResult.ZeroDegree2Rms}\t{sensor.AccuracyResult.ZeroDegreeMaxDev}";
-            //    foreach(HelixEvoSensor sensor2 in sensorsLastRun)
+            //    foreach (HelixEvoSensor sensor2 in sensorsLastRun)
             //    {
-            //        if(sensor2.SerialNumber == sensor.SerialNumber)
+            //        if (sensor2.SerialNumber == sensor.SerialNumber)
             //        {
             //            line += $"\t{sensor2.AccuracyResult.Timestamp}\t{sensor2.AccuracyResult.ZeroDegree2Rms}" +
             //                $"\t{sensor2.AccuracyResult.ZeroDegreeMaxDev}";
@@ -75,9 +75,12 @@ namespace HelixTroubleshootingWPF.Functions
             //        }
             //    }
             //}
-            //WriteFile(Path.Join(Config.ResultsDir,"FirstLastAccuracy"), Path.Join(Config.ResultsDir, @"FirstLastAccuracy\firstLastAccuracy.txt"), lines);
-            List<HelixEvoSensor> sensors = LinearityFlatnessResults();
-            SaveFlatnessResults(ref sensors);
+            //WriteFile(Path.Join(Config.ResultsDir, "FirstLastAccuracy"), Path.Join(Config.ResultsDir, @"FirstLastAccuracy\firstLastAccuracy.txt"), lines);
+
+            //List<HelixEvoSensor> sensors = LinearityFlatnessResults();
+            //SaveFlatnessResults(ref sensors);
+            List<HelixEvoSensor> sensors = GetEvoData();
+            GetRectificationTemps(ref sensors);
         }
     }
 }

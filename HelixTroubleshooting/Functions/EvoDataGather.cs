@@ -560,15 +560,15 @@ namespace HelixTroubleshootingWPF.Functions
 
             }
         }
-        public static void GetRectificationTemps(ref List<HelixEvoSensor> sensors, string model)
+        public static void GetRectificationTemps(ref List<HelixEvoSensor> sensors, string model = "")
         {
             List<Tuple<string, double, double, double>> temps = new();
-            List<string> lines = new() { "SerialNumber\tFirstTemp\tLastTemp\tDifference\tRefCycleAvg" };
+            List<string> lines = new() { "SerialNumber\tPartNumber\tFirstTemp\tLastTemp\tDifference\tRefCycleAvg" };
             GetTcompData(ref sensors);
             //Tuples are <sn, first temp, last temp, difference>
             foreach (HelixEvoSensor sensor in sensors)
             {
-                if (!sensor.PartNumber.Contains(model)) { continue; }
+                if (!sensor.PartNumber.Contains(model) && model != "") { continue; }
                 string dataFolder = Path.Join(Config.RectDataDir, $"\\SN{sensor.SerialNumber.Substring(0, 3)}XXX\\SN{sensor.SerialNumber}");
                 if (Directory.Exists(dataFolder))
                 {
@@ -579,7 +579,7 @@ namespace HelixTroubleshootingWPF.Functions
                         if(temp.Item2 != 0.0 && temp.Item3 != 0.0)
                         {
                             temps.Add(temp);
-                            lines.Add($"{sensor.SerialNumber}\t{temp.Item2}\t{temp.Item3}\t{Math.Round(temp.Item4, 3)}\t{Math.Round(sensor.TComp.RefCycleAvg, 3)}");
+                            lines.Add($"{sensor.SerialNumber}\t{sensor.PartNumber}\t{temp.Item2}\t{temp.Item3}\t{Math.Round(temp.Item4, 3)}\t{Math.Round(sensor.TComp.RefCycleAvg, 3)}");
                         }
                     }
                 }

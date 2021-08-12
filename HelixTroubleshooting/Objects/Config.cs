@@ -33,6 +33,9 @@ namespace HelixTroubleshootingWPF.Functions
         public string RectDataReportDir { get; private set; } = "";
         public int ReportIntervalMinutes { get; private set; } = 1440;
         public bool OneInstance { get; private set; } = true;
+        public float StaringDotSensitivityPercent { get; private set; } = 0.20f;
+        public float StaringDotExcludeXPercent { get; private set; } = 0.25f;
+        public float StaringDotExcludeYPercent { get; private set; } = 0.25f;
         public DateTime ReportStartTime { get; private set; } = new Func<DateTime>(() =>
         {
             DateTime time = DateTime.Today;
@@ -60,6 +63,7 @@ namespace HelixTroubleshootingWPF.Functions
                         "dataGrouping = \"\"/>",
                         "\t<SensorTest sensorIp = \"10.0.4.96\"/>",
                         "\t<RectDataReport generateReports = \"false\" reportDirectory = \"\" intervalMinutes = \"1440\" startTime = \"16:30\"/>",
+                        "\t<StaringDotRemoval staringDotSensitivityPercent = \"20\" staringDotExcludeXPercent = \"25\" staringDotExcludeYPercent = \"25\"/>",
                     "</Helix_Troubleshooting_Config>" };
                 File.WriteAllLines(configPath, lines);
                 XmlDocument config = new XmlDocument();
@@ -116,6 +120,9 @@ namespace HelixTroubleshootingWPF.Functions
             GenerateReports = false;
             ReportIntervalMinutes = 1440;
             StartMinimized = false;
+            StaringDotSensitivityPercent = 0.20f;
+            StaringDotExcludeXPercent = 0.25f;
+            StaringDotExcludeYPercent = 0.25f;
         }
         public void LoadConfig()
         {
@@ -217,6 +224,13 @@ namespace HelixTroubleshootingWPF.Functions
             {
                 StartMinimized = elements[0].Attributes.GetNamedItem("startMinimized").Value.ToLower() == "true";
                 OneInstance = elements[0].Attributes.GetNamedItem("oneInstance").Value.ToLower() == "true";
+            }
+            elements = config.GetElementsByTagName("StaringDotRemoval");
+            if (elements != null)
+            {
+                StaringDotSensitivityPercent = (float.Parse(elements[0].Attributes.GetNamedItem("staringDotSensitivityPercent").Value) / 100f);
+                StaringDotExcludeXPercent = (float.Parse(elements[0].Attributes.GetNamedItem("staringDotExcludeXPercent").Value)/ 100f);
+                StaringDotExcludeYPercent = (float.Parse(elements[0].Attributes.GetNamedItem("staringDotExcludeYPercent").Value) / 100f);
             }
         }
     }
