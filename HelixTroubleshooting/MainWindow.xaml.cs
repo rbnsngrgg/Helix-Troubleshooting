@@ -13,9 +13,8 @@ namespace HelixTroubleshootingWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        public readonly string Version = "3.2.3";
+        public readonly string Version = "3.3.0";
        
-
         public MainWindow()
         {
             InitializeComponent();
@@ -186,6 +185,15 @@ namespace HelixTroubleshootingWPF
                 DetailsButton1.Visibility = Visibility.Visible;
                 DetailsButton2.Visibility = Visibility.Hidden;
             }
+            else if (item == "Create R Configs")
+            {
+                DetailsBox.Text = "Generate \"R\" config files for Evo and Solo sensors, based on existing non-R configs." + 
+                    " Enter the path of the folder that contains all of the sensor rectification configs, then click start.";
+                DetailsTextBox1.Visibility = Visibility.Visible;
+                DetailsTextBox2.Visibility = Visibility.Hidden;
+                DetailsButton1.Visibility = Visibility.Visible;
+                DetailsButton2.Visibility = Visibility.Hidden;
+            }
             else if (item == "Test")
             {
                 DetailsBox.Text = "Test function";
@@ -307,6 +315,10 @@ namespace HelixTroubleshootingWPF
                     TToolsFunctions.AllEvoReports(true);
                 }
                 MessageBox.Show("Report(s) Generated", "Evo Performance Reports", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else if (function == "Create R Configs")
+            {
+                RPartConfig.CreateRPartConfigs(DetailsTextBox1.Text);
             }
             else if (function == "Test")
             {

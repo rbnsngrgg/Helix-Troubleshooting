@@ -1,3 +1,6 @@
+3.3.0
+	--Added function to create "R" part number config files for Evo and Solo sensors, based on configs that are present for non-R part numbers.
+
 3.2.3
 	-Improvement for the staring dot removal function.
 		-The staring dot bounding box is found only using 0-degree images, as the dots appear brighter in these images.
