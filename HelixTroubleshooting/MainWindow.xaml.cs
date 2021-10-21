@@ -327,13 +327,12 @@ namespace HelixTroubleshootingWPF
         }
         private void DetailsButton2_Click(object sender, RoutedEventArgs e)
         {
-            if (FunctionList.SelectedItems.Count == 0) { return; }
-
-            string function = FunctionList.SelectedItem.ToString();
-
-            if (function.Contains("Fix Algorithm Errors"))
-            {
-                TToolsFunctions.RestoreTcomp(DetailsTextBox1.Text);
+            if (FunctionList.SelectedItems.Count != 0) {
+                string function = FunctionList.SelectedItem.ToString();
+                if (function.Contains("Fix Algorithm Errors"))
+                {
+                    TToolsFunctions.RestoreTcomp(DetailsTextBox1.Text);
+                }
             }
         }
 

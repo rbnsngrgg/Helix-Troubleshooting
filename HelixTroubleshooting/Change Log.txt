@@ -1,5 +1,6 @@
 3.3.0
 	--Added function to create "R" part number config files for Evo and Solo sensors, based on configs that are present for non-R part numbers.
+	--Applied alsSensitivity config variable, where the function previously explicitly defined "3".
 
 3.2.3
 	-Improvement for the staring dot removal function.
@@ -76,7 +77,3 @@
 
 0.1.1
 	-Initial build
-
-
-
-

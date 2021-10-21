@@ -22,8 +22,7 @@ namespace HelixTroubleshootingWPF.Functions
         //Find all files in directory that contain a certain string. Return empty list if none found.
         private static List<string> GetFilesWith(string directory, string find)
         {
-            find = find.Insert(0, "*");
-            find += "*";
+            find = find.Insert(0, "*") + "*";
             List<string> files = new();
             try
             {
@@ -45,12 +44,8 @@ namespace HelixTroubleshootingWPF.Functions
             string folder = "";
             if(sn.Length == 8)
             {
-                sn = sn.Remove(5);
-                sn += "XXX";
-                if (Directory.Exists($@"{directory}\{sn}"))
-                {
-                    folder = $@"{directory}\{sn}";
-                }
+                sn = sn.Remove(5) + "XXX";
+                folder = Directory.Exists($@"{directory}\{sn}") ? $@"{directory}\{sn}" : "";
             }
             return folder;
         }

@@ -50,7 +50,7 @@ namespace HelixTroubleshootingWPF.Functions
 
                     if (occurrences.ContainsKey(entry))
                     {
-                        if (occurrences[entry] <= 3)
+                        if (occurrences[entry] <= Config.AlsSensitivity)
                         { newLines.Add(line); }
                     }
                 }
