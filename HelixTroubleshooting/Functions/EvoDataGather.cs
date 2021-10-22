@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using HelixTroubleshootingML.Model;
 using HelixTroubleshootingWPF.Objects;
 
 namespace HelixTroubleshootingWPF.Functions
@@ -415,58 +414,6 @@ namespace HelixTroubleshootingWPF.Functions
                 }
             }
             return sensor;
-        }
-        public static void TestML()
-        {
-            string[] headers = ComboHeader.Split("\t");
-            //string[] data = AllSensorDataSingle(sn).GetDataList().ToArray();
-            List<HelixEvoSensor> testSensors = GetEvoData();
-            for (int i = testSensors.Count - 1; i >= 0; i--)
-            {
-                if (int.TryParse(testSensors[i].SerialNumber, out int snInt))
-                {
-                    if (snInt < 138700 | !testSensors[i].CheckComplete())
-                    {
-                        testSensors.RemoveAt(i);
-                    }
-                }
-                else
-                {
-                    testSensors.RemoveAt(i);
-                }
-            }
-            int sensorsTested = 0;
-            float averageAbsError = 0.0f;
-            foreach (HelixEvoSensor sensor in testSensors)
-            {
-                var input = new ModelInput();
-                Type inputType = input.GetType();
-                string[] data = sensor.GetDataList().ToArray();
-                for (int i = 0; i < headers.Length; i++)
-                {
-                    System.Reflection.PropertyInfo propertyInfo = inputType.GetProperty(headers[i]);
-                    if (propertyInfo == null) { continue; }
-                    Type propType = propertyInfo.PropertyType;
-                    if (propType == typeof(Single))
-                    {
-                        propertyInfo.SetValue(input, Single.Parse(data[i]));
-                    }
-                    else if (propType == typeof(System.String))
-                    {
-                        propertyInfo.SetValue(input, data[i]);
-                    }
-                    else if (propType == typeof(bool))
-                    {
-                        propertyInfo.SetValue(input, bool.Parse(data[i]));
-                    }
-                }
-                ModelOutput result = ConsumeModel.Predict(input);
-                float absDiff = Math.Abs(input.MaxDev - result.Score);
-                averageAbsError += absDiff;
-                sensorsTested++;
-                Debug.WriteLine($"Sensor {sensor.SerialNumber}:\t2RMS(Actual|Predicted) {input.MaxDev}|{result.Score}\tAbs Difference: {absDiff}");
-            }
-            Debug.WriteLine($"\nSensors tested:\t{sensorsTested}\nAverage Abs Diff:\t{averageAbsError / sensorsTested}");
         }
         public static void GetAccuracyResults(ref List<HelixEvoSensor> sensors)
         {

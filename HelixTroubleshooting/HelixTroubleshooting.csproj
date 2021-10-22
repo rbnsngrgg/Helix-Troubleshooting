@@ -5,15 +5,15 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>bar.ico</ApplicationIcon>
-    <Version>3.3.0</Version>
+    <Version>3.3.1</Version>
     <Company>Perceptron, Inc.</Company>
     <Authors>Gregg Robinson</Authors>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-    <RuntimeIdentifier>win-x86</RuntimeIdentifier>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <FileVersion>3.3.0.0</FileVersion>
-    <AssemblyVersion>3.3.0.0</AssemblyVersion>
+    <AssemblyVersion>3.3.1.0</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -38,10 +38,6 @@
     <PackageReference Include="ScottPlot" Version="4.0.48" />
     <PackageReference Include="ScottPlot.WPF" Version="4.0.48" />
     <PackageReference Include="Telnet" Version="0.8.6" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\HelixTroubleshootingML.Model\HelixTroubleshootingML.Model.csproj" />
   </ItemGroup>
 
   <ItemGroup>

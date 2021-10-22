@@ -13,7 +13,7 @@ namespace HelixTroubleshootingWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        public readonly string Version = "3.3.0";
+        public readonly string Version = "3.3.1";
        
         public MainWindow()
         {
@@ -288,10 +288,6 @@ namespace HelixTroubleshootingWPF
             else if(function.Contains("KNN Validation"))
             {
                 TToolsFunctions.RunCombos();
-            }
-            else if(function.Contains("Test ML.net"))
-            {
-                TToolsFunctions.TestML();
             }
             else if(function == "Generate TComp Template")
             {

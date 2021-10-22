@@ -5,7 +5,6 @@ using System.Globalization;
 using System.IO;
 using System.Timers;
 using System.Windows;
-using HelixTroubleshootingML.Model;
 //using System.Windows.Shapes;
 
 namespace HelixTroubleshootingWPF.Functions

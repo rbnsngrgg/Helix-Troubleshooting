@@ -5,10 +5,6 @@ VisualStudioVersion = 16.0.29201.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelixTroubleshooting", "HelixTroubleshooting\HelixTroubleshooting.csproj", "{1540E095-32F1-4436-9018-FC63A29DF1AD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelixTroubleshootingML.Model", "HelixTroubleshootingML.Model\HelixTroubleshootingML.Model.csproj", "{1499062E-8D95-4901-8BA4-3CC9CD8E984E}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelixTroubleshootingML.ConsoleApp", "HelixTroubleshootingML.ConsoleApp\HelixTroubleshootingML.ConsoleApp.csproj", "{D76ACFE5-CEBC-45AC-A989-CD7B8C8A3972}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,14 +15,6 @@ Global
 		{1540E095-32F1-4436-9018-FC63A29DF1AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1540E095-32F1-4436-9018-FC63A29DF1AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1540E095-32F1-4436-9018-FC63A29DF1AD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1499062E-8D95-4901-8BA4-3CC9CD8E984E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1499062E-8D95-4901-8BA4-3CC9CD8E984E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1499062E-8D95-4901-8BA4-3CC9CD8E984E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1499062E-8D95-4901-8BA4-3CC9CD8E984E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D76ACFE5-CEBC-45AC-A989-CD7B8C8A3972}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D76ACFE5-CEBC-45AC-A989-CD7B8C8A3972}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D76ACFE5-CEBC-45AC-A989-CD7B8C8A3972}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D76ACFE5-CEBC-45AC-A989-CD7B8C8A3972}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

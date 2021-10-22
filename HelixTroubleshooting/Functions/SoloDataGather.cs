@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using HelixTroubleshootingML.Model;
 //using System.Windows.Shapes;
 
 namespace HelixTroubleshootingWPF.Functions
