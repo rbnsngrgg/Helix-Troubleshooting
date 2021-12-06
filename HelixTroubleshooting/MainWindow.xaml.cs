@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Timers;
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace HelixTroubleshootingWPF
 {
@@ -13,7 +14,7 @@ namespace HelixTroubleshootingWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        public readonly string Version = "3.3.1";
+        public readonly string Version = "3.4.0";
        
         public MainWindow()
         {
@@ -165,11 +166,22 @@ namespace HelixTroubleshootingWPF
                 DataGatherSettings();
                 DetailsTextBox1.Visibility = Visibility.Visible;
             }
-            else if (item == "Generate TComp Template")
+            else if (item == "Generate Generic TComp")
             {
                 DetailsBox.Text = "Generate a Tcomp template for a given Evo sensor model." +
                     " Enter the first 7 digits of the part number in the format \"XXX-XXXX\"" +
-                    " and enter a number of months for the range of t-comp templates to include.";
+                    " and enter a number of months for the range of t-comp files to include.";
+                DetailsTextBox1.Visibility = Visibility.Visible;
+                DetailsTextBox2.Visibility = Visibility.Visible;
+                DetailsButton1.Visibility = Visibility.Visible;
+                DetailsButton2.Visibility = Visibility.Hidden;
+            }
+            else if (item == "Apply TComp Template")
+            {
+                DetailsBox.Text = "Apply a Tcomp template for a specified sensor. " +
+                    "The generated template will overwrite t-comp data that already exists for the sensor." +
+                    " Enter the serial number of ther sensor" +
+                    " and enter a number of months for the range of t-comp files to include.";
                 DetailsTextBox1.Visibility = Visibility.Visible;
                 DetailsTextBox2.Visibility = Visibility.Visible;
                 DetailsButton1.Visibility = Visibility.Visible;
@@ -289,11 +301,22 @@ namespace HelixTroubleshootingWPF
             {
                 TToolsFunctions.RunCombos();
             }
-            else if(function == "Generate TComp Template")
+            else if(function == "Generate Generic TComp")
             {
                 try
                 {
                     TToolsFunctions.Template(DetailsTextBox1.Text, int.Parse(DetailsTextBox2.Text));
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Template Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else if(function == "Apply TComp Template")
+            {
+                try
+                {
+                    TToolsFunctions.ApplyTemplate(Regex.Match(DetailsTextBox1.Text, @"\d{6}$").Value, int.Parse(DetailsTextBox2.Text));
                 }
                 catch(Exception ex)
                 {
@@ -356,7 +379,7 @@ namespace HelixTroubleshootingWPF
         {
             foreach (ListViewItem item in FunctionList.Items)
             {
-                if (item.Content.ToString().Contains("Data Gather"))
+                if (item.Content.ToString().Contains("Data Gather") || item.Content.ToString().Contains("Generic"))
                 {
                     if (item.Visibility == Visibility.Visible)
                     { item.Visibility = Visibility.Collapsed; }

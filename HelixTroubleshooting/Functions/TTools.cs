@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
 using HelixTroubleshootingWPF.Objects;
 //namespace Helix_Troubleshooting_CS
@@ -14,7 +15,7 @@ namespace HelixTroubleshootingWPF.Functions
         //Array of strings to be added to function list
         public static readonly string[] functionList = new string[] {"ALS Point Removal","Fix Algorithm Errors","Illuminated Sphere Summary",
             "Solo Laser Line Analysis","Staring Dot Removal","Temperature Adjust", "DACMEMS Data Gather", "UFF Data Gather", "LPF Data Gather",
-            "Pitch Data Gather","Evo Data Gather", "Sensor Test", "Generate TComp Template", "Evo Performance Reports", "Create R Configs", "Test"};// "Evo KNN", "Evo KNN Regression", "KNN Validation", "Test ML.net"};
+            "Pitch Data Gather","Evo Data Gather", "Sensor Test", "Generate Generic TComp", "Apply TComp Template", "Evo Performance Reports", "Create R Configs", "Test"};// "Evo KNN", "Evo KNN Regression", "KNN Validation", "Test ML.net"};
 
         public static TToolsConfig Config = new();
         //Private Helper Functions----------------------------------------------------------------------------------------
@@ -42,9 +43,9 @@ namespace HelixTroubleshootingWPF.Functions
         private static string GetGroupFolder(string directory, string sn)
         {
             string folder = "";
-            if(sn.Length == 8)
+            if(Regex.IsMatch(sn, @"\d{6}$"))
             {
-                sn = sn.Remove(5) + "XXX";
+                sn = "SN" + Regex.Match(sn, @"\d{6}$").Value.Substring(0,3) + "XXX";
                 folder = Directory.Exists($@"{directory}\{sn}") ? $@"{directory}\{sn}" : "";
             }
             return folder;

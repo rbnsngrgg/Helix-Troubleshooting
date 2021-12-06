@@ -47,7 +47,7 @@ namespace HelixTroubleshootingWPF.Objects
         //Constructors
         public HelixImage()
         {
-            settings.SetDefine("tiff:ignore-tags", "37373");
+            settings.SetDefine("tiff:ignore-tags", "37373,37374");
         }
         public HelixImage(string path)
         {
@@ -61,7 +61,7 @@ namespace HelixTroubleshootingWPF.Objects
         }
         public HelixImage(string path, MagickImage magick)
         {
-            settings.SetDefine("tiff:ignore-tags", "37373");
+            settings.SetDefine("tiff:ignore-tags", "37373,37374");
             this.path = path;
             Name = System.IO.Path.GetFileName(path);
             this.Magick = magick;
