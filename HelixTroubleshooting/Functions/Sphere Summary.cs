@@ -25,7 +25,7 @@ namespace HelixTroubleshootingWPF.Functions
 
             //MagickReadSettings to ignore null tag 37373 in tif images generated during rectification.
             var settings = new MagickReadSettings();
-            settings.SetDefine("tiff:ignore-tags", "37373");
+            settings.SetDefine("tiff:ignore-tags", "37373,37374");
 
             //Create summary folder
             string summaryFolder = $@"{System.IO.Path.GetDirectoryName(images[0])}\Summary";
@@ -56,10 +56,13 @@ namespace HelixTroubleshootingWPF.Functions
                             //if (image2.Contains(zValue))
                             if(System.IO.Path.GetFileName(image2).Split("Y")[0] == zValue)
                             {
-                                summaryImage.Composite(new MagickImage(image2, settings), CompositeOperator.Lighten);
+                                MagickImage magickImage2 = new MagickImage(image2, settings);
+                                summaryImage.Composite(magickImage2, CompositeOperator.Lighten);
+                                magickImage2.Dispose();
                             }
                         }
                         summaryImage.Write($@"{summaryFolder}\{zValue}.tif");
+                        summaryImage.Dispose();
                         break;
                     }
                 }

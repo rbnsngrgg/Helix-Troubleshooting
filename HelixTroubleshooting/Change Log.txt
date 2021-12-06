@@ -1,3 +1,9 @@
+3.4.0
+	--Added further automation to t-comp template generation.
+		"Apply TComp Template" allows the user to enter a serial number and number of months, then have the template applied automatically, as well as logged for tracking purposes.
+	--Fixed a bug with illuminated sphere summary that caused crashing due to tiff tag 37374.
+	--Improved the performance of illuminated sphere sumamry by promptly disposing of images when they're no longer needed.
+
 3.3.0
 	--Added function to create "R" part number config files for Evo and Solo sensors, based on configs that are present for non-R part numbers.
 	--Applied alsSensitivity config variable, where the function previously explicitly defined "3".

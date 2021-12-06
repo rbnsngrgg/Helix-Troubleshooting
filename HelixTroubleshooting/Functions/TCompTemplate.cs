@@ -14,11 +14,24 @@ namespace HelixTroubleshootingWPF.Functions
             Tuple<TCompData, int> templateData = GenerateTemplate(model, months);
             TCompData template = templateData.Item1;
             List<string> lines = template.GetLines();
-            string templateFolder = Path.Join(Config.ResultsDir, "\\TComp_Templates");
+            string templateFolder = Path.Join(Config.ResultsDir, "\\TComp_Templates\\GenericTemplates");
             Directory.CreateDirectory(templateFolder);
             WriteFile(templateFolder, Path.Join(templateFolder, $"{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}_{model}_Template.txt"), lines);
             MessageBox.Show($"{model} template generated using the data from {templateData.Item2} sensors from the past {months} months.",
-                "Template Generated",MessageBoxButton.OK, MessageBoxImage.Information);
+                "Template Generated", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public static void ApplyTemplate(string serialNumber, int months)
+        {
+            HelixEvoSensor sensor = AllEvoDataSingle(new() { SerialNumber = serialNumber });
+            Tuple<TCompData, int> templateData = GenerateTemplate(sensor.PartNumber.Substring(0,8), months); //Only get 920-0201 portion of PN
+            TCompData template = templateData.Item1;
+            List<string> lines = template.GetLines();
+            string snGroupFolder = GetGroupFolder(Config.TcompDir, sensor.SerialNumber);
+            WriteFile(snGroupFolder, Path.Join(snGroupFolder, $"SN{sensor.SerialNumber}.txt"), lines, false);
+            LogTemplateApplication(sensor, templateData.Item2, months);
+            MessageBox.Show($"Template generated for SN{sensor.SerialNumber}, model {sensor.PartNumber}. Used data from {templateData.Item2} sensors" +
+                $" from the past {months} months.", "Template Applied", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public static Tuple<TCompData,int> GenerateTemplate(string model, int months)
@@ -147,6 +160,18 @@ namespace HelixTroubleshootingWPF.Functions
                     template.MeasurementData[key].Add(0.0);
                 }
             }
+        }
+
+        public static void LogTemplateApplication(HelixEvoSensor sensor, int numSensors, int months)
+        {
+            List<string> headers = new() { "SerialNumber\tFilter\tDateGenerated\t#SensorsUsed\t#Months" };
+            string templateLogPath = Path.Join(Config.ResultsDir, "\\TComp_Templates\\Template.log");
+            if (!File.Exists(templateLogPath))
+            {
+                File.WriteAllLines(templateLogPath, headers);
+            }
+            File.AppendAllText(templateLogPath, 
+                $"{sensor.SerialNumber}\t{sensor.PartNumber.Substring(0,8)}\t{DateTime.Now:yyyy-MM-dd-HH-mm-ss}\t{numSensors}\t{months}");
         }
     }
 }
