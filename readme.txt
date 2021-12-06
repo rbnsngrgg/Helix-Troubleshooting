@@ -14,5 +14,3 @@ Main features:
 -Temperature adjustment of t-comp data. In the event that the reference cycle temperature of a sensor's t-comp data does not match the normal operating temperature, it can be easily adjusted through this function, where the application will adjust each temperature entry in the file so that the average of the first 5 (reference cycle) matches the temperature specified.
 
 -The application gathers data from each of the build fixtures and compiles them into a text file as tab-separated-values.
-
-- (In progress) Data gathered for the sensors is used to generate a dataframe that represents a K-Nearest Neighbors regression algorithm to uncover relationships between fixture data and sensor performance.
