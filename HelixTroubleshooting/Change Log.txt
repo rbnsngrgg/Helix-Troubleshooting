@@ -1,3 +1,6 @@
+3.4.1
+	--Properly dispose of system tray icon on closing.
+
 3.4.0
 	--Added further automation to t-comp template generation.
 		"Apply TComp Template" allows the user to enter a serial number and number of months, then have the template applied automatically, as well as logged for tracking purposes.
