@@ -408,6 +408,7 @@ namespace HelixTroubleshootingWPF
 
         private void HelixTroubleshootingMainWindow_Closed(object sender, EventArgs e)
         {
+            TaskBarIcon.Dispose();
             var processes = Process.GetProcessesByName("HelixTroubleshooting");
             foreach (Process p in processes)
             {
