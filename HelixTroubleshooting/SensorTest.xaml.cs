@@ -16,6 +16,7 @@ using System.Threading;
 using uEye;
 using PrimS;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace HelixTroubleshootingWPF
 {
@@ -351,6 +352,7 @@ namespace HelixTroubleshootingWPF
 
         private void FixtureResultsGetDataBtn_Click(object sender, RoutedEventArgs e)
         {
+            string inputMatchText = Regex.Match(FixtureResultsSnEntry.Text, @"\d{6}$").Value;
             FillFixtureInfo(FixtureResultsSnEntry.Text);
         }
     }

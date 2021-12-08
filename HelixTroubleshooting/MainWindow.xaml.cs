@@ -14,8 +14,8 @@ namespace HelixTroubleshootingWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        public readonly string Version = "3.4.0";
-       
+        private readonly string Version = "3.4.0";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -31,18 +31,18 @@ namespace HelixTroubleshootingWPF
                 TToolsFunctions.Timer.AutoReset = false;
                 TToolsFunctions.Timer.Enabled = true;
             }
-            if(TToolsFunctions.Config.StartMinimized)
+            if (TToolsFunctions.Config.StartMinimized)
             {
                 ShowInTaskbar = false;
                 WindowState = WindowState.Minimized;
                 Hide();
             }
-            if(TToolsFunctions.Config.OneInstance)
+            if (TToolsFunctions.Config.OneInstance)
             {
                 CheckInstances();
             }
         }
-        
+
         private void UpdateDetails(string item)
         {
             /// <summary>Updates Details Groupbox based on the item that was selected</summary>
@@ -50,48 +50,48 @@ namespace HelixTroubleshootingWPF
             {
                 DetailsBox.Text = "Removes erroneous entries in the CG text files for Evo sensors that cause ALS Point errors during rectification." +
                     "\nEnter the directory of a rectification images folder, then click \"Start\".";
-                DetailsTextBox1.Visibility = System.Windows.Visibility.Visible;
-                DetailsTextBox2.Visibility = System.Windows.Visibility.Hidden;
+                DetailsTextBox1.Visibility = Visibility.Visible;
+                DetailsTextBox2.Visibility = Visibility.Hidden;
                 DetailsButton1.Content = "Start";
-                DetailsButton1.Visibility = System.Windows.Visibility.Visible;
+                DetailsButton1.Visibility = Visibility.Visible;
                 DetailsButton2.Content = "";
-                DetailsButton2.Visibility = System.Windows.Visibility.Hidden;
+                DetailsButton2.Visibility = Visibility.Hidden;
             }
-            else if(item.Contains("Fix Algorithm Errors"))
+            else if (item.Contains("Fix Algorithm Errors"))
             {
-                DetailsBox.Text = "Patches algorithm errors in an Evo sensor's t-comp file.\nEnter the serial number (SNXXXXXX) and click \"Start\"." +
+                DetailsBox.Text = "Patches algorithm errors in an Evo sensor's t-comp file.\nEnter the serial number and click \"Start\"." +
                     "\n\nAlternatively, an original t-comp file can be replaced by clicking \"Restore Original\"";
-                DetailsTextBox1.Visibility = System.Windows.Visibility.Visible;
-                DetailsTextBox2.Visibility = System.Windows.Visibility.Hidden;
+                DetailsTextBox1.Visibility = Visibility.Visible;
+                DetailsTextBox2.Visibility = Visibility.Hidden;
                 DetailsButton1.Content = "Start";
-                DetailsButton1.Visibility = System.Windows.Visibility.Visible;
+                DetailsButton1.Visibility = Visibility.Visible;
                 DetailsButton2.Content = "Restore Original";
-                DetailsButton2.Visibility = System.Windows.Visibility.Visible;
+                DetailsButton2.Visibility = Visibility.Visible;
 
             }
-            else if(item.Contains("Illuminated Sphere Summary"))
+            else if (item.Contains("Illuminated Sphere Summary"))
             {
                 DetailsBox.Text = "Generates compilation images of illuminated spheres (\"RZ\" prefix) from the rectification images folder of Evo or Solo sensors. " +
                     "The summary images are placed in a folder named \"Summary\".\n\nEnter the directory of a rectification images folder, then click \"Start\".";
-                DetailsTextBox1.Visibility = System.Windows.Visibility.Visible;
-                DetailsTextBox2.Visibility = System.Windows.Visibility.Hidden;
+                DetailsTextBox1.Visibility = Visibility.Visible;
+                DetailsTextBox2.Visibility = Visibility.Hidden;
                 DetailsButton1.Content = "Start";
-                DetailsButton1.Visibility = System.Windows.Visibility.Visible;
+                DetailsButton1.Visibility = Visibility.Visible;
                 DetailsButton2.Content = "";
-                DetailsButton2.Visibility = System.Windows.Visibility.Hidden;
+                DetailsButton2.Visibility = Visibility.Hidden;
             }
-            else if(item.Contains("Solo Laser Line Analysis"))
+            else if (item.Contains("Solo Laser Line Analysis"))
             {
                 DetailsBox.Text = "Analyzes the laser line images from the rectification images folder of a Helix Solo sensor. The results are placed in the analysis folder, " +
                     "specified in the config.\n\nEnter a directory for rectification images and click \"Start\".";
-                DetailsTextBox1.Visibility = System.Windows.Visibility.Visible;
-                DetailsTextBox2.Visibility = System.Windows.Visibility.Hidden;
+                DetailsTextBox1.Visibility = Visibility.Visible;
+                DetailsTextBox2.Visibility = Visibility.Hidden;
                 DetailsButton1.Content = "Start";
-                DetailsButton1.Visibility = System.Windows.Visibility.Visible;
+                DetailsButton1.Visibility = Visibility.Visible;
                 DetailsButton2.Content = "";
-                DetailsButton2.Visibility = System.Windows.Visibility.Hidden;
+                DetailsButton2.Visibility = Visibility.Hidden;
             }
-            else if(item.Contains("Staring Dot Removal"))
+            else if (item.Contains("Staring Dot Removal"))
             {
                 DetailsBox.Text = "Cleans the staring dots from rectification images of Evo sensors, providing a workaround for laser model errors caused by these dots." +
                     "\nEnter the directory of a rectification images folder, then click \"Start\".";
@@ -102,10 +102,10 @@ namespace HelixTroubleshootingWPF
                 DetailsButton2.Content = "";
                 DetailsButton2.Visibility = Visibility.Hidden;
             }
-            else if(item.Contains("Temperature Adjust"))
+            else if (item.Contains("Temperature Adjust"))
             {
                 DetailsBox.Text = "Adjust the temperature column of a t-comp file, so that the reference cycle average is equal to the sensor's current operating temperature." +
-                    "\n\nEnter the serial number (SNXXXXXX) in the first box, the desired reference average in the 2nd box, then click \"start\".";
+                    "\n\nEnter the serial number in the first box, the desired reference average in the 2nd box, then click \"start\".";
                 DetailsTextBox1.Visibility = Visibility.Visible;
                 DetailsTextBox2.Visibility = Visibility.Visible;
                 DetailsButton1.Content = "Start";
@@ -113,32 +113,32 @@ namespace HelixTroubleshootingWPF
                 DetailsButton2.Content = "";
                 DetailsButton2.Visibility = Visibility.Hidden;
             }
-            else if(item.Contains("DACMEMS Data Gather"))
+            else if (item.Contains("DACMEMS Data Gather"))
             {
                 DetailsBox.Text = "Gather data for each sensor that has run through the DACMEMS Tuning Fixture, paired with its zero degree 2RMS and Max Deviation.";
                 DataGatherSettings();
             }
-            else if(item.Contains("UFF Data Gather"))
+            else if (item.Contains("UFF Data Gather"))
             {
                 DetailsBox.Text = "Gather data for each sensor that has run through the Universal Focus Fixture, paired with its zero degree 2RMS and Max Deviation.";
                 DataGatherSettings();
             }
-            else if(item.Contains("LPF Data Gather"))
+            else if (item.Contains("LPF Data Gather"))
             {
                 DetailsBox.Text = "Gather data for each sensor that has run through the Laser Power Fixture, paired with its zero degree 2RMS and Max Deviation.";
                 DataGatherSettings();
             }
-            else if(item.Contains("Pitch Data Gather"))
+            else if (item.Contains("Pitch Data Gather"))
             {
                 DetailsBox.Text = "Gather data for each sensor that has run through the Camera Pitch Fixture, paired with its zero degree 2RMS and Max Deviation.";
                 DataGatherSettings();
             }
-            else if(item.Contains("Evo Data Gather"))
+            else if (item.Contains("Evo Data Gather"))
             {
                 DetailsBox.Text = "Gather data from each fixture for each Evo sensor, paired with accuracy test 0 degree 2RMS and Max Deviation.";
                 DataGatherSettings();
             }
-            else if(item.Contains("Sensor Test"))
+            else if (item.Contains("Sensor Test"))
             {
                 DetailsBox.Text = "Test sensor functionality and gather sensor fixture information.";
                 DataGatherSettings();
@@ -199,7 +199,7 @@ namespace HelixTroubleshootingWPF
             }
             else if (item == "Create R Configs")
             {
-                DetailsBox.Text = "Generate \"R\" config files for Evo and Solo sensors, based on existing non-R configs." + 
+                DetailsBox.Text = "Generate \"R\" config files for Evo and Solo sensors, based on existing non-R configs." +
                     " Enter the path of the folder that contains all of the sensor rectification configs, then click start.";
                 DetailsTextBox1.Visibility = Visibility.Visible;
                 DetailsTextBox2.Visibility = Visibility.Hidden;
@@ -216,12 +216,12 @@ namespace HelixTroubleshootingWPF
             }
         }
 
-        private void CheckInstances()
+        private static void CheckInstances()
         {
-            var processes = Process.GetProcessesByName("HelixTroubleshooting");
+            Process[] processes = Process.GetProcessesByName("HelixTroubleshooting");
             if (processes.Length > 1)
             {
-                MessageBox.Show("There is another instance of Helix Troubleshooting running. OneInstance in the config is set to \"true\".",
+                _ = MessageBox.Show("There is another instance of Helix Troubleshooting running. OneInstance in the config is set to \"true\".",
                     "One Instance", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 Environment.Exit(0);
             }
@@ -247,7 +247,8 @@ namespace HelixTroubleshootingWPF
             }
             else if (function.Contains("Fix Algorithm Errors"))
             {
-                TToolsFunctions.AlgorithmErrors(DetailsTextBox1.Text);
+                string inputMatchText = Regex.Match(DetailsTextBox1.Text, @"\d{6}$").Value;
+                TToolsFunctions.AlgorithmErrors(inputMatchText);
             }
             else if (function.Contains("Illuminated Sphere Summary"))
             {
@@ -263,7 +264,8 @@ namespace HelixTroubleshootingWPF
             }
             else if (function.Contains("Temperature Adjust"))
             {
-                TToolsFunctions.TempAdjust(DetailsTextBox1.Text, DetailsTextBox2.Text);
+                string inputMatchText = Regex.Match(DetailsTextBox1.Text, @"\d{6}$").Value;
+                TToolsFunctions.TempAdjust(inputMatchText, DetailsTextBox2.Text);
             }
             else if (function.Contains("DACMEMS Data Gather"))
             {
@@ -289,51 +291,53 @@ namespace HelixTroubleshootingWPF
             {
                 TToolsFunctions.RunSensorTest();
             }
-            else if (function == ("Evo KNN"))
+            else if (function == "Evo KNN")
             {
                 TToolsFunctions.RunKnn("", DetailsTextBox1.Text);
             }
             else if (function.Contains("Evo KNN Regression"))
             {
-                TToolsFunctions.RunKnn(DetailsTextBox1.Text,"");
+                TToolsFunctions.RunKnn(DetailsTextBox1.Text, "");
             }
-            else if(function.Contains("KNN Validation"))
+            else if (function.Contains("KNN Validation"))
             {
                 TToolsFunctions.RunCombos();
             }
-            else if(function == "Generate Generic TComp")
+            else if (function == "Generate Generic TComp")
             {
                 try
                 {
-                    TToolsFunctions.Template(DetailsTextBox1.Text, int.Parse(DetailsTextBox2.Text));
+                    TToolsFunctions.Template(DetailsTextBox1.Text, int.Parse(DetailsTextBox2.Text, System.Globalization.CultureInfo.InvariantCulture));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Template Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _ = MessageBox.Show(ex.Message, "Template Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-            else if(function == "Apply TComp Template")
+            else if (function == "Apply TComp Template")
             {
                 try
                 {
-                    TToolsFunctions.ApplyTemplate(Regex.Match(DetailsTextBox1.Text, @"\d{6}$").Value, int.Parse(DetailsTextBox2.Text));
+                    string inputMatchText = Regex.Match(DetailsTextBox1.Text, @"\d{6}$").Value;
+                    TToolsFunctions.ApplyTemplate(inputMatchText, int.Parse(DetailsTextBox2.Text, System.Globalization.CultureInfo.InvariantCulture));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Template Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _ = MessageBox.Show(ex.Message, "Template Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             else if (function == "Evo Performance Reports")
             {
-                if(DetailsTextBox1.Text != "")
+                if (DetailsTextBox1.Text != "")
                 {
-                    TToolsFunctions.SingleEvoReport(DetailsTextBox1.Text);
+                    string inputMatchText = Regex.Match(DetailsTextBox1.Text, @"\d{6}$").Value;
+                    TToolsFunctions.SingleEvoReport(inputMatchText);
                 }
                 else
                 {
                     TToolsFunctions.AllEvoReports(true);
                 }
-                MessageBox.Show("Report(s) Generated", "Evo Performance Reports", MessageBoxButton.OK, MessageBoxImage.Information);
+                _ = MessageBox.Show("Report(s) Generated", "Evo Performance Reports", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else if (function == "Create R Configs")
             {
@@ -346,7 +350,8 @@ namespace HelixTroubleshootingWPF
         }
         private void DetailsButton2_Click(object sender, RoutedEventArgs e)
         {
-            if (FunctionList.SelectedItems.Count != 0) {
+            if (FunctionList.SelectedItems.Count != 0)
+            {
                 string function = FunctionList.SelectedItem.ToString();
                 if (function.Contains("Fix Algorithm Errors"))
                 {
@@ -361,8 +366,8 @@ namespace HelixTroubleshootingWPF
             //Add functions to the list widget
             foreach (string function in TToolsFunctions.functionList)
             {
-                ListViewItem newItem = new ListViewItem() { Content = function };
-                if((string)newItem.Content != "Test")
+                ListViewItem newItem = new() { Content = function };
+                if ((string)newItem.Content != "Test")
                 {
                     FunctionList.Items.Add(newItem);
                 }
@@ -381,21 +386,18 @@ namespace HelixTroubleshootingWPF
             {
                 if (item.Content.ToString().Contains("Data Gather") || item.Content.ToString().Contains("Generic"))
                 {
-                    if (item.Visibility == Visibility.Visible)
-                    { item.Visibility = Visibility.Collapsed; }
-                    else
-                    { item.Visibility = Visibility.Visible; }
+                    item.Visibility = item.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
                 }
             }
         }
         private void DataGatherSettings()
         {
-            DetailsTextBox1.Visibility = System.Windows.Visibility.Hidden;
-            DetailsTextBox2.Visibility = System.Windows.Visibility.Hidden;
+            DetailsTextBox1.Visibility = Visibility.Hidden;
+            DetailsTextBox2.Visibility = Visibility.Hidden;
             DetailsButton1.Content = "Start";
-            DetailsButton1.Visibility = System.Windows.Visibility.Visible;
+            DetailsButton1.Visibility = Visibility.Visible;
             DetailsButton2.Content = "";
-            DetailsButton2.Visibility = System.Windows.Visibility.Hidden;
+            DetailsButton2.Visibility = Visibility.Hidden;
         }
         private void FileMenuExit_Click(object sender, RoutedEventArgs e)
         {
@@ -409,7 +411,7 @@ namespace HelixTroubleshootingWPF
         private void HelixTroubleshootingMainWindow_Closed(object sender, EventArgs e)
         {
             TaskBarIcon.Dispose();
-            var processes = Process.GetProcessesByName("HelixTroubleshooting");
+            Process[] processes = Process.GetProcessesByName("HelixTroubleshooting");
             foreach (Process p in processes)
             {
                 p.Kill();
@@ -418,11 +420,9 @@ namespace HelixTroubleshootingWPF
 
         private void HelixTroubleshootingMainWindow_StateChanged(object sender, EventArgs e)
         {
-            switch (WindowState)
+            if (WindowState == WindowState.Minimized)
             {
-                case WindowState.Minimized:
-                    ShowInTaskbar = false;
-                    break;
+                ShowInTaskbar = false;
             }
         }
 
@@ -436,6 +436,11 @@ namespace HelixTroubleshootingWPF
         private void ContextMenuExit_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void ToolsMenuOpenResultsFolder_Click(object sender, RoutedEventArgs e)
+        {
+            _ = Process.Start("explorer.exe", TToolsFunctions.Config.ResultsDir);
         }
     }
 }

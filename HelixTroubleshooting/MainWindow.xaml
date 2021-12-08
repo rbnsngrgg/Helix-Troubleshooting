@@ -35,6 +35,7 @@
                 </MenuItem>
                 <MenuItem Header="_Tools">
                     <MenuItem x:Name="ToolsMenuToggleDataGather" Header="Show/Hide Data Gather Functions" Click="ToolsMenuToggleDataGather_Click"/>
+                    <MenuItem x:Name="ToolsMenuOpenResultsFolder" Header="Open Results Folder" Click="ToolsMenuOpenResultsFolder_Click"/>
                 </MenuItem>
             </Menu>
         </DockPanel>
