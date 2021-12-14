@@ -171,7 +171,7 @@ namespace HelixTroubleshootingWPF.Functions
                 File.WriteAllLines(templateLogPath, headers);
             }
             File.AppendAllText(templateLogPath, 
-                $"{sensor.SerialNumber}\t{sensor.PartNumber.Substring(0,8)}\t{DateTime.Now:yyyy-MM-dd-HH-mm-ss}\t{numSensors}\t{months}");
+                $"\n{sensor.SerialNumber}\t{sensor.PartNumber.Substring(0,8)}\t{DateTime.Now:yyyy-MM-dd-HH-mm-ss}\t{numSensors}\t{months}");
         }
     }
 }

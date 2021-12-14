@@ -2,6 +2,7 @@
 	--Properly dispose of system tray icon on closing.
 	--Add tools menu option to open the results folder specified in the config.
 	--All serial number inputs now accept serial numbers with or without the "SN" prefix.
+	--Fix formatting of tcomp log
 
 3.4.0
 	--Added further automation to t-comp template generation.
