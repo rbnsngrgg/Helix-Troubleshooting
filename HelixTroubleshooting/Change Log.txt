@@ -1,3 +1,8 @@
+3.4.2
+	--Update default path for t-comp backups.
+	--Add top level error handling via message boxes.
+	--Template application function now backs up the original tcomp.
+
 3.4.1
 	--Properly dispose of system tray icon on closing.
 	--Add tools menu option to open the results folder specified in the config.
