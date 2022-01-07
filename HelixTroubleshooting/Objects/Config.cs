@@ -69,7 +69,7 @@ namespace HelixTroubleshootingWPF.Functions
                 XmlDocument config = new XmlDocument();
                 config.Load(configPath);
                 //Set tcompBackupDir, tcompDir, rectDataDir, and resultsDir to default values
-                config.FirstChild.ChildNodes[0].Attributes[0].Value = @"\\castor\Production\Manufacturing\Evo\Tcomp Templates\Originals";
+                config.FirstChild.ChildNodes[0].Attributes[0].Value = @"\\castor\Production\Manufacturing\Helix\Evo\Tcomp Templates\Originals";
                 config.FirstChild.ChildNodes[0].Attributes[1].Value = @"\\castor\Production\Manufacturing\MfgSoftware\ThermalTest\200-0526\Results";
                 config.FirstChild.ChildNodes[0].Attributes[2].Value = @"\\castor\Ftproot\RectData";
                 config.FirstChild.ChildNodes[0].Attributes[3].Value = @"\\castor\Production\Manufacturing\MFGENG SW Tools\Helix Troubleshooting\Results";

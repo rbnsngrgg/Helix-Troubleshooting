@@ -28,7 +28,11 @@ namespace HelixTroubleshootingWPF.Functions
             TCompData template = templateData.Item1;
             List<string> lines = template.GetLines();
             string snGroupFolder = GetGroupFolder(Config.TcompDir, sensor.SerialNumber);
-            WriteFile(snGroupFolder, Path.Join(snGroupFolder, $"SN{sensor.SerialNumber}.txt"), lines, false);
+
+            string tcompPath = Path.Join(snGroupFolder, $"SN{sensor.SerialNumber}.txt");
+
+            if (File.Exists(tcompPath)) { TCompBackup(tcompPath); }
+            WriteFile(snGroupFolder, tcompPath, lines, false);
             LogTemplateApplication(sensor, templateData.Item2, months);
             MessageBox.Show($"Template generated for SN{sensor.SerialNumber}, model {sensor.PartNumber}. Used data from {templateData.Item2} sensors" +
                 $" from the past {months} months.", "Template Applied", MessageBoxButton.OK, MessageBoxImage.Information);

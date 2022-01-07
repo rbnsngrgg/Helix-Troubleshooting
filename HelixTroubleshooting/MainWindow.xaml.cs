@@ -14,7 +14,7 @@ namespace HelixTroubleshootingWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly string Version = "3.4.1";
+        private readonly string Version = "3.4.2";
 
         public MainWindow()
         {
@@ -235,127 +235,151 @@ namespace HelixTroubleshootingWPF
 
         private void DetailsButton1_Click(object sender, RoutedEventArgs e)
         {
-            if (FunctionList.SelectedItems.Count == 0)
+            try
             {
-                return;
-            }
-            string function = (string)((ListViewItem)FunctionList.SelectedItem).Content;
+                if (FunctionList.SelectedItems.Count == 0)
+                {
+                    return;
+                }
+                string function = (string)((ListViewItem)FunctionList.SelectedItem).Content;
 
-            if (function.Contains("ALS Point Removal"))
-            {
-                TToolsFunctions.ALSPointRemoval(DetailsTextBox1.Text);
-            }
-            else if (function.Contains("Fix Algorithm Errors"))
-            {
-                string inputMatchText = Regex.Match(DetailsTextBox1.Text, @"\d{6}$").Value;
-                TToolsFunctions.AlgorithmErrors(inputMatchText);
-            }
-            else if (function.Contains("Illuminated Sphere Summary"))
-            {
-                TToolsFunctions.SphereSummary(DetailsTextBox1.Text);
-            }
-            else if (function.Contains("Solo Laser Line Analysis"))
-            {
-                TToolsFunctions.LineAnalysis(DetailsTextBox1.Text);
-            }
-            else if (function.Contains("Staring Dot Removal"))
-            {
-                TToolsFunctions.StaringDotRemoval(DetailsTextBox1.Text);
-            }
-            else if (function.Contains("Temperature Adjust"))
-            {
-                string inputMatchText = Regex.Match(DetailsTextBox1.Text, @"\d{6}$").Value;
-                TToolsFunctions.TempAdjust(inputMatchText, DetailsTextBox2.Text);
-            }
-            else if (function.Contains("DACMEMS Data Gather"))
-            {
-                TToolsFunctions.DacMemsDataGather();
-            }
-            else if (function.Contains("UFF Data Gather"))
-            {
-                TToolsFunctions.UffDataGather();
-            }
-            else if (function.Contains("LPF Data Gather"))
-            {
-                TToolsFunctions.LpfDataGather();
-            }
-            else if (function.Contains("Pitch Data Gather"))
-            {
-                TToolsFunctions.PitchDataGather();
-            }
-            else if (function.Contains("Evo Data Gather"))
-            {
-                TToolsFunctions.GatherEvoData();
-            }
-            else if (function.Contains("Sensor Test"))
-            {
-                TToolsFunctions.RunSensorTest();
-            }
-            else if (function == "Evo KNN")
-            {
-                TToolsFunctions.RunKnn("", DetailsTextBox1.Text);
-            }
-            else if (function.Contains("Evo KNN Regression"))
-            {
-                TToolsFunctions.RunKnn(DetailsTextBox1.Text, "");
-            }
-            else if (function.Contains("KNN Validation"))
-            {
-                TToolsFunctions.RunCombos();
-            }
-            else if (function == "Generate Generic TComp")
-            {
-                try
+                if (function.Contains("ALS Point Removal"))
                 {
-                    TToolsFunctions.Template(DetailsTextBox1.Text, int.Parse(DetailsTextBox2.Text, System.Globalization.CultureInfo.InvariantCulture));
+                    TToolsFunctions.ALSPointRemoval(DetailsTextBox1.Text);
                 }
-                catch (Exception ex)
-                {
-                    _ = MessageBox.Show(ex.Message, "Template Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            else if (function == "Apply TComp Template")
-            {
-                try
+                else if (function.Contains("Fix Algorithm Errors"))
                 {
                     string inputMatchText = Regex.Match(DetailsTextBox1.Text, @"\d{6}$").Value;
-                    TToolsFunctions.ApplyTemplate(inputMatchText, int.Parse(DetailsTextBox2.Text, System.Globalization.CultureInfo.InvariantCulture));
+                    TToolsFunctions.AlgorithmErrors(inputMatchText);
                 }
-                catch (Exception ex)
+                else if (function.Contains("Illuminated Sphere Summary"))
                 {
-                    _ = MessageBox.Show(ex.Message, "Template Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    TToolsFunctions.SphereSummary(DetailsTextBox1.Text);
                 }
-            }
-            else if (function == "Evo Performance Reports")
-            {
-                if (DetailsTextBox1.Text != "")
+                else if (function.Contains("Solo Laser Line Analysis"))
+                {
+                    TToolsFunctions.LineAnalysis(DetailsTextBox1.Text);
+                }
+                else if (function.Contains("Staring Dot Removal"))
+                {
+                    TToolsFunctions.StaringDotRemoval(DetailsTextBox1.Text);
+                }
+                else if (function.Contains("Temperature Adjust"))
                 {
                     string inputMatchText = Regex.Match(DetailsTextBox1.Text, @"\d{6}$").Value;
-                    TToolsFunctions.SingleEvoReport(inputMatchText);
+                    TToolsFunctions.TempAdjust(inputMatchText, DetailsTextBox2.Text);
                 }
-                else
+                else if (function.Contains("DACMEMS Data Gather"))
                 {
-                    TToolsFunctions.AllEvoReports(true);
+                    TToolsFunctions.DacMemsDataGather();
                 }
-                _ = MessageBox.Show("Report(s) Generated", "Evo Performance Reports", MessageBoxButton.OK, MessageBoxImage.Information);
+                else if (function.Contains("UFF Data Gather"))
+                {
+                    TToolsFunctions.UffDataGather();
+                }
+                else if (function.Contains("LPF Data Gather"))
+                {
+                    TToolsFunctions.LpfDataGather();
+                }
+                else if (function.Contains("Pitch Data Gather"))
+                {
+                    TToolsFunctions.PitchDataGather();
+                }
+                else if (function.Contains("Evo Data Gather"))
+                {
+                    TToolsFunctions.GatherEvoData();
+                }
+                else if (function.Contains("Sensor Test"))
+                {
+                    TToolsFunctions.RunSensorTest();
+                }
+                else if (function == "Evo KNN")
+                {
+                    TToolsFunctions.RunKnn("", DetailsTextBox1.Text);
+                }
+                else if (function.Contains("Evo KNN Regression"))
+                {
+                    TToolsFunctions.RunKnn(DetailsTextBox1.Text, "");
+                }
+                else if (function.Contains("KNN Validation"))
+                {
+                    TToolsFunctions.RunCombos();
+                }
+                else if (function == "Generate Generic TComp")
+                {
+                    try
+                    {
+                        TToolsFunctions.Template(DetailsTextBox1.Text, int.Parse(DetailsTextBox2.Text, System.Globalization.CultureInfo.InvariantCulture));
+                    }
+                    catch (Exception ex)
+                    {
+                        _ = MessageBox.Show(ex.Message, "Template Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                else if (function == "Apply TComp Template")
+                {
+                    try
+                    {
+                        string inputMatchText = Regex.Match(DetailsTextBox1.Text, @"\d{6}$").Value;
+                        TToolsFunctions.ApplyTemplate(inputMatchText, int.Parse(DetailsTextBox2.Text, System.Globalization.CultureInfo.InvariantCulture));
+                    }
+                    catch (Exception ex)
+                    {
+                        _ = MessageBox.Show(ex.Message, "Template Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                else if (function == "Evo Performance Reports")
+                {
+                    if (DetailsTextBox1.Text != "")
+                    {
+                        string inputMatchText = Regex.Match(DetailsTextBox1.Text, @"\d{6}$").Value;
+                        TToolsFunctions.SingleEvoReport(inputMatchText);
+                    }
+                    else
+                    {
+                        TToolsFunctions.AllEvoReports(true);
+                    }
+                    _ = MessageBox.Show("Report(s) Generated", "Evo Performance Reports", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else if (function == "Create R Configs")
+                {
+                    RPartConfig.CreateRPartConfigs(DetailsTextBox1.Text);
+                }
+                else if (function == "Test")
+                {
+                    TToolsFunctions.DebugFunction();
+                }
             }
-            else if (function == "Create R Configs")
+            catch (Exception ex)
             {
-                RPartConfig.CreateRPartConfigs(DetailsTextBox1.Text);
-            }
-            else if (function == "Test")
-            {
-                TToolsFunctions.DebugFunction();
+                MessageBox.Show(ex.Message, ex.StackTrace, MessageBoxButton.OK, MessageBoxImage.Error);
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    MessageBox.Show(ex.Message, ex.StackTrace, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
         private void DetailsButton2_Click(object sender, RoutedEventArgs e)
         {
-            if (FunctionList.SelectedItems.Count != 0)
+            try
             {
-                string function = FunctionList.SelectedItem.ToString();
-                if (function.Contains("Fix Algorithm Errors"))
+                if (FunctionList.SelectedItems.Count != 0)
                 {
-                    TToolsFunctions.RestoreTcomp(DetailsTextBox1.Text);
+                    string function = FunctionList.SelectedItem.ToString();
+                    if (function.Contains("Fix Algorithm Errors"))
+                    {
+                        TToolsFunctions.RestoreTcomp(DetailsTextBox1.Text);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, ex.StackTrace, MessageBoxButton.OK, MessageBoxImage.Error);
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    MessageBox.Show(ex.Message, ex.StackTrace, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

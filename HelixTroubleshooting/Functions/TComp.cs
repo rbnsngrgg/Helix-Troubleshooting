@@ -84,12 +84,7 @@ namespace HelixTroubleshootingWPF.Functions
                 //Backup the original file, write and save the new lines with ".txt" file extension
                 if (file.ToLower().Contains(".day2"))
                 {
-                    string backupFile = $"{Config.TcompBackupDir}\\{System.IO.Path.GetFileName(file)}";
-                    if (File.Exists(backupFile))
-                    {
-                        File.Delete(backupFile);
-                    }
-                    File.Move(file, backupFile);
+                    TCompBackup(file);
                     File.WriteAllLines($"{file.Replace(System.IO.Path.GetFileName(file), "")}{System.IO.Path.GetFileNameWithoutExtension(file)}.txt", lines);
                 }
                 else
@@ -98,6 +93,15 @@ namespace HelixTroubleshootingWPF.Functions
                 }
                 MessageBox.Show($"Algorithm errors fixed for {sn}", "Done", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
+        public static void TCompBackup(string file)
+        {
+            string backupFile = $"{Config.TcompBackupDir}\\{System.IO.Path.GetFileName(file)}";
+            if (File.Exists(backupFile))
+            {
+                File.Delete(backupFile);
+            }
+            File.Move(file, backupFile);
         }
         public static void TempAdjust(string sn, string tempString)
         {
